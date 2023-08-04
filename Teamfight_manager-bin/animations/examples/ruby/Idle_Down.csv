@@ -1,0 +1,6 @@
+ID,FPS,LOOPTYPE,,
+Idle_Down,10,1,,
+,,,,
+TEXTUREID,LEFT,TOP,WIDTH,HEIGHT
+graphics/RubySheet.png,256,768,256,256
+graphics/RubySheet.png,512,1280,256,256

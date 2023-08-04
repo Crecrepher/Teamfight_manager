@@ -1,0 +1,11 @@
+ID,FPS,LOOPTYPE,,
+Jump,10,0,,
+,,,,
+TEXTUREID,LEFT,TOP,WIDTH,HEIGHT
+graphics/sprite_sheet.png,0,360,120,120
+graphics/sprite_sheet.png,120,360,120,120
+graphics/sprite_sheet.png,240,360,120,120
+graphics/sprite_sheet.png,360,360,120,120
+graphics/sprite_sheet.png,480,360,120,120
+graphics/sprite_sheet.png,600,360,120,120
+graphics/sprite_sheet.png,720,360,120,120

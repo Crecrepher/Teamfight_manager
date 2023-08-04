@@ -1,0 +1,8 @@
+ID,FPS,LOOPTYPE,,
+Move_Side,10,1,,
+,,,,
+TEXTUREID,LEFT,TOP,WIDTH,HEIGHT
+graphics/RubySheet.png,0,0,256,256
+graphics/RubySheet.png,256,0,256,256
+graphics/RubySheet.png,512,0,256,256
+graphics/RubySheet.png,768,0,256,256
