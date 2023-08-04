@@ -67,7 +67,7 @@ void SceneGame::Update(float dt)
 	//스테이지로 돌아가기
 	if (INPUT_MGR.GetKeyDown(sf::Keyboard::Escape))
 	{
-		SCENE_MGR.ChangeScene(SceneId::Stage);
+		SCENE_MGR.ChangeScene(SceneId::Home);
 		return;
 	}
 }

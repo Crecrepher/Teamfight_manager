@@ -162,7 +162,7 @@
     <ClCompile Include="Scene\SceneGame.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="Scene\SceneStage.cpp">
+    <ClCompile Include="Scene\SceneHome.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="GameObject\SpriteEffect.cpp" />
@@ -206,7 +206,7 @@
     <ClInclude Include="Scene\SceneGame.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
     </ClInclude>
-    <ClInclude Include="Scene\SceneStage.h">
+    <ClInclude Include="Scene\SceneHome.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="Universial\ErrorPrinter.h" />

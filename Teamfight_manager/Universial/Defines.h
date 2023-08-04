@@ -20,7 +20,7 @@ enum class SceneId
 {
 	None = -1,
 	Title,
-	Stage,
+	Home,
 	Game,
 	Count
 };

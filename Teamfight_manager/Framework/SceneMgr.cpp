@@ -3,7 +3,7 @@
 #include "SceneMgr.h"
 #include "Scene.h"
 #include "SceneTitile.h"
-#include "SceneStage.h"
+#include "SceneHome.h"
 #include "SceneGame.h"
 
 #include "ResourceMgr.h"
@@ -26,7 +26,7 @@ void SceneMgr::Init()
 	}
 			
 	scenes.push_back(new SceneTitile());
-	scenes.push_back(new SceneStage());
+	scenes.push_back(new SceneHome());
 	scenes.push_back(new SceneGame());
 
 	for (auto scene : scenes)

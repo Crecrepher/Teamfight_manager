@@ -1,5 +1,5 @@
 #include "stdafx.h"
-#include "SceneStage.h"
+#include "SceneHome.h"
 
 #include "DataTableMgr.h"
 #include "StringTable.h"
@@ -13,16 +13,16 @@
 #include "SoundGo.h"
 #include "UiButton.h"
 
-SceneStage::SceneStage() : Scene(SceneId::Stage)
+SceneHome::SceneHome() : Scene(SceneId::Home)
 {
 	resourceListPath = "tables/StageResourceList.csv";
 }
 
-SceneStage::~SceneStage()
+SceneHome::~SceneHome()
 {
 }
 
-void SceneStage::Init()
+void SceneHome::Init()
 {
 	Release();
 	
@@ -40,7 +40,7 @@ void SceneStage::Init()
 	}
 }
 
-void SceneStage::Release()
+void SceneHome::Release()
 {
 	for (auto go : gameObjects)
 	{
@@ -48,18 +48,18 @@ void SceneStage::Release()
 	}
 }
 
-void SceneStage::Enter()
+void SceneHome::Enter()
 {
 	Scene::Enter();
 	RESOURCE_MGR.LoadFromCsv("tables/StageResourceList.csv");
 }
 
-void SceneStage::Exit()
+void SceneHome::Exit()
 {
 	Scene::Exit();
 }
 
-void SceneStage::Update(float dt)
+void SceneHome::Update(float dt)
 {
 	Scene::Update(dt);
 
@@ -74,9 +74,7 @@ void SceneStage::Update(float dt)
 	}
 }
 
-void SceneStage::Draw(sf::RenderWindow& window)
+void SceneHome::Draw(sf::RenderWindow& window)
 {
 	Scene::Draw(window);
-	window.setMouseCursorVisible(true);
-	//없어도 되나?
 }

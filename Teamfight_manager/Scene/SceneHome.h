@@ -1,12 +1,12 @@
 #pragma once
 #include "Scene.h"
 
-class SceneStage : public Scene
+class SceneHome : public Scene
 {
 protected:
 public:
-	SceneStage();
-	virtual ~SceneStage() override;
+	SceneHome();
+	virtual ~SceneHome() override;
 
 	virtual void Init() override;
 	virtual void Release() override;

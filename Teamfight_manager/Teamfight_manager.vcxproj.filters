@@ -60,7 +60,7 @@
     <ClCompile Include="GameObject\TextGo.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="Scene\SceneStage.cpp">
+    <ClCompile Include="Scene\SceneHome.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="GameObject\SoundGo.cpp">
@@ -143,7 +143,7 @@
     <ClInclude Include="GameObject\TextGo.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="Scene\SceneStage.h">
+    <ClInclude Include="Scene\SceneHome.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="GameObject\SoundGo.h">
