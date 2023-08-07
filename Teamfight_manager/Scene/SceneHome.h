@@ -3,6 +3,16 @@
 
 class SceneHome : public Scene
 {
+public:
+	enum class MainMenuType
+	{
+		NONE = -1,
+		TEAM_MANAGE,
+		OPERATE,
+		LEAGUE,
+		GAME,
+		SYSTEM,
+	};
 protected:
 public:
 	SceneHome();
@@ -19,7 +29,15 @@ public:
 
 	void AddGoSprites();
 	void AddGoUiButton();
+	void AddGoText();
 
 	void MakeMainUi();
+
+	void ReturnMainUiIndex(int& startNum, int& endNum, MainMenuType Type);
+	void MainUiOpen(MainMenuType Type);
+	void MainUiClose();
+	void MainUiFunc(int index);
+
+	void UpdateMoney();
 };
 

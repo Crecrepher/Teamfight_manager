@@ -99,6 +99,9 @@
     <ClCompile Include="Scene\SceneChampEdit.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="Framework\TeamMgr.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Universial\stdafx.h">
@@ -189,6 +192,9 @@
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="Scene\SceneChampEdit.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Framework\TeamMgr.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>

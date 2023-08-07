@@ -5,6 +5,7 @@
 #include "Scene.h"
 #include "ResourceMgr.h"
 #include "DataTableMgr.h"
+#include "TeamMgr.h"
 
 Framework::Framework(int w, int h, const std::string& t)
     :screenWidth(w), screenHeight(h), title(t)
@@ -17,6 +18,7 @@ void Framework::Init(int width, int height, const std::string& title)
     RESOURCE_MGR.Init();
     DATATABLE_MGR.LoadAll();
     SCENE_MGR.Init();
+    TEAM_MGR.Init();
 }
 
 void Framework::Release()

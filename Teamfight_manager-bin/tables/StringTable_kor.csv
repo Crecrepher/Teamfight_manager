@@ -1,5 +1,34 @@
-ID,ENGLISH
-HELLO,반갑습니다
-BYE,안녕히가세요
-YOUDIE,유다희
-TITLE,엔터를 눌러 시작하세요
+ID,KOR
+MainB0Text,팀 관리
+MainB1Text,운영
+MainB2Text,대회
+MainB3Text,게임
+MainB4Text,시스템
+MainB5Text,선수영입
+MainB6Text,훈련
+MainB7Text,선수단
+MainB8Text,역사
+MainB9Text,스폰서
+MainB10Text,장비
+MainB11Text,시설개선
+MainB12Text,소식함
+MainB13Text,일정
+MainB14Text,순위표
+MainB15Text,팀 통계
+MainB16Text,챔피언 통계
+MainB17Text,챔피언 정보
+MainB18Text,조합 테스트
+MainB19Text,타이틀로
+MainB20Text,저장
+MainB21Text,환경설정
+MainB22Text,내 팀 정보 수정
+PlayerName0,Zeus
+PlayerName1,Oner
+PlayerName2,Faker
+PlayerName3,Gumayusi
+PlayerName4,Keria
+PlayerName5,Sky
+PlayerName6,Doran
+PlayerName7,Peanut
+PlayerName8,Chovy
+PlayerName9,BeryL
