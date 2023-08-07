@@ -32,6 +32,11 @@ void SceneTitile::Init()
 	worldView.setCenter(centerPos);
 	uiView.setSize(windowSize);
 	uiView.setCenter(centerPos);
+
+	AddGo(new UiButton("graphics/Origin/Sprite/sponser_logo_new_16.png","ChampEdit"));
+	AddGo(new UiButton("graphics/Origin/Sprite/default_button_1.png", "StartB"));
+	AddGo(new SpriteGo("graphics/Origin/Sprite/stadium.png", "Back"));
+	AddGo(new SpriteGo("graphics/Origin/Sprite/teamfight_manager_title_bg.png", "Monitor"));
 	for (auto go : gameObjects)
 	{
 		go->Init();
@@ -50,6 +55,34 @@ void SceneTitile::Enter()
 {
 	Scene::Enter();
 	RESOURCE_MGR.LoadFromCsv("tables/TitleResourceList.csv");
+
+	UiButton* bt = (UiButton*)FindGo("ChampEdit");
+	bt->SetPosition(1000, 300);
+	bt->SetOrigin(Origins::MC);
+	bt->SetSize(1.5, 1.5);
+	bt->sortLayer = 100;
+	bt->OnClick = []() {
+		SCENE_MGR.ChangeScene(SceneId::ChampEdit);
+	};
+
+	bt = (UiButton*)FindGo("StartB");
+	bt->SetPosition(FRAMEWORK.GetWindowSize()/2.f);
+	bt->SetOrigin(Origins::MC);
+	bt->SetSize(1.5, 1.5);
+	bt->sortLayer = 100;
+	bt->OnClick = []() {
+		SCENE_MGR.ChangeScene(SceneId::Home);
+	};
+
+	SpriteGo* spr = (SpriteGo*)FindGo("Back");
+	spr->SetPosition(0, 0);
+	spr->SetOrigin(Origins::TL);
+
+	spr = (SpriteGo*)FindGo("Monitor");
+	spr->SetPosition(0, 0);
+	spr->SetOrigin(Origins::TL);
+	spr->SetSize(FRAMEWORK.GetWindowSize().x/ spr->GetSize().x,
+		FRAMEWORK.GetWindowSize().y/ spr->GetSize().y);
 }
 
 void SceneTitile::Exit()

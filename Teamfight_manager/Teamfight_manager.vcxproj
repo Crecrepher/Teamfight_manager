@@ -122,6 +122,7 @@
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>./Animation;./DataTable;./SFML-2.5.1/include;./GameObject/ZSObject;./GameObject;./Universial;./Framework;./Scene;./;./3rd;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
+      <AdditionalOptions>/std:c++latest %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -159,6 +160,7 @@
     <ClCompile Include="GameObject\RectGo.cpp" />
     <ClCompile Include="GameObject\SoundGo.cpp" />
     <ClCompile Include="GameObject\TextGo.cpp" />
+    <ClCompile Include="Scene\SceneChampEdit.cpp" />
     <ClCompile Include="Scene\SceneGame.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
     </ClCompile>
@@ -200,6 +202,7 @@
     <ClInclude Include="GameObject\SpriteEffect.h" />
     <ClInclude Include="DataTable\StringTable.h" />
     <ClInclude Include="GameObject\UiButton.h" />
+    <ClInclude Include="Scene\SceneChampEdit.h" />
     <ClInclude Include="Universial\ObjectPool.h" />
     <ClInclude Include="GameObject\SoundGo.h" />
     <ClInclude Include="GameObject\TextGo.h" />
