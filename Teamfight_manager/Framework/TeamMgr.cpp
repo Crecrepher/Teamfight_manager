@@ -44,6 +44,10 @@ void TeamMgr::ShowPlayer()
 
 void TeamMgr::RecruitLocal(int index)
 {
+	if (money < 10 || recruiting_players[index].first == true)
+	{
+		return;
+	}
 	money -= 10;
 	PlayerInfo* recruitPlayer = &recruiting_players[index].second;
 	recruiting_players[index].first = true;
@@ -70,11 +74,14 @@ void TeamMgr::RecruitLocal(int index)
 			Utils::RandomRange(0, ableCharacteristic - 1));
 	}
 	recruitPlayer->contract_cost = Utils::RandomRange(95, 105+(recruitPlayer->knownChamp*10)+(recruitPlayer->knownCharacter * 10));
-		//12,13
 }
 
 void TeamMgr::Employ(int index)
 {
+	if (money < recruiting_players[index].second.contract_cost)
+	{
+		return;
+	}
 	playerNum++;
 	money -= recruiting_players[index].second.contract_cost;
 	player.push_back(recruiting_players[index].second);

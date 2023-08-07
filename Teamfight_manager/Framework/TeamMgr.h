@@ -65,6 +65,7 @@ public:
 	void Employ(int index);
 
 	int GetMoney() { return money; }
+	void EarnMoney(int money) { this->money += money; }
 };
 
 #define TEAM_MGR (TeamMgr::Instance())

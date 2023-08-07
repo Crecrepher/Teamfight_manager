@@ -14,6 +14,8 @@ public:
 		SYSTEM,
 	};
 protected:
+	bool cheatMode = true;
+
 public:
 	SceneHome();
 	virtual ~SceneHome() override;
@@ -39,5 +41,7 @@ public:
 	void MainUiFunc(int index);
 
 	void UpdateMoney();
+
+	void TestingCheats();
 };
 

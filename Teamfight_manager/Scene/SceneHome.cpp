@@ -70,15 +70,7 @@ void SceneHome::Update(float dt)
 {
 	Scene::Update(dt);
 
-	// Title Back
-	if (INPUT_MGR.GetKeyDown(sf::Keyboard::Escape))
-	{
-		SCENE_MGR.ChangeScene(SceneId::Title);
-	}
-	if (INPUT_MGR.GetKeyDown(sf::Keyboard::Enter))
-	{
-		SCENE_MGR.ChangeScene(SceneId::Game);
-	}
+	TestingCheats();
 }
 
 void SceneHome::Draw(sf::RenderWindow& window)
@@ -348,4 +340,49 @@ void SceneHome::UpdateMoney()
 	TextGo* text = (TextGo*)FindGo("MoneyInfoT");
 	text->text.setString(std::to_string(TEAM_MGR.GetMoney()));
 	text->SetOrigin(Origins::TL);
+}
+
+void SceneHome::TestingCheats()
+{
+	//***********************************************
+	//					Cheat Mode
+	//***********************************************
+	//
+	//	M :				Earn money 100
+	//	LShift + M :	Earn money 10000
+	// 
+	// ESC :			SceneTitle
+	// Enter :			SceneGame
+	//
+	//-----------------------------------------------
+
+	if (!cheatMode)
+	{
+		return;
+	}
+
+	//ShowMeTheMoney!!!
+	if (INPUT_MGR.GetKeyDown(sf::Keyboard::M))
+	{
+		if (INPUT_MGR.GetKey(sf::Keyboard::LShift))
+		{
+			TEAM_MGR.EarnMoney(10000);
+		}
+		else
+		{
+			TEAM_MGR.EarnMoney(100);
+		}
+		UpdateMoney();
+	}
+
+	// Title Back
+	if (INPUT_MGR.GetKeyDown(sf::Keyboard::Escape))
+	{
+		SCENE_MGR.ChangeScene(SceneId::Title);
+	}
+	if (INPUT_MGR.GetKeyDown(sf::Keyboard::Enter))
+	{
+		SCENE_MGR.ChangeScene(SceneId::Game);
+	}
+
 }
