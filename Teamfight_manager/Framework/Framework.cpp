@@ -41,7 +41,7 @@ void Framework::Run()
     clock.restart();
 
     sf::Image cursorImg;
-    cursorImg.loadFromFile("graphics/cursor_bright.png");
+    cursorImg.loadFromFile("graphics/Origin/Texture2D/mouse_curosr.png");
 
     sf::Cursor cursor;
     if (cursor.loadFromPixels(cursorImg.getPixelsPtr(), cursorImg.getSize(), {0,0 /*cursorImg.getSize().x / 2, cursorImg.getSize().y / 2*/ }))
