@@ -1,5 +1,6 @@
 #pragma once
 #include "Scene.h"
+#include "TeamMgr.h"
 
 class SceneHome : public Scene
 {
@@ -16,6 +17,7 @@ public:
 protected:
 	bool cheatMode = true;
 
+	bool backClick = true;
 public:
 	SceneHome();
 	virtual ~SceneHome() override;
@@ -34,6 +36,8 @@ public:
 	void AddGoText();
 
 	void MakeMainUi();
+	void MakeSubUi();
+	void MakeSubUiTraining();
 
 	void ReturnMainUiIndex(int& startNum, int& endNum, MainMenuType Type);
 	void MainUiOpen(MainMenuType Type);
@@ -41,6 +45,8 @@ public:
 	void MainUiFunc(int index);
 
 	void UpdateMoney();
+	void Recruit(int grade,int slotNum);
+	void MakeLocalPlayer(PlayerInfo& player);
 
 	void TestingCheats();
 };

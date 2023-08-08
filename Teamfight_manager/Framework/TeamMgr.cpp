@@ -1,9 +1,5 @@
 #include "stdafx.h"
 #include "TeamMgr.h"
-#include "InputMgr.h"
-#include "Utils.h"
-#include "DataTableMgr.h"
-#include "StringTable.h"
 
 void TeamMgr::Init()
 {
@@ -11,7 +7,36 @@ void TeamMgr::Init()
 	gearParts = std::vector<int>(4, 0);
 	facility = std::vector<bool>(40, false);
 	recruiting_players = std::vector<std::pair<bool, PlayerInfo>>(4,{false,PlayerInfo()});
+	dayGrowTable = std::vector<std::vector<int>>(10);
+	trainingGrowTable = std::vector<std::vector<int>>(10);
+	InitGrowTable();
+	
 	return;
+}
+
+void TeamMgr::InitGrowTable()
+{
+	dayGrowTable[0] = { 300,600,400,700 };
+	dayGrowTable[1] = { 300,600,400,800 };
+	dayGrowTable[2] = { 300,600,600,400 };
+	dayGrowTable[3] = { 200,250,400,400 };
+	dayGrowTable[4] = { 100,0,400,0 };
+	dayGrowTable[5] = { 0,0,200,0 };
+	dayGrowTable[6] = { 0,0,0,-100 };
+	dayGrowTable[7] = { -50,-100,0,-200 };
+	dayGrowTable[8] = { -100,-200,-100,-300 };
+	dayGrowTable[9] = { -200,-200,-120,-400 };
+
+	trainingGrowTable[0] = { 30,60,72,80 };
+	trainingGrowTable[1] = { 24,48,64,72 };
+	trainingGrowTable[2] = { 20,40,52,60 };
+	trainingGrowTable[3] = { 16,32,40,48 };
+	trainingGrowTable[4] = { 10,20,32,40 };
+	trainingGrowTable[5] = { 6,12,24,32 };
+	trainingGrowTable[6] = { 4,8,16,24 };
+	trainingGrowTable[7] = { 2,4,8,16 };
+	trainingGrowTable[8] = { 2,4,8,16 };
+	trainingGrowTable[9] = { 2,4,8,16 };
 }
 
 void TeamMgr::ShowPlayer()
@@ -42,38 +67,10 @@ void TeamMgr::ShowPlayer()
 	}
 }
 
-void TeamMgr::RecruitLocal(int index)
+void TeamMgr::Recruit(int index, PlayerInfo player)
 {
-	if (money < 10 || recruiting_players[index].first == true)
-	{
-		return;
-	}
-	money -= 10;
-	PlayerInfo* recruitPlayer = &recruiting_players[index].second;
+	recruiting_players[index].second = player;
 	recruiting_players[index].first = true;
-	{
-		std::stringstream ss;
-		ss << "PlayerName" << Utils::RandomRange(0,9);
-		auto stringtable = DATATABLE_MGR.Get<StringTable>(DataTable::Ids::String);
-		recruitPlayer->name = stringtable->GetW(ss.str());
-	}
-	recruitPlayer->age = Utils::RandomRange(19,21);
-	recruitPlayer->attack = Utils::RandomRange(9, 16);
-	recruitPlayer->defence = 25 - recruitPlayer->attack;
-	recruitPlayer->knownChamp = Utils::RandomRange(1, 3);
-	for (int i = 0; i < recruitPlayer->knownChamp; i++)
-	{
-		recruitPlayer->proficiency.push_back({ 
-			Utils::RandomRange(0, ableChamp-1),
-			Utils::RandomRange(5, 7) });
-	}
-	recruitPlayer->knownCharacter = Utils::RandomRange(0, 3);
-	for (int i = 0; i < recruitPlayer->knownCharacter; i++)
-	{
-		recruitPlayer->characteristic.push_back(
-			Utils::RandomRange(0, ableCharacteristic - 1));
-	}
-	recruitPlayer->contract_cost = Utils::RandomRange(95, 105+(recruitPlayer->knownChamp*10)+(recruitPlayer->knownCharacter * 10));
 }
 
 void TeamMgr::Employ(int index)
@@ -86,4 +83,96 @@ void TeamMgr::Employ(int index)
 	money -= recruiting_players[index].second.contract_cost;
 	player.push_back(recruiting_players[index].second);
 	recruiting_players[index] = { false,PlayerInfo() };
+	playerTraining.push_back(TrainingInfo());
+}
+
+TeamMgr::Schedule TeamMgr::GetSchedule(int date)
+{
+	std::vector<int> vacation = { 27,28,29,32,33,34,43,44,45,46 };
+	if (date == 1)
+	{
+		return TeamMgr::Schedule::Recruit;
+	}
+	if ((date>5 && date < 13)||((date > 18 && date < 26)))
+	{
+		return TeamMgr::Schedule::League;
+	}
+	for (int i = 0; i < vacation.size(); i++)
+	{
+		if (date == vacation[i])
+		{
+			return TeamMgr::Schedule::Vacation;
+		}
+	}
+	return TeamMgr::Schedule::Recruit;
+}
+
+void TeamMgr::DayPass()
+{
+	date++;
+	if (date >= 48)
+	{
+		date = 0;
+		year++;
+		for (int i = 0; i < playerNum; i++)
+		{
+			player[i].age++;
+		}
+	}
+
+	playerTraining = GetGrowStats(playerTraining);
+
+	for (int i = 0; i < playerNum; i++)
+	{
+		LevelUpdate(playerTraining[i].xpAtk, player[i].attack);
+		LevelUpdate(playerTraining[i].xpDef, player[i].defence);
+		for (int j = 0; j < player[i].knownChamp; j++)
+		{
+			LevelUpdate(playerTraining[i].xpChamp[j], player[i].proficiency[j].second);
+		}
+	}
+	
+}
+
+std::vector<TrainingInfo> TeamMgr::GetGrowStats(std::vector<TrainingInfo> playerTraining)
+{
+	std::vector<TrainingInfo> trainResult = playerTraining;
+	for (int i = 0; i < playerNum; i++)
+	{
+		int ageIndex = player[i].age - 17;
+		if (ageIndex < 0)
+		{
+			ageIndex = 0;
+		}
+		else if (ageIndex > 9)
+		{
+			ageIndex = 9;
+		}
+		trainResult[i].xpAtk
+			+= dayGrowTable[ageIndex][player[i].potential]
+			+ (trainingGrowTable[ageIndex][player[i].potential]
+				* trainResult[i].trainingAtk);
+		trainResult[i].xpDef
+			+= dayGrowTable[ageIndex][player[i].potential]
+			+ (trainingGrowTable[ageIndex][player[i].potential]
+				* trainResult[i].trainingDef);
+		for (int j = 0; j < player[i].knownChamp; j++)
+		{
+			trainResult[i].xpChamp[j]
+				+= dayGrowTable[ageIndex][player[i].potential]
+				+ (trainingGrowTable[ageIndex][player[i].potential]
+					* trainResult[i].trainingChamp[4]);
+		}
+	}
+	return trainResult;
+}
+
+void TeamMgr::LevelUpdate(int& xp, int& level)
+{
+	int levelUpVal = 1300 + (level * 10);
+	if (xp >= levelUpVal)
+	{
+		xp -= levelUpVal;
+		level++;
+	}
 }

@@ -21,6 +21,8 @@ struct PlayerInfo
 	std::vector<int> characteristic; 
 	//특성 <특성코드>
 	int knownCharacter = 0; //특성 갯수
+
+	int potential = 0;
 	//------------------통계----------------//
 	int kill = 0;
 	int assist = 0;
@@ -28,9 +30,34 @@ struct PlayerInfo
 	int totalAssist = 0;
 };
 
+struct TrainingInfo
+{
+	int maxTrainingPoint = 3;
+	int usedTrainingPoint = 0;
+
+	int xpAtk = 0;
+	int	trainingAtk = 0;
+
+	int xpDef = 0;
+	int	trainingDef = 0;
+
+	std::vector<int> xpChamp = std::vector<int>(4);
+	std::vector<int> trainingChamp = std::vector<int>(4);
+};
+
 class TeamMgr : public Singleton<TeamMgr>
 {
 	friend Singleton<TeamMgr>;
+
+public:
+	enum class Schedule
+	{
+		Recruit,
+		PracticeLeague,
+		League,
+		Vacation,
+		EventLeague
+	};
 
 protected:
 	TeamMgr() = default;
@@ -41,6 +68,9 @@ protected:
 	int money = 200;
 
 	std::vector<PlayerInfo> player;
+	std::vector<TrainingInfo> playerTraining;
+	std::vector<std::vector<int>> dayGrowTable;
+	std::vector<std::vector<int>> trainingGrowTable;
 	int playerNum = 0;
 	int MaxPlayer = 6;
 
@@ -56,16 +86,32 @@ protected:
 	std::vector<bool> facility; //40
 	//시설 [인덱스 = 시설코드] <보유여부>
 
-
+	int year = 2021;
+	int date = 0;
 public:
 	void Init();
+	void InitGrowTable();
 
 	void ShowPlayer();
-	void RecruitLocal(int index); //지역인재 영입
+	void Recruit(int index, PlayerInfo player);
 	void Employ(int index);
+
+	bool CheckRecruitSlot(int index) { return recruiting_players[index].first; }
 
 	int GetMoney() { return money; }
 	void EarnMoney(int money) { this->money += money; }
+	void UseMoney(int money) { this->money -= money; }
+
+	int GetAbleChamps() { return ableChamp; }
+	int GetAbleCharacteristic() { return ableCharacteristic; }
+
+	int GetTodayDate() { return date; }
+	int GetTodayYear() { return year; }
+	Schedule GetSchedule(int date);
+
+	void DayPass();
+	std::vector<TrainingInfo> GetGrowStats(std::vector<TrainingInfo> playerTraining);
+	void LevelUpdate(int& xp, int& level);
 };
 
 #define TEAM_MGR (TeamMgr::Instance())

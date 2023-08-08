@@ -7,12 +7,12 @@
 #include "InputMgr.h"
 #include "ResourceMgr.h"
 #include "Framework.h"
-#include "TeamMgr.h"
 
 #include "SpriteGo.h"
 #include "TextGo.h"
 #include "SoundGo.h"
 #include "UiButton.h"
+#include "RectGo.h"
 
 SceneHome::SceneHome() : Scene(SceneId::Home)
 {
@@ -38,6 +38,7 @@ void SceneHome::Init()
 	AddGoSprites();
 	AddGoUiButton();
 	AddGoText();
+	AddGo(new RectGo("UiShade"));
 	
 	for (auto go : gameObjects)
 	{
@@ -59,6 +60,13 @@ void SceneHome::Enter()
 	RESOURCE_MGR.LoadFromCsv("tables/HomeResourceList.csv");
 
 	MakeMainUi();
+	MakeSubUi();
+
+	RectGo* rect = (RectGo*)FindGo("UiShade");
+	rect->SetSize(FRAMEWORK.GetWindowSize());
+	rect->sortLayer = 110;
+	rect->sortOrder = -1;
+	rect->rectangle.setFillColor(sf::Color(0, 0, 0, 150));
 }
 
 void SceneHome::Exit()
@@ -68,7 +76,17 @@ void SceneHome::Exit()
 
 void SceneHome::Update(float dt)
 {
+	if (!backClick)
+	{
+		backClick = true;
+	}
+
 	Scene::Update(dt);
+
+	if (INPUT_MGR.GetMouseButtonUp(sf::Mouse::Left)&& backClick)
+	{
+		MainUiClose();
+	}
 
 	TestingCheats();
 }
@@ -89,11 +107,49 @@ void SceneHome::AddGoSprites()
 	AddGo(new SpriteGo("graphics/Origin/Sprite/header_gold_icon.png", "GoldUi"));
 	AddGo(new SpriteGo("graphics/Origin/Sprite/header_calendar_icon.png", "CalendarUi"));
 	AddGo(new SpriteGo("graphics/Origin/Sprite/header_league_bg.png", "LeagueUi"));
+
+	AddGo(new SpriteGo("graphics/Origin/Sprite/training_ui_bg.png", "TrainingUi"));
+	AddGo(new SpriteGo("graphics/Origin/Sprite/scroll_bar.png", "ScrollBar"));
+	for (int i = 0; i < 6; i++)
+	{
+		std::stringstream ss;
+		ss << "TrainingSlotUi" << i;
+		AddGo(new SpriteGo("graphics/Origin/Sprite/training_slot_bg.png", ss.str()));
+		ss.str("");
+		ss << "XpBack" << i;
+		AddGo(new SpriteGo("graphics/Origin/Sprite/exp_guage_0.png", ss.str()));
+		ss.str("");
+		ss << "XpCur" << i;
+		AddGo(new SpriteGo("graphics/Origin/Sprite/exp_guage_1.png", ss.str()));
+		ss.str("");
+		ss << "XpFuture" << i;
+		AddGo(new SpriteGo("graphics/Origin/Sprite/exp_guage_2.png", ss.str()));
+	}
+	for (int i = 0; i < 56; i++)
+	{
+		std::stringstream ss;
+		ss << "TrainingPointGuage" << i;
+		AddGo(new SpriteGo("graphics/Origin/Sprite/training_point_guage_0.png", ss.str()));
+	}
+	for (int i = 0; i < 8; i++)
+	{
+		std::stringstream ss;
+		ss << "CharacterIcons" << i;
+		AddGo(new SpriteGo("graphics/Origin/Sprite/character_icons_0.png", ss.str()));
+		ss << "Back";
+		AddGo(new SpriteGo("graphics/Origin/Sprite/champion&player_slot_0.png", ss.str()));
+		ss << "Line";
+		AddGo(new SpriteGo("graphics/Origin/Sprite/champion&player_slot_1.png", ss.str()));
+	}
+	AddGo(new SpriteGo("graphics/Origin/Sprite/attack_icon.png", "IconAtk0"));
+	AddGo(new SpriteGo("graphics/Origin/Sprite/attack_icon.png", "IconAtk1"));
+	AddGo(new SpriteGo("graphics/Origin/Sprite/defense_icon.png", "IconDef0"));
+	AddGo(new SpriteGo("graphics/Origin/Sprite/defense_icon.png", "IconDef1"));
 }
 
 void SceneHome::AddGoUiButton()
 {
-
+	AddGo(new UiButton("graphics/Origin/Sprite/proceed_button_0.png", "PlayB"));
 	for (int i = 0; i < 23; i++)
 	{
 		std::stringstream ss;
@@ -102,7 +158,24 @@ void SceneHome::AddGoUiButton()
 		ss << "Text";
 		AddGo(new TextGo(ss.str()));
 	}
-	AddGo(new UiButton("graphics/Origin/Sprite/proceed_button_0.png", "PlayB"));
+	
+	AddGo(new UiButton("graphics/Origin/Sprite/default_button_0.png", "TrainPointReturnB"));
+	AddGo(new UiButton("graphics/Origin/Sprite/default_button_0.png", "TrainCloseB"));
+	for (int i = 0; i < 12; i++)
+	{
+		std::stringstream ss;
+		ss << "PlayerList" << i;
+		AddGo(new UiButton("graphics/Origin/Sprite/player_list_bg_0.png", ss.str()));
+	}
+	for (int i = 0; i < 6; i++)
+	{
+		std::stringstream ss;
+		ss << "TrainingPointDownB" << i;
+		AddGo(new UiButton("graphics/Origin/Sprite/training_point_arrow_button_0.png", ss.str()));
+		ss.str("");
+		ss << "TrainingPointUpB";
+		AddGo(new UiButton("graphics/Origin/Sprite/training_point_arrow_button_2.png", ss.str()));
+	}
 }
 
 void SceneHome::AddGoText()
@@ -190,6 +263,7 @@ void SceneHome::MakeMainUi()
 		bt->OnClick = [this,i]() {
 			MainUiClose();
 			MainUiOpen((MainMenuType)i);
+			backClick = false;
 		};
 		int startNum = 0;
 		int endNum = 0;
@@ -208,6 +282,7 @@ void SceneHome::MakeMainUi()
 			bt2->sortLayer = 100;
 			bt2->OnClick = [this,j]() {
 				MainUiFunc(j);
+				backClick = false;
 			};
 			bt2->SetActive(false);
 
@@ -256,6 +331,39 @@ void SceneHome::MakeMainUi()
 	text->SetPosition(FRAMEWORK.GetWindowSize().x * 0.85f, 22.f);
 	text->sortLayer = 107;
 
+}
+
+void SceneHome::MakeSubUi()
+{
+	MakeSubUiTraining();
+}
+
+void SceneHome::MakeSubUiTraining()
+{
+	SpriteGo* spr = (SpriteGo*)FindGo("TrainingUi");
+	spr->SetOrigin(Origins::MC);
+	spr->SetPosition(FRAMEWORK.GetWindowSize().x * 0.5f, 
+		FRAMEWORK.GetWindowSize().y * 0.44f);
+	spr->SetSize((FRAMEWORK.GetWindowSize().x / spr->GetSize().x) - 0.05f,
+		(FRAMEWORK.GetWindowSize().x / spr->GetSize().x) - 0.05f);
+	spr->sortLayer = 110;
+
+	for (int i = 0; i < 6; i++)
+	{
+		std::stringstream ss;
+		ss << "TrainingSlotUi" << i;
+		spr = (SpriteGo*)FindGo("TrainingUi");
+		AddGo(new SpriteGo("graphics/Origin/Sprite/training_slot_bg.png", ss.str()));
+		ss.str("");
+		ss << "XpBack" << i;
+		AddGo(new SpriteGo("graphics/Origin/Sprite/exp_guage_0.png", ss.str()));
+		ss.str("");
+		ss << "XpCur" << i;
+		AddGo(new SpriteGo("graphics/Origin/Sprite/exp_guage_1.png", ss.str()));
+		ss.str("");
+		ss << "XpFuture" << i;
+		AddGo(new SpriteGo("graphics/Origin/Sprite/exp_guage_2.png", ss.str()));
+	}
 }
 
 void SceneHome::ReturnMainUiIndex(int& startNum, int& endNum, MainMenuType Type)
@@ -323,7 +431,7 @@ void SceneHome::MainUiFunc(int index)
 	switch (index)
 	{
 	case 5:
-		TEAM_MGR.RecruitLocal(0);
+		Recruit(0,0);
 		TEAM_MGR.Employ(0);
 		UpdateMoney();
 		break;
@@ -340,6 +448,63 @@ void SceneHome::UpdateMoney()
 	TextGo* text = (TextGo*)FindGo("MoneyInfoT");
 	text->text.setString(std::to_string(TEAM_MGR.GetMoney()));
 	text->SetOrigin(Origins::TL);
+}
+
+void SceneHome::Recruit(int grade, int slotNum)
+{
+	PlayerInfo player;
+	std::wstring name;
+	int age;
+	int attack;
+	int defence;
+	int knownChamp;
+	std::vector<std::pair<int, int>> proficiency;
+	int knownCharacter;
+	std::vector<int> characteristic;
+	int contract_cost;
+	int potential;
+	switch (grade)
+	{
+	case 0:
+		if (TEAM_MGR.GetMoney() < 10 || TEAM_MGR.CheckRecruitSlot(slotNum) == true)
+		{
+			return;
+		}
+		MakeLocalPlayer(player);
+		TEAM_MGR.UseMoney(10);
+		break;
+	default:
+		break;
+	}
+	TEAM_MGR.Recruit(slotNum, player);
+}
+
+void SceneHome::MakeLocalPlayer(PlayerInfo& player)
+{
+	{
+		std::stringstream ss;
+		ss << "PlayerName" << Utils::RandomRange(0, 9);
+		auto stringtable = DATATABLE_MGR.Get<StringTable>(DataTable::Ids::String);
+		player.name = stringtable->GetW(ss.str());
+	}
+	player.age = Utils::RandomRange(19, 21);
+	player.attack = Utils::RandomRange(9, 16);
+	player.defence = 25 - player.attack;
+	player.knownChamp = Utils::RandomRange(1, 3);
+	for (int i = 0; i < player.knownChamp; i++)
+	{
+		player.proficiency.push_back({
+			Utils::RandomRange(0, TEAM_MGR.GetAbleChamps() - 1),
+			Utils::RandomRange(5, 7) });
+	}
+	player.knownCharacter = Utils::RandomRange(0, 3);
+	for (int i = 0; i < player.knownCharacter; i++)
+	{
+		player.characteristic.push_back(
+			Utils::RandomRange(0, TEAM_MGR.GetAbleCharacteristic() - 1));
+	}
+	player.contract_cost = Utils::RandomRange(95, 105 + (player.knownChamp * 10) + (player.knownCharacter * 10));
+	player.potential = 0;
 }
 
 void SceneHome::TestingCheats()
