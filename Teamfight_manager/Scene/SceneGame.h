@@ -8,7 +8,7 @@ class SceneGame : public Scene
 {
 protected:
 	Phase currentPhase=Phase::None;
-	Mode mode=Mode::Sqaud;
+	Mode mode=Mode::Duo;
 	Team team;
 	Turn currentTurn;
 

@@ -6,8 +6,7 @@ class Champion : public SpriteGo
 {
 protected:
 	//// Ban/Pick 선택 값
-	std::string characterId;
-
+	
 	//// ChampionMgr 기반 선택 값 (임시) struct 로 받을 예정
 	//AnimatioControler championAnimation;
 	//float championmaxHp;
@@ -32,12 +31,12 @@ protected:
 	bool team;
 
 	ChampionStance currentStance;
-	ChampionType currentType;
 	TagetingOrder currentOrder;
 	
 	State currentState;
 	
 	float hp;
+	float skillCoolTime=10.f;
 	float skillTimer;
 	float reviveTimer;
 
@@ -60,11 +59,10 @@ public:
 	void SetMyTeam(std::vector<Champion*>* myTeam);
 	void SetEnemyTeam(std::vector<Champion*>* enemyTeam);
 	void ChangeStance(ChampionStance stance);
-	void SetState(float mHp, float atk, float def, float atkS, float atkR, float spd);
+	void SetState(State path);
 	void SetOrder(TagetingOrder order) { this->currentOrder = order; }
-	void SetId(std::string id) { this->characterId = id; }
-	std::string GetId() { return this->taget->characterId; }
-	void SetSacleX(float x) { this->sprite.setScale({ x, 1 }); }
+	void SetSacleX(float x);
+	void SetCoolTime(float t) { this->skillCoolTime = t; }
 	void SetPlayerTeam() { team = true; }
 
 	void FindTaget();
@@ -76,6 +74,7 @@ public:
 
 	void Idle(float dt);
 	void Move(float dt);
+	void Action(float dt);
 	void Attack(float dt);
 	void Skill(float dt);
 	void UltimateSkill(float dt);

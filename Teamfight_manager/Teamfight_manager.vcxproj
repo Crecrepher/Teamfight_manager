@@ -154,6 +154,7 @@
   <ItemGroup>
     <ClCompile Include="Animation\AnimatioControler.cpp" />
     <ClCompile Include="Animation\AnimatonClip.cpp" />
+    <ClCompile Include="Framework\ChampionMgr.cpp" />
     <ClCompile Include="GameObject\Champion.cpp" />
     <ClCompile Include="DataTable\DataTable.cpp" />
     <ClCompile Include="Framework\DataTableMgr.cpp" />
@@ -195,6 +196,7 @@
     <ClInclude Include="3rd\rapidcsv.h" />
     <ClInclude Include="Animation\AnimatioControler.h" />
     <ClInclude Include="Animation\AnimatonClip.h" />
+    <ClInclude Include="Framework\ChampionMgr.h" />
     <ClInclude Include="GameObject\Champion.h" />
     <ClInclude Include="DataTable\DataTable.h" />
     <ClInclude Include="Framework\DataTableMgr.h" />

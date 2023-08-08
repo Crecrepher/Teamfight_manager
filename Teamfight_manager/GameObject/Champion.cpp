@@ -34,44 +34,64 @@ void Champion::Release()
 
 void Champion::Update(float dt)
 {
-		SpriteGo::Update(dt);
+	SpriteGo::Update(dt);
 
-		if (this->currentStance == ChampionStance::None)
-			return;
+	dt *= 10.f;
 
-		switch (this->currentStance)
-		{
-		case ChampionStance::Idle:
-		{
-			Idle(dt);
-			break;
-		}
-		case ChampionStance::Move:
-		{
-			Move(dt);
-			break;
-		}
-		case ChampionStance::Attack:
-		{
-			Attack(dt);
-			break;
-		}
-		case ChampionStance::Skill:
-		{
-			Skill(dt);
-			break;
-		}
-		case ChampionStance::UltimateSkill:
-		{
-			UltimateSkill(dt);
-			break;
-		}
-		case ChampionStance::Dead:
-		{
-			Dead(dt);
-			break;
-		}
-		}
+	skillTimer += dt;
+
+	if (skillTimer >= skillCoolTime)
+	{
+		skillTimer = skillCoolTime;
+	}
+
+	if (this->currentStance == ChampionStance::None)
+		return;
+
+	if (this->hp <= 0)
+	{
+		ChampionDie();
+		return;
+	}
+
+	switch (this->currentStance)
+	{
+	case ChampionStance::Idle:
+	{
+		Idle(dt);
+		break;
+	}
+	case ChampionStance::Move:
+	{
+		Move(dt);
+		break;
+	}
+	case ChampionStance::Action:
+	{
+		Action(dt);
+		break;
+	}
+	case ChampionStance::Attack:
+	{
+		Attack(dt);
+		break;
+	}
+	case ChampionStance::Skill:
+	{
+		Skill(dt);
+		break;
+	}
+	case ChampionStance::UltimateSkill:
+	{
+		UltimateSkill(dt);
+		break;
+	}
+	case ChampionStance::Dead:
+	{
+		Dead(dt);
+		break;
+	}
+	}
 	
 }
 
@@ -82,12 +102,6 @@ void Champion::ChangeStance(ChampionStance stance)
 
 void Champion::Idle(float dt)
 {
-	if (this->hp <= 0)
-	{
-		ChampionDie();
-		return;
-	}
-
 	if (!this->enemyTeam->empty())
 	{
 		FindTaget();
@@ -95,15 +109,16 @@ void Champion::Idle(float dt)
 
 	if (this->taget != nullptr)
 	{
+		//std::cout << abs(Utils::Distance(this->GetPosition(), this->taget->GetPosition())) << std::endl;
 		SetSacleX(Utils::Normalize(taget->GetPosition() - this->position).x);
-		if (abs(Utils::Distance(this->GetPosition(), this->taget->GetPosition())) >= 25.f)
+		if (abs(Utils::Distance(this->GetPosition(), this->taget->GetPosition())) > this->currentState.attackRange)
 		{
 			ChangeStance(ChampionStance::Move);
 			return;
 		}
-		else if (abs(Utils::Distance(this->GetPosition(), this->taget->GetPosition())) <= 25.f)
+		else if (abs(Utils::Distance(this->GetPosition(), this->taget->GetPosition())) <= this->currentState.attackRange)
 		{
-			ChangeStance(ChampionStance::Attack);
+			ChangeStance(ChampionStance::Action);
 			return;
 		}
 	}
@@ -111,12 +126,6 @@ void Champion::Idle(float dt)
 
 void Champion::Move(float dt)
 {
-	if (this->hp <= 0)
-	{
-		ChampionDie();
-		return;
-	}
-
 	if (!this->enemyTeam->empty())
 	{
 		FindTaget();
@@ -124,56 +133,71 @@ void Champion::Move(float dt)
 
 	if (this->taget != nullptr)
 	{
-		if (abs(Utils::Distance(this->GetPosition(), this->taget->GetPosition())) <= 25.f)
+		if (abs(Utils::Distance(this->GetPosition(), this->taget->GetPosition())) <= this->currentState.attackRange)
 		{
 			ChangeStance(ChampionStance::Idle);
 			return;
 		}
 	}
-
 	SetPosition(this->position + Utils::Normalize(taget->GetPosition() - this->position) * this->currentState.speed * dt);
+}
+
+void Champion::Action(float dt)
+{
+	if (abs(Utils::Distance(this->GetPosition(), this->taget->GetPosition())) <= this->currentState.attackRange && skillTimer == skillCoolTime)
+	{
+		ChangeStance(ChampionStance::Skill);
+		return;
+	}
+	else if (abs(Utils::Distance(this->GetPosition(), this->taget->GetPosition())) <= this->currentState.attackRange)
+	{
+		ChangeStance(ChampionStance::Attack);
+		return;
+	}
 }
 
 void Champion::Attack(float dt)
 {
-	if (this->hp <= 0)
-	{
-		ChampionDie();
-		return;
-	}
-
-	//std::cout << "공격" << std::endl;
+	std::cout << "공격" << std::endl;
 	ChangeStance(ChampionStance::Idle);
 }
 
 void Champion::Skill(float dt)
 {
-	if (this->hp <= 0)
-	{
-		ChampionDie();
-		return;
-	}
-
+	std::cout << "스킬" << std::endl;
+	skillTimer = 0;
+	ChangeStance(ChampionStance::Idle);
 }
 
-void Champion::SetState(float mHp, float atk, float def,
-	float atkS, float atkR, float spd)
+void Champion::SetState(State path)
 {
-	this->currentState.maxHp = mHp;
-	this->currentState.attack = atk;
-	this->currentState.defend = def;
-	this->currentState.attackSpeed = atkS;
-	this->currentState.attackRange = atkR;
-	this->currentState.speed = spd;
+	this->currentState.charId = path.charId;
+	this->currentState.maxHp = path.maxHp;
+	this->currentState.attack = path.attack;
+	this->currentState.defend = path.defend;
+	this->currentState.attackSpeed = path.attackSpeed;
+	this->currentState.attackRange = path.attackRange;
+	this->currentState.speed = path.speed;
+	this->currentState.skillCode1 = path.skillCode1;
+	this->currentState.skillCode2 = path.skillCode2;
+	this->currentState.type = path.type;
+}
+
+void Champion::SetSacleX(float x)
+{
+	if (x >= 0)
+	{
+		this->sprite.setScale({ 1, 1 });
+	}
+	else if (x < 0)
+	{
+		this->sprite.setScale({ -1,1 });
+	}
 }
 
 void Champion::UltimateSkill(float dt)
 {
-	if (this->hp <= 0)
-	{
-		ChampionDie();
-		return;
-	}
+
 }
 
 void Champion::Dead(float dt)
@@ -212,7 +236,7 @@ void Champion::FindTaget()
 	{
 	case TagetingOrder::Default:
 	{
-		switch (this->currentType)
+		switch (this->currentState.type)
 		{
 		case ChampionType::Warrios:
 		{

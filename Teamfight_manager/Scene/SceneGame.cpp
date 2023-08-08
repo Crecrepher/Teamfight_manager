@@ -6,6 +6,7 @@
 #include "SceneMgr.h"
 #include "InputMgr.h"
 #include "ResourceMgr.h"
+#include "ChampionMgr.h"
 #include "Framework.h"
 
 #include "SpriteGo.h"
@@ -47,8 +48,6 @@ void SceneGame::Init()
 	};
 	championPool.Init();
 
-	fullStep = 4;
-	step = 1;
 	// 경기장 x : 366 - 910
 	// 경기장 y : 198 - 490
 
@@ -69,12 +68,30 @@ void SceneGame::Release()
 void SceneGame::Enter()
 {
 	Scene::Enter();
-
 	RESOURCE_MGR.LoadFromCsv("tables/GameResourceList.csv");
+
+	currentPhase = Phase::None;
 }
 
 void SceneGame::Exit()
 {
+	if (!redTeam.empty())
+	{
+		for (auto team : redTeam)
+		{
+			RemoveGo(team);
+		}
+		redTeam.clear();
+	}
+	if (!blueTeam.empty())
+	{
+		for (auto team : blueTeam)
+		{
+			RemoveGo(team);
+		}
+		blueTeam.clear();
+	}
+	ClearObjectPool(championPool);
 	Scene::Exit();
 }
 
@@ -91,26 +108,21 @@ void SceneGame::Update(float dt)
 		case Mode::Duo:
 		{
 			fullStep = 6;
-			step = 1;
-			// Blue 팀이 될 플레이어 선택
-			team = Team::Blue;
 			break;
 		}
 		case Mode::Trio:
 		{
 			fullStep = 8;
-			step = 1;
-			team = Team::Blue;
 			break;
 		}
 		case Mode::Sqaud:
 		{
 			fullStep = 14;
-			step = 1;
-			team = Team::Blue;
 			break;
 		}
 		}
+		step = 1;
+		team = Team::Blue;
 		ChangePhase(Phase::Ban);
 		break;
 	}
@@ -144,6 +156,24 @@ void SceneGame::Update(float dt)
 		SCENE_MGR.ChangeScene(SceneId::Home);
 		return;
 	}
+	if (INPUT_MGR.GetKeyDown(sf::Keyboard::Num1))
+	{
+		mode = Mode::Duo;
+		SCENE_MGR.ChangeScene(SceneId::Game);
+		return;
+	}
+	if (INPUT_MGR.GetKeyDown(sf::Keyboard::Num2))
+	{
+		mode = Mode::Trio;
+		SCENE_MGR.ChangeScene(SceneId::Game);
+		return;
+	}
+	if (INPUT_MGR.GetKeyDown(sf::Keyboard::Num3))
+	{
+		mode = Mode::Sqaud;
+		SCENE_MGR.ChangeScene(SceneId::Game);
+		return;
+	}
 }
 
 void SceneGame::Draw(sf::RenderWindow& window)
@@ -155,6 +185,11 @@ void SceneGame::ChangePhase(Phase cPhase)
 {
 	switch (cPhase)
 	{
+	case Phase::None:
+	{
+		currentPhase = Phase::None;
+		break;
+	}
 	case Phase::Ban:
 	{
 		currentPhase = Phase::Ban;
@@ -173,7 +208,7 @@ void SceneGame::ChangePhase(Phase cPhase)
 	case Phase::Battle:
 	{
 		currentPhase = Phase::Battle;
-		battleTimer = 20.f;
+		battleTimer = 30.f;
 		break;
 	}
 	}
@@ -272,11 +307,10 @@ void SceneGame::PickPhase(float dt)
 	case Team::Red:
 	{
 		Champion* redChamp = championPool.Get();
-		redChamp->SetState(100, 10, 10, 10, 10, 25);
+		redChamp->SetState(CHAMPION_MGR.GetChampion("swordman"));
 		redChamp->SetOrder(TagetingOrder::ShortRange);
 		redChamp->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/Origin/Sprite/archer_0.png"));
-		redChamp->SetPosition((Utils::RandomRange(400,500)), (Utils::RandomRange(300, 400)));
-		redChamp->SetId(std::to_string(step));
+		redChamp->SetPosition((Utils::RandomRange(420,520)), (Utils::RandomRange(300, 450)));
 		redChamp->SetEnemyTeam(&blueTeam);
 		redChamp->SetMyTeam(&redTeam);
 		redChamp->ChangeStance(ChampionStance::None);
@@ -295,11 +329,10 @@ void SceneGame::PickPhase(float dt)
 	case Team::Blue:
 	{
 		Champion* blueChamp = championPool.Get();
-		blueChamp->SetState(100, 10, 10, 10, 10, 25);
+		blueChamp->SetState(CHAMPION_MGR.GetChampion("archer"));
 		blueChamp->SetOrder(TagetingOrder::ShortRange);
 		blueChamp->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/Origin/Sprite/archer_0.png"));
-		blueChamp->SetPosition((Utils::RandomRange(700, 800)), (Utils::RandomRange(300, 400)));
-		blueChamp->SetId(std::to_string(step));
+		blueChamp->SetPosition((Utils::RandomRange(750, 850)), (Utils::RandomRange(300, 450)));
 		blueChamp->SetEnemyTeam(&redTeam);
 		blueChamp->SetMyTeam(&blueTeam);
 		blueChamp->ChangeStance(ChampionStance::None);
@@ -319,7 +352,7 @@ void SceneGame::PickPhase(float dt)
 
 	if (step == fullStep)
 	{
-		readyTimer = 5.f;
+		readyTimer = 1.f;
 
 		ChangePhase(Phase::Ready);
 	}
@@ -362,7 +395,6 @@ void SceneGame::BattlePhase(float dt)
 			redTeam.clear();
 		}
 
-
 		if (!blueTeam.empty())
 		{
 			for (auto team : blueTeam)
@@ -372,6 +404,6 @@ void SceneGame::BattlePhase(float dt)
 			}
 			blueTeam.clear();
 		}
-		ChangePhase(Phase::Pick);
+		ChangePhase(Phase::None);
 	}
 }

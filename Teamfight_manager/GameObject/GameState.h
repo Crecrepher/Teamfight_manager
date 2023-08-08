@@ -1,4 +1,5 @@
 #pragma once
+
 enum class Phase
 {
 	None=-1,
@@ -35,6 +36,7 @@ enum class ChampionStance
 	None=-1,
 	Idle,
 	Move,
+	Action,
 	Attack,
 	Skill,
 	UltimateSkill,
@@ -63,10 +65,14 @@ enum class TagetingOrder
 
 struct State
 {
+	std::string charId;
 	float maxHp;
 	float attack;
 	float defend;
 	float attackSpeed;
 	float attackRange;
 	float speed;
+	int skillCode1;
+	int skillCode2;
+	ChampionType type;
 };
