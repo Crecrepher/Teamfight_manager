@@ -61,12 +61,15 @@ void SceneHome::Enter()
 
 	MakeMainUi();
 	MakeSubUi();
+	UiTrainingOpen(false);
 
 	RectGo* rect = (RectGo*)FindGo("UiShade");
 	rect->SetSize(FRAMEWORK.GetWindowSize());
 	rect->sortLayer = 110;
 	rect->sortOrder = -1;
 	rect->rectangle.setFillColor(sf::Color(0, 0, 0, 150));
+
+
 }
 
 void SceneHome::Exit()
