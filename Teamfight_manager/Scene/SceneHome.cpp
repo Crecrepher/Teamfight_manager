@@ -26,7 +26,7 @@ SceneHome::~SceneHome()
 void SceneHome::Init()
 {
 	Release();
-	
+
 	sf::Vector2f windowSize = FRAMEWORK.GetWindowSize();
 	sf::Vector2f centerPos = windowSize * 0.5f;
 
@@ -39,7 +39,7 @@ void SceneHome::Init()
 	AddGoUiButton();
 	AddGoText();
 	AddGo(new RectGo("UiShade"));
-	
+
 	for (auto go : gameObjects)
 	{
 		go->Init();
@@ -83,7 +83,8 @@ void SceneHome::Update(float dt)
 
 	Scene::Update(dt);
 
-	if (INPUT_MGR.GetMouseButtonUp(sf::Mouse::Left)&& backClick)
+	if (INPUT_MGR.GetMouseButtonUp(sf::Mouse::Left) && backClick
+		&& !isMenuOn)
 	{
 		MainUiClose();
 	}
@@ -125,7 +126,7 @@ void SceneHome::AddGoSprites()
 		ss << "XpFuture" << i;
 		AddGo(new SpriteGo("graphics/Origin/Sprite/exp_guage_2.png", ss.str()));
 	}
-	for (int i = 0; i < 56; i++)
+	for (int i = 0; i < 48; i++)
 	{
 		std::stringstream ss;
 		ss << "TrainingPointGuage" << i;
@@ -134,12 +135,21 @@ void SceneHome::AddGoSprites()
 	for (int i = 0; i < 8; i++)
 	{
 		std::stringstream ss;
+		ss << "LeftTrainingPointGuage" << i;
+		AddGo(new SpriteGo("graphics/Origin/Sprite/unused_point_guage_0.png", ss.str()));
+	}
+	for (int i = 0; i < 4; i++)
+	{
+		std::stringstream ss;
 		ss << "CharacterIcons" << i;
 		AddGo(new SpriteGo("graphics/Origin/Sprite/character_icons_0.png", ss.str()));
 		ss << "Back";
 		AddGo(new SpriteGo("graphics/Origin/Sprite/champion&player_slot_0.png", ss.str()));
 		ss << "Line";
 		AddGo(new SpriteGo("graphics/Origin/Sprite/champion&player_slot_1.png", ss.str()));
+		ss.str("");
+		ss << "CharacterStatIcons" << i;
+		AddGo(new SpriteGo("graphics/Origin/Sprite/character_icons_0.png", ss.str()));
 	}
 	AddGo(new SpriteGo("graphics/Origin/Sprite/attack_icon.png", "IconAtk0"));
 	AddGo(new SpriteGo("graphics/Origin/Sprite/attack_icon.png", "IconAtk1"));
@@ -158,7 +168,7 @@ void SceneHome::AddGoUiButton()
 		ss << "Text";
 		AddGo(new TextGo(ss.str()));
 	}
-	
+
 	AddGo(new UiButton("graphics/Origin/Sprite/default_button_0.png", "TrainPointReturnB"));
 	AddGo(new UiButton("graphics/Origin/Sprite/default_button_0.png", "TrainCloseB"));
 	for (int i = 0; i < 12; i++)
@@ -173,7 +183,7 @@ void SceneHome::AddGoUiButton()
 		ss << "TrainingPointDownB" << i;
 		AddGo(new UiButton("graphics/Origin/Sprite/training_point_arrow_button_0.png", ss.str()));
 		ss.str("");
-		ss << "TrainingPointUpB";
+		ss << "TrainingPointUpB" << i;
 		AddGo(new UiButton("graphics/Origin/Sprite/training_point_arrow_button_2.png", ss.str()));
 	}
 }
@@ -190,12 +200,12 @@ void SceneHome::MakeMainUi()
 	ground->SetOrigin(Origins::TC);
 	ground->SetSize(FRAMEWORK.GetWindowSize().x / ground->GetSize().x,
 		FRAMEWORK.GetWindowSize().x / ground->GetSize().x);
-	ground->SetPosition(FRAMEWORK.GetWindowSize().x/2.f, FRAMEWORK.GetWindowSize().y*0.8f);
+	ground->SetPosition(FRAMEWORK.GetWindowSize().x / 2.f, FRAMEWORK.GetWindowSize().y * 0.8f);
 	ground->sortLayer = 5;
 
 	SpriteGo* spr = (SpriteGo*)FindGo("House");
 	spr->SetOrigin(Origins::BC);
-	spr->SetSize(3,3);
+	spr->SetSize(3, 3);
 	spr->SetPosition(ground->GetPosition());
 	spr->sortLayer = 2;
 
@@ -214,9 +224,9 @@ void SceneHome::MakeMainUi()
 	spr->sortLayer = 105;
 
 	SpriteGo* leagueUi = (SpriteGo*)FindGo("LeagueUi");
-	leagueUi->SetPosition(0, spr->GetSize().y*2.f);
+	leagueUi->SetPosition(0, spr->GetSize().y * 2.f);
 	leagueUi->SetOrigin(Origins::TL);
-	leagueUi->SetSize(2,2);
+	leagueUi->SetSize(2, 2);
 	leagueUi->sortLayer = 106;
 
 	float uiSizeHead = 2.0f;
@@ -234,14 +244,14 @@ void SceneHome::MakeMainUi()
 	sprIc->sortLayer = 107;
 
 	spr = (SpriteGo*)FindGo("HeadSlot1");
-	spr->SetPosition(FRAMEWORK.GetWindowSize().x * 0.8f+15.f, 10.f);
+	spr->SetPosition(FRAMEWORK.GetWindowSize().x * 0.8f + 15.f, 10.f);
 	spr->SetOrigin(Origins::TL);
 	spr->SetSize(uiSizeHead, uiSizeHead);
 	spr->sortLayer = 106;
 
 	sprIc = (SpriteGo*)FindGo("GoldUi");
 	sprIc->SetSize(uiSizeHead, uiSizeHead);
-	sprIc->SetPosition(spr->GetPosition().x+10.f,
+	sprIc->SetPosition(spr->GetPosition().x + 10.f,
 		spr->GetPosition().y + 10.f);
 	sprIc->SetOrigin(Origins::TL);
 	sprIc->sortLayer = 107;
@@ -256,31 +266,31 @@ void SceneHome::MakeMainUi()
 		ss << "MainB" << i;
 		bt = (UiButton*)FindGo(ss.str());
 		bt->SetOrigin(Origins::BL);
-		bt->SetSize(uiSizeHead+0.45f, uiSizeHead);
-		bt->SetPosition(15.f + 15.f * i + (bt->GetSize().x * i* uiSizeMainB),
+		bt->SetSize(uiSizeHead + 0.45f, uiSizeHead);
+		bt->SetPosition(15.f + 15.f * i + (bt->GetSize().x * i * uiSizeMainB),
 			FRAMEWORK.GetWindowSize().y - 30.f);
 		bt->sortLayer = 100;
-		bt->OnClick = [this,i]() {
+		bt->OnClick = [this, i]() {
 			MainUiClose();
 			MainUiOpen((MainMenuType)i);
 			backClick = false;
 		};
 		int startNum = 0;
 		int endNum = 0;
-		ReturnMainUiIndex(startNum, endNum,(MainMenuType)i);
+		ReturnMainUiIndex(startNum, endNum, (MainMenuType)i);
 		int boundNum = 1;
 		for (int j = startNum; j < endNum; j++)
 		{
 			boundNum++;
 			std::stringstream ss2;
-			ss2 << "MainB" << j; 
+			ss2 << "MainB" << j;
 			UiButton* bt2 = (UiButton*)FindGo(ss2.str());
 			bt2->SetOrigin(Origins::BL);
 			bt2->SetSize(uiSizeHead + 0.45f, uiSizeHead);
 			bt2->SetPosition(15.f + 15.f * i + (bt->GetSize().x * i * uiSizeMainB),
-				FRAMEWORK.GetWindowSize().y - (50.f * boundNum) +20.f);
+				FRAMEWORK.GetWindowSize().y - (50.f * boundNum) + 20.f);
 			bt2->sortLayer = 100;
-			bt2->OnClick = [this,j]() {
+			bt2->OnClick = [this, j]() {
 				MainUiFunc(j);
 				backClick = false;
 			};
@@ -307,7 +317,7 @@ void SceneHome::MakeMainUi()
 		btText->text.setFillColor(sf::Color::White);
 		btText->text.setCharacterSize(20);
 		btText->SetOrigin(Origins::MC);
-		btText->SetPosition(bt->GetPosition().x + bt->GetSize().x+15.f , bt->GetPosition().y - bt->GetSize().y);
+		btText->SetPosition(bt->GetPosition().x + bt->GetSize().x + 15.f, bt->GetPosition().y - bt->GetSize().y);
 		btText->sortLayer = 101;
 	}
 
@@ -319,7 +329,7 @@ void SceneHome::MakeMainUi()
 		FRAMEWORK.GetWindowSize().y - 30.f);
 	bt->sortLayer = 101;
 	bt->OnClick = []() {
-		SCENE_MGR.ChangeScene(SceneId::Game);
+		TEAM_MGR.DayPass();
 	};
 
 	TextGo* text = (TextGo*)FindGo("MoneyInfoT");
@@ -342,7 +352,7 @@ void SceneHome::MakeSubUiTraining()
 {
 	SpriteGo* spr = (SpriteGo*)FindGo("TrainingUi");
 	spr->SetOrigin(Origins::MC);
-	spr->SetPosition(FRAMEWORK.GetWindowSize().x * 0.5f, 
+	spr->SetPosition(FRAMEWORK.GetWindowSize().x * 0.5f,
 		FRAMEWORK.GetWindowSize().y * 0.44f);
 	spr->SetSize((FRAMEWORK.GetWindowSize().x / spr->GetSize().x) - 0.05f,
 		(FRAMEWORK.GetWindowSize().x / spr->GetSize().x) - 0.05f);
@@ -352,17 +362,162 @@ void SceneHome::MakeSubUiTraining()
 	{
 		std::stringstream ss;
 		ss << "TrainingSlotUi" << i;
-		spr = (SpriteGo*)FindGo("TrainingUi");
-		AddGo(new SpriteGo("graphics/Origin/Sprite/training_slot_bg.png", ss.str()));
+		spr = (SpriteGo*)FindGo(ss.str());
+		spr->SetOrigin(Origins::TL);
+		spr->SetSize(2, 2);
+		spr->SetPosition(483 + (spr->GetSize().x * 2.f + 10.f) * (i % 2), 275 + (spr->GetSize().y * 2.f + 10.f) * (i / 2));
+		spr->sortLayer = 111;
 		ss.str("");
 		ss << "XpBack" << i;
-		AddGo(new SpriteGo("graphics/Origin/Sprite/exp_guage_0.png", ss.str()));
+		SpriteGo* xpBar = (SpriteGo*)FindGo(ss.str());
+		xpBar->SetOrigin(Origins::TL);
+		xpBar->SetSize(2, 2);
+		xpBar->SetPosition(spr->GetPosition().x+55.f, spr->GetPosition().y + 56.f);
+		xpBar->sortLayer = 112;
 		ss.str("");
 		ss << "XpCur" << i;
-		AddGo(new SpriteGo("graphics/Origin/Sprite/exp_guage_1.png", ss.str()));
+		xpBar = (SpriteGo*)FindGo(ss.str());
+		xpBar->SetOrigin(Origins::TL);
+		xpBar->SetSize(2, 2);
+		xpBar->SetPosition(spr->GetPosition().x + 55.f, spr->GetPosition().y + 56.f);
+		xpBar->sortLayer = 114;
 		ss.str("");
 		ss << "XpFuture" << i;
-		AddGo(new SpriteGo("graphics/Origin/Sprite/exp_guage_2.png", ss.str()));
+		xpBar = (SpriteGo*)FindGo(ss.str());
+		xpBar->SetOrigin(Origins::TL);
+		xpBar->SetSize(2, 2);
+		xpBar->SetPosition(spr->GetPosition().x + 55.f, spr->GetPosition().y + 56.f);
+		xpBar->sortLayer = 113;
+
+		ss.str("");
+		ss << "TrainingPointDownB" << i;
+		UiButton* trainPointB = (UiButton*)FindGo(ss.str());
+		trainPointB->SetOrigin(Origins::MC);
+		trainPointB->SetSize(2, 2);
+		trainPointB->SetPosition(spr->GetPosition().x + 320.f, spr->GetPosition().y + 27.f);
+		trainPointB->sortLayer = 113;
+		ss.str("");
+		ss << "TrainingPointUpB" << i;
+		trainPointB = (UiButton*)FindGo(ss.str());
+		trainPointB->SetOrigin(Origins::MC);
+		trainPointB->SetSize(2, 2);
+		trainPointB->SetPosition(spr->GetPosition().x + 350.f, spr->GetPosition().y + 27.f);
+		trainPointB->sortLayer = 113;
+
+		for (int j = i * 8; j < i*8+8; j++)
+		{
+			std::stringstream ss;
+			ss << "TrainingPointGuage" << j;
+			SpriteGo* trainPoint = (SpriteGo*)FindGo(ss.str());
+			trainPoint->SetOrigin(Origins::MC);
+			trainPoint->SetSize(2, 2);
+			trainPoint->SetPosition(spr->GetPosition().x + 295.f-(j%8*6), spr->GetPosition().y + 27.f);
+			trainPoint->sortLayer = 112;
+		}
+		if (i>1)
+		{
+			ss.str("");
+			ss << "CharacterStatIcons" << i-2;
+			SpriteGo* charIcon = (SpriteGo*)FindGo(ss.str());
+			charIcon->SetOrigin(Origins::TL);
+			charIcon->SetSize(2, 2);
+			charIcon->sprite.setTextureRect({0,0,25,25});
+			charIcon->SetPosition(spr->GetPosition().x , spr->GetPosition().y);
+			charIcon->sortLayer = 112;
+		}
+		if (i == 0)
+		{
+			SpriteGo* statIcon = (SpriteGo*)FindGo("IconAtk1");
+			statIcon->SetOrigin(Origins::MC);
+			statIcon->SetPosition(spr->GetPosition().x + 25.f, spr->GetPosition().y + 25.f);
+			statIcon->SetSize(2, 2);
+			statIcon->sortLayer = 111;
+		}
+		if (i == 1)
+		{
+			SpriteGo* statIcon = (SpriteGo*)FindGo("IconDef1");
+			statIcon->SetOrigin(Origins::MC);
+			statIcon->SetPosition(spr->GetPosition().x + 25.f, spr->GetPosition().y+25.f);
+			statIcon->SetSize(2, 2);
+			statIcon->sortLayer = 111;
+		}
+	}
+
+	for (int i = 0; i < 8; i++)
+	{
+		std::stringstream ss;
+		ss << "LeftTrainingPointGuage" << i;
+		SpriteGo* leftTrainPoint = (SpriteGo*)FindGo(ss.str());
+		leftTrainPoint->SetOrigin(Origins::MC);
+		leftTrainPoint->SetPosition(1155 - (i * 18), 246);
+		leftTrainPoint->SetSize(2, 2);
+		leftTrainPoint->sortLayer = 113;
+	}
+
+	for (int i = 0; i < 4; i++)
+	{
+		std::stringstream ss;
+		ss << "CharacterIcons" << i;
+		SpriteGo* characterIcons = (SpriteGo*)FindGo(ss.str());
+		characterIcons->SetOrigin(Origins::TL);
+		characterIcons->sprite.setTextureRect({ 0,0,25,25 });
+		characterIcons->SetPosition(250+(55*i), 190);
+		characterIcons->SetSize(2, 2);
+		characterIcons->sortLayer = 112;
+		ss << "Back";
+		spr = (SpriteGo*)FindGo(ss.str());
+		spr->SetOrigin(Origins::TL);
+		spr->SetPosition(characterIcons->GetPosition());
+		spr->SetSize(2, 2);
+		spr->sortLayer = 111;
+		ss << "Line";
+		spr = (SpriteGo*)FindGo(ss.str());
+		spr->SetOrigin(Origins::TL);
+		spr->SetPosition(characterIcons->GetPosition());
+		spr->SetSize(2, 2);
+		spr->sortLayer = 113;
+		
+	}
+	spr = (SpriteGo*)FindGo("IconAtk0");
+	spr->SetOrigin(Origins::MC);
+	spr->SetPosition(60,215);
+	spr->SetSize(2, 2);
+	spr->sortLayer = 111;
+
+	spr = (SpriteGo*)FindGo("IconDef0");
+	spr->SetOrigin(Origins::MC);
+	spr->SetPosition(150, 215);
+	spr->SetSize(2, 2);
+	spr->sortLayer = 111;
+
+	UiButton* bt = (UiButton*)FindGo("TrainPointReturnB");
+	bt->SetOrigin(Origins::ML);
+	bt->SetPosition(495, 245);
+	bt->SetSize(1.5, 1.2);
+	bt->sortLayer = 111;
+
+	bt = (UiButton*)FindGo("TrainCloseB");
+	bt->SetOrigin(Origins::MC);
+	bt->SetPosition(1175, 555);
+	bt->SetSize(2, 2);
+	bt->sortLayer = 111;
+	bt->OnClick = [this]() {
+		isMenuOn = false;
+		UiTrainingOpen(false);
+	};
+
+	for (int i = 0; i < 12; i++)
+	{
+		std::stringstream ss;
+		ss << "PlayerList" << i;
+		bt = (UiButton*)FindGo(ss.str());
+		bt->SetOrigin(Origins::TL);
+		bt->SetPosition(42, 308+(i*35));
+		bt->SetSize(2, 2);
+		bt->sortLayer = 111;
+		bt->OnClick = [this,i]() {
+			UiTrainingPlayerSelect(i);
+		};
 	}
 }
 
@@ -428,18 +583,546 @@ void SceneHome::MainUiClose()
 
 void SceneHome::MainUiFunc(int index)
 {
+	if (isMenuOn)
+	{
+		return;
+	}
 	switch (index)
 	{
 	case 5:
-		Recruit(0,0);
+		Recruit(0, 0);
 		TEAM_MGR.Employ(0);
 		UpdateMoney();
+		break;
+	case 6:
+		UiTrainingOpen();
+		isMenuOn = true;//임시코드
 		break;
 	case 7:
 		TEAM_MGR.ShowPlayer();
 		break;
+	case 13:
+		std::cout << "오늘의 일정은 " ;
+		{
+			switch (TEAM_MGR.GetSchedule(TEAM_MGR.GetTodayDate()))
+			{
+			case TeamMgr::Schedule::Recruit:
+				std::cout << "선수모집일";
+				break;
+			case TeamMgr::Schedule::PracticeLeague:
+				std::cout << "연습경기일";
+				break;
+			case TeamMgr::Schedule::League:
+				std::cout << "경기일";
+				break;
+			case TeamMgr::Schedule::Vacation:
+				std::cout << "선수단 전체 휴가";
+				break;
+			case TeamMgr::Schedule::EventLeague:
+				std::cout << "이벤트 경기";
+				break;
+			default:
+				break;
+			}
+		}
+		std::cout << " 입니다." << std::endl;
+		break;
 	default:
 		break;
+	}
+	//isMenuOn = true;
+	//나중에 주석풀기
+}
+
+void SceneHome::UiTrainingOpen(bool on)
+{
+	SpriteGo* spr = (SpriteGo*)FindGo("TrainingUi");
+	spr->SetActive(on);
+
+	for (int i = 0; i < 6; i++)
+	{
+		std::stringstream ss;
+		ss << "TrainingSlotUi" << i;
+		spr = (SpriteGo*)FindGo(ss.str());
+		spr->SetActive(false);
+		ss.str("");
+		ss << "XpBack" << i;
+		SpriteGo* xpBar = (SpriteGo*)FindGo(ss.str());
+		xpBar->SetActive(false);
+		ss.str("");
+		ss << "XpCur" << i;
+		xpBar = (SpriteGo*)FindGo(ss.str());
+		xpBar->SetActive(false);
+		ss.str("");
+		ss << "XpFuture" << i;
+		xpBar = (SpriteGo*)FindGo(ss.str());
+		xpBar->SetActive(false);
+
+		ss.str("");
+		ss << "TrainingPointDownB" << i;
+		UiButton* trainPointB = (UiButton*)FindGo(ss.str());
+		trainPointB->SetActive(false);
+		ss.str("");
+		ss << "TrainingPointUpB" << i;
+		trainPointB = (UiButton*)FindGo(ss.str());
+		trainPointB->SetActive(false);
+
+		for (int j = i * 8; j < i * 8 + 8; j++)
+		{
+			std::stringstream ss;
+			ss << "TrainingPointGuage" << j;
+			SpriteGo* trainPoint = (SpriteGo*)FindGo(ss.str());
+			trainPoint->SetActive(false);
+		}
+		if (i > 1)
+		{
+			ss.str("");
+			ss << "CharacterStatIcons" << i - 2;
+			SpriteGo* charIcon = (SpriteGo*)FindGo(ss.str());
+			charIcon->SetActive(false);
+		}
+		if (i == 0)
+		{
+			SpriteGo* statIcon = (SpriteGo*)FindGo("IconAtk1");
+			statIcon->SetActive(false);
+		}
+		if (i == 1)
+		{
+			SpriteGo* statIcon = (SpriteGo*)FindGo("IconDef1");
+			statIcon->SetActive(false);
+		}
+	}
+
+	for (int i = 0; i < 8; i++)
+	{
+		std::stringstream ss;
+		ss << "LeftTrainingPointGuage" << i;
+		SpriteGo* leftTrainPoint = (SpriteGo*)FindGo(ss.str());
+		leftTrainPoint->SetActive(false);
+	}
+
+	for (int i = 0; i < 4; i++)
+	{
+		std::stringstream ss;
+		ss << "CharacterIcons" << i;
+		SpriteGo* characterIcons = (SpriteGo*)FindGo(ss.str());
+		characterIcons->SetActive(false);
+		ss << "Back";
+		spr = (SpriteGo*)FindGo(ss.str());
+		spr->SetActive(false);
+		ss << "Line";
+		spr = (SpriteGo*)FindGo(ss.str());
+		spr->SetActive(false);
+
+	}
+	spr = (SpriteGo*)FindGo("IconAtk0");
+	spr->SetActive(on);
+
+	spr = (SpriteGo*)FindGo("IconDef0");
+	spr->SetActive(on);
+
+	UiButton* bt = (UiButton*)FindGo("TrainPointReturnB");
+	bt->SetActive(false);
+
+	bt = (UiButton*)FindGo("TrainCloseB");
+	bt->SetActive(on);
+
+	RectGo* rect = (RectGo*)FindGo("UiShade");
+	rect->SetActive(on);
+
+	int playerNum = TEAM_MGR.GetPlayerNum();
+	for (int i = 0; i < playerNum; i++)
+	{
+		std::stringstream ss;
+		ss << "PlayerList" << i;
+		bt = (UiButton*)FindGo(ss.str());
+		bt->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/Origin/Sprite/player_list_bg_0.png"));
+		bt->SetActive(on);
+	}
+	for (int i = playerNum; i < 12; i++)
+	{
+		std::stringstream ss;
+		ss << "PlayerList" << i;
+		bt = (UiButton*)FindGo(ss.str());
+		bt->SetActive(false);
+	}
+	if (on)
+	{
+		gainTrainingInfo = TEAM_MGR.GetTrainingInfo();
+		maxTrainingPoint = TEAM_MGR.GetMaxTrainingPoint();
+	}
+	else
+	{
+		TEAM_MGR.SetTrainingInfo(gainTrainingInfo);
+	}
+}
+
+void SceneHome::UiTrainingPlayerSelect(int index)
+{
+	PlayerInfo selectedPlayer = TEAM_MGR.GetPlayerInfo()[index];
+	TrainingInfo* tInfo = &gainTrainingInfo[index];
+	SpriteGo* spr;
+	for (int i = 0; i < 2+ selectedPlayer.knownChamp; i++)
+	{
+		std::stringstream ss;
+		ss << "TrainingSlotUi" << i;
+		spr = (SpriteGo*)FindGo(ss.str());
+		spr->SetActive(true);
+		ss.str("");
+		ss << "XpBack" << i;
+		SpriteGo* xpBar = (SpriteGo*)FindGo(ss.str());
+		xpBar->SetActive(true);
+		ss.str("");
+		ss << "XpCur" << i;
+		xpBar = (SpriteGo*)FindGo(ss.str());
+		xpBar->SetActive(true);
+		switch (i)
+		{
+		case 0: 
+			xpBar->SetSize(tInfo->xpAtk * 2.f
+				/(1300 + (selectedPlayer.attack * 10)), 2.f);
+			break;
+		case 1:
+			xpBar->SetSize(tInfo->xpDef * 2.f
+				/ (1300 + (selectedPlayer.defence * 10)), 2.f);
+			break;
+		default:
+			xpBar->SetSize(tInfo->xpChamp[i-2] * 2.f
+				/ (1300 + (selectedPlayer.proficiency[i - 2].second * 10)), 2.f);
+			break;
+		}
+		
+		ss.str("");
+		ss << "XpFuture" << i;
+		xpBar = (SpriteGo*)FindGo(ss.str());
+		xpBar->SetActive(true);
+		TrainingInfo futureTrainingInfo =
+			TEAM_MGR.GetGrowStats(gainTrainingInfo)[index];
+		switch (i)
+		{
+		case 0:
+			xpBar->SetSize(std::min(futureTrainingInfo.xpAtk * 2.f
+				/ (1300 + (selectedPlayer.attack * 10)), 2.f), 2.f);
+			break;
+		case 1:
+			xpBar->SetSize(std::min(futureTrainingInfo.xpDef * 2.f
+				/ (1300 + (selectedPlayer.defence * 10)),2.f), 2.f);
+			break;
+		default:
+			xpBar->SetSize(std::min(futureTrainingInfo.xpChamp[i - 2] * 2.f
+				/ (1300 + (selectedPlayer.proficiency[i - 2].second * 10)), 2.f)
+				, 2.f);
+			break;
+		}
+
+
+		ss.str("");
+		ss << "TrainingPointDownB" << i;
+		UiButton* trainPointB = (UiButton*)FindGo(ss.str());
+		trainPointB->SetActive(true); 
+		switch (i)
+		{
+		case 0:
+			trainPointB->OnClick = [this, index]() {
+				if (0 < gainTrainingInfo[index].trainingAtk)
+				{
+					gainTrainingInfo[index].trainingAtk--;
+					gainTrainingInfo[index].usedTrainingPoint--;
+					UiTrainingGaugeUpdate(index);
+				}
+			};
+			break;
+		case 1:
+			trainPointB->OnClick = [this, index]() {
+				if (0 < gainTrainingInfo[index].trainingDef)
+				{
+					gainTrainingInfo[index].trainingDef--;
+					gainTrainingInfo[index].usedTrainingPoint--;
+					UiTrainingGaugeUpdate(index);
+				}
+			};
+			break;
+		default:
+			trainPointB->OnClick = [this, index,i]() {
+				if (0 < gainTrainingInfo[index].trainingChamp[i-2])
+				{
+					gainTrainingInfo[index].trainingChamp[i - 2]--;
+					gainTrainingInfo[index].usedTrainingPoint--;
+					UiTrainingGaugeUpdate(index);
+				}
+			};
+			break;
+		}
+
+		ss.str("");
+		ss << "TrainingPointUpB" << i;
+		trainPointB = (UiButton*)FindGo(ss.str());
+		trainPointB->SetActive(true);
+		switch (i)
+		{
+		case 0:
+			trainPointB->OnClick = [this, index]() {
+				if (gainTrainingInfo[index].usedTrainingPoint
+					< maxTrainingPoint)
+				{
+					gainTrainingInfo[index].trainingAtk++;
+					gainTrainingInfo[index].usedTrainingPoint++;
+					UiTrainingGaugeUpdate(index);
+				}
+			};
+			break;
+		case 1:
+			trainPointB->OnClick = [this, index]() {
+				if (gainTrainingInfo[index].usedTrainingPoint
+					<maxTrainingPoint)
+				{
+					gainTrainingInfo[index].trainingDef++;
+					gainTrainingInfo[index].usedTrainingPoint++;
+					UiTrainingGaugeUpdate(index);
+				}
+			};
+			break;
+		default:
+			trainPointB->OnClick = [this, index, i]() {
+				if (gainTrainingInfo[index].usedTrainingPoint
+					< maxTrainingPoint)
+				{
+					gainTrainingInfo[index].trainingChamp[i - 2]++;
+					gainTrainingInfo[index].usedTrainingPoint++;
+					UiTrainingGaugeUpdate(index);
+				}
+			};
+			break;
+		}
+
+		for (int j = i * 8; j < i * 8 + maxTrainingPoint; j++)
+		{
+			ss.str("");
+			ss << "TrainingPointGuage" << j;
+			SpriteGo* trainPoint = (SpriteGo*)FindGo(ss.str());
+			trainPoint->SetActive(true);
+		}
+
+		if (i > 1)
+		{
+			ss.str("");
+			ss << "CharacterStatIcons" << i - 2;
+			SpriteGo* charIcon = (SpriteGo*)FindGo(ss.str());
+			charIcon->SetActive(true);
+			std::stringstream champ;
+			champ << "graphics/Origin/Sprite/character_icons_";
+			switch (selectedPlayer.proficiency[i-2].first)
+			{
+			case 0:
+				champ << 0;
+				break;
+			case 1:
+				champ << 2;
+				break;
+			default:
+				champ << selectedPlayer.proficiency[i - 2].first + 3;
+				break;
+			}
+			champ << ".png";
+			charIcon->sprite.setTexture((*RESOURCE_MGR.GetTexture(champ.str())));
+		}
+		if (i == 0)
+		{
+			SpriteGo* statIcon = (SpriteGo*)FindGo("IconAtk1");
+			statIcon->SetActive(true);
+		}
+		if (i == 1)
+		{
+			SpriteGo* statIcon = (SpriteGo*)FindGo("IconDef1");
+			statIcon->SetActive(true);
+		}
+	}
+
+	for (int i = 2 + selectedPlayer.knownChamp; i < 6; i++)
+	{
+		std::stringstream ss;
+		ss << "TrainingSlotUi" << i;
+		spr = (SpriteGo*)FindGo(ss.str());
+		spr->SetActive(false);
+		ss.str("");
+		ss << "XpBack" << i;
+		SpriteGo* xpBar = (SpriteGo*)FindGo(ss.str());
+		xpBar->SetActive(false);
+		ss.str("");
+		ss << "XpCur" << i;
+		xpBar = (SpriteGo*)FindGo(ss.str());
+		xpBar->SetActive(false);
+		ss.str("");
+		ss << "XpFuture" << i;
+		xpBar = (SpriteGo*)FindGo(ss.str());
+		xpBar->SetActive(false);
+
+		ss.str("");
+		ss << "TrainingPointDownB" << i;
+		UiButton* trainPointB = (UiButton*)FindGo(ss.str());
+		trainPointB->SetActive(false);
+		ss.str("");
+		ss << "TrainingPointUpB" << i;
+		trainPointB = (UiButton*)FindGo(ss.str());
+		trainPointB->SetActive(false);
+
+		for (int j = i * 8; j < i * 8 + 8; j++)
+		{
+			std::stringstream ss;
+			ss << "TrainingPointGuage" << j;
+			SpriteGo* trainPoint = (SpriteGo*)FindGo(ss.str());
+			trainPoint->SetActive(false);
+		}
+		ss.str("");
+		ss << "CharacterStatIcons" << i - 2;
+		SpriteGo* charIcon = (SpriteGo*)FindGo(ss.str());
+		charIcon->SetActive(false);
+
+	}
+
+	for (int i = 0; i < 8; i++)
+	{
+		std::stringstream ss;
+		ss << "LeftTrainingPointGuage" << i;
+		SpriteGo* leftTrainPoint = (SpriteGo*)FindGo(ss.str());
+		if (i< maxTrainingPoint)
+		{
+			leftTrainPoint->SetActive(true);
+		}
+	}
+
+	UiTrainingGaugeUpdate(index);
+
+	for (int i = 0; i < 4; i++)
+	{
+		std::stringstream ss;
+		ss << "CharacterIcons" << i;
+		SpriteGo* characterIcons = (SpriteGo*)FindGo(ss.str());
+		if (i < selectedPlayer.knownChamp)
+		{
+			characterIcons->SetActive(true);
+			std::stringstream champ;
+			champ << "graphics/Origin/Sprite/character_icons_";
+			switch (selectedPlayer.proficiency[i].first)
+			{
+			case 0:
+				champ << 0;
+				break;
+			case 1:
+				champ << 2;
+				break;
+			default:
+				champ << selectedPlayer.proficiency[i].first + 3;
+				break;
+			}
+			champ << ".png";
+			characterIcons->sprite.setTexture((*RESOURCE_MGR.GetTexture(champ.str())));
+			ss << "Back";
+			spr = (SpriteGo*)FindGo(ss.str());
+			spr->SetActive(true);
+			ss << "Line";
+			spr = (SpriteGo*)FindGo(ss.str());
+			spr->SetActive(true);
+		}
+		else
+		{
+			characterIcons->SetActive(false);
+			ss << "Back";
+			spr = (SpriteGo*)FindGo(ss.str());
+			spr->SetActive(false);
+			ss << "Line";
+			spr = (SpriteGo*)FindGo(ss.str());
+			spr->SetActive(false);
+		}
+	}
+
+	UiButton* bt = (UiButton*)FindGo("TrainPointReturnB");
+	bt->SetActive(true);
+	bt->OnClick = [this,index]() {
+		gainTrainingInfo[index].usedTrainingPoint = 0;
+		gainTrainingInfo[index].trainingAtk = 0;
+		gainTrainingInfo[index].trainingDef = 0;
+		for (int i = 0; i < 4; i++)
+		{
+			gainTrainingInfo[index].trainingChamp[i] = 0;
+		}
+		UiTrainingGaugeUpdate(index);
+	};
+
+	int playerNum = TEAM_MGR.GetPlayerNum();
+	for (int i = 0; i < playerNum; i++)
+	{
+		std::stringstream ss;
+		ss << "PlayerList" << i;
+		bt = (UiButton*)FindGo(ss.str());
+		if (i == index)
+		{
+			bt->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/Origin/Sprite/player_list_bg_2.png"));
+		}
+		else
+		{
+			bt->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/Origin/Sprite/player_list_bg_0.png"));
+		}
+	}
+}
+
+void SceneHome::UiTrainingGaugeUpdate(int index)
+{
+	for (int i = 0; i < 8; i++)
+	{
+		std::stringstream ss;
+		ss << "TrainingPointGuage" << i;
+		SpriteGo* trainPoint = (SpriteGo*)FindGo(ss.str());
+		if (i < gainTrainingInfo[index].trainingAtk)
+		{
+			trainPoint->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/Origin/Sprite/training_point_guage_1.png"));
+		}
+		else
+		{
+			trainPoint->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/Origin/Sprite/training_point_guage_0.png"));
+		}
+		ss.str("");
+		ss << "LeftTrainingPointGuage" << i;
+		SpriteGo* leftTrainPoint = (SpriteGo*)FindGo(ss.str());
+		if (i< maxTrainingPoint - gainTrainingInfo[index].usedTrainingPoint)
+		{
+			leftTrainPoint->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/Origin/Sprite/unused_point_guage_1.png"));
+		}
+		else
+		{
+			leftTrainPoint->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/Origin/Sprite/unused_point_guage_0.png"));
+		}
+	}
+	for (int i = 8; i < 16; i++)
+	{
+		std::stringstream ss;
+		ss << "TrainingPointGuage" << i;
+		SpriteGo* trainPoint = (SpriteGo*)FindGo(ss.str());
+		if (i-8 < gainTrainingInfo[index].trainingDef)
+		{
+			trainPoint->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/Origin/Sprite/training_point_guage_1.png"));
+		}
+		else
+		{
+			trainPoint->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/Origin/Sprite/training_point_guage_0.png"));
+		}
+	}
+	for (int i = 0; i < 4; i++)
+	{
+		for (int j = 0; j < 8; j++)
+		{
+			std::stringstream ss;
+			ss << "TrainingPointGuage" << 16 + (i * 8) + j;
+			SpriteGo* trainPoint = (SpriteGo*)FindGo(ss.str());
+			if (j < gainTrainingInfo[index].trainingChamp[i])
+			{
+				trainPoint->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/Origin/Sprite/training_point_guage_1.png"));
+			}
+			else
+			{
+				trainPoint->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/Origin/Sprite/training_point_guage_0.png"));
+			}
+		}
 	}
 }
 
@@ -487,15 +1170,29 @@ void SceneHome::MakeLocalPlayer(PlayerInfo& player)
 		auto stringtable = DATATABLE_MGR.Get<StringTable>(DataTable::Ids::String);
 		player.name = stringtable->GetW(ss.str());
 	}
-	player.age = Utils::RandomRange(19, 21);
+	player.age = Utils::RandomRange(18, 21);
 	player.attack = Utils::RandomRange(9, 16);
 	player.defence = 25 - player.attack;
 	player.knownChamp = Utils::RandomRange(1, 3);
 	for (int i = 0; i < player.knownChamp; i++)
-	{
-		player.proficiency.push_back({
-			Utils::RandomRange(0, TEAM_MGR.GetAbleChamps() - 1),
-			Utils::RandomRange(5, 7) });
+	{	
+		while (true)
+		{
+			int champCode = Utils::RandomRange(0, TEAM_MGR.GetAbleChamps() - 1);
+			bool checker = true;
+			for (int j = 0; j < i; j++)
+			{
+				if (player.proficiency[j].first == champCode)
+				{
+					checker = false;
+				}
+			}
+			if (checker)
+			{
+				player.proficiency.push_back({champCode,Utils::RandomRange(5, 7) });
+				break;
+			}
+		}
 	}
 	player.knownCharacter = Utils::RandomRange(0, 3);
 	for (int i = 0; i < player.knownCharacter; i++)
@@ -524,6 +1221,13 @@ void SceneHome::TestingCheats()
 	if (!cheatMode)
 	{
 		return;
+	}
+
+	//Point Mouse vector2f
+	if (INPUT_MGR.GetMouseButtonDown(sf::Mouse::Left))
+	{
+		std::cout << INPUT_MGR.GetMousePos().x << "\t"
+			<< INPUT_MGR.GetMousePos().y << std::endl;
 	}
 
 	//ShowMeTheMoney!!!

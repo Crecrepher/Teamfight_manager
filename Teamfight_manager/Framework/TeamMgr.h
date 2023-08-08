@@ -32,7 +32,6 @@ struct PlayerInfo
 
 struct TrainingInfo
 {
-	int maxTrainingPoint = 3;
 	int usedTrainingPoint = 0;
 
 	int xpAtk = 0;
@@ -65,6 +64,7 @@ protected:
 
 	int ableChamp = 9; //Ã¨ÇÇ¾ð°¡´É
 	int ableCharacteristic = 36; //Æ¯¼º°¹¼ö
+	int maxTrainingPoint = 3;
 	int money = 200;
 
 	std::vector<PlayerInfo> player;
@@ -95,6 +95,11 @@ public:
 	void ShowPlayer();
 	void Recruit(int index, PlayerInfo player);
 	void Employ(int index);
+	int GetPlayerNum() { return playerNum; }
+	std::vector<PlayerInfo> GetPlayerInfo() { return player; }
+	std::vector<TrainingInfo> GetTrainingInfo() { return playerTraining; }
+	void SetTrainingInfo(std::vector<TrainingInfo> trainingInfo) { playerTraining = trainingInfo; }
+	int GetMaxTrainingPoint() { return maxTrainingPoint; }
 
 	bool CheckRecruitSlot(int index) { return recruiting_players[index].first; }
 

@@ -161,7 +161,7 @@ std::vector<TrainingInfo> TeamMgr::GetGrowStats(std::vector<TrainingInfo> player
 			trainResult[i].xpChamp[j]
 				+= dayGrowTable[ageIndex][player[i].potential]
 				+ (trainingGrowTable[ageIndex][player[i].potential]
-					* trainResult[i].trainingChamp[4]);
+					* trainResult[i].trainingChamp[j]);
 		}
 	}
 	return trainResult;

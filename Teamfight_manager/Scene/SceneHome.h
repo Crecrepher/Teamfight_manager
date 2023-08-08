@@ -18,6 +18,10 @@ protected:
 	bool cheatMode = true;
 
 	bool backClick = true;
+	bool isMenuOn = false;
+
+	std::vector<TrainingInfo> gainTrainingInfo;
+	int maxTrainingPoint = 3;
 public:
 	SceneHome();
 	virtual ~SceneHome() override;
@@ -43,6 +47,10 @@ public:
 	void MainUiOpen(MainMenuType Type);
 	void MainUiClose();
 	void MainUiFunc(int index);
+
+	void UiTrainingOpen(bool on = true);
+	void UiTrainingPlayerSelect(int index);
+	void UiTrainingGaugeUpdate(int index);
 
 	void UpdateMoney();
 	void Recruit(int grade,int slotNum);
