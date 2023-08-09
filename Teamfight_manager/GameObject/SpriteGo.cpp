@@ -3,7 +3,7 @@
 #include "Utils.h"
 #include "ResourceMgr.h"
 
-SpriteGo::SpriteGo(const std::string id, const std::string n,sf::Vector2f spriteDir)
+SpriteGo::SpriteGo(const std::string id, const std::string n)
 	:GameObject(n),textureId(id)
 {
 

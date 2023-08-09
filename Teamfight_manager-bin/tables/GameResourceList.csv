@@ -1,1 +1,4 @@
 RESOURCE_TYPES 1.TEX 2.FONT 3.SOUND 4.ANI,RESOURCE_PATH
+0,graphics/Origin/Texture2D/stadium.png
+0,graphics/Origin/Sprite/archer_0.png
+0,graphics/Origin/Sprite/header_bg#43707.png

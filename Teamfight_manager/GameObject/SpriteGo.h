@@ -8,8 +8,7 @@ public:
 	sf::Sprite sprite;
 	std::string textureId;
 
-	SpriteGo(const std::string id = "", const std::string n = "",
-		sf::Vector2f spriteDir = sf::Vector2f(-1, -1));
+	SpriteGo(const std::string id = "", const std::string n = "");
 	virtual ~SpriteGo() override;
 
 	virtual void SetPosition(float x, float y);
