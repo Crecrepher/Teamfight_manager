@@ -122,6 +122,7 @@
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>./Animation;./DataTable;./SFML-2.5.1/include;./GameObject/ZSObject;./GameObject;./Universial;./Framework;./Scene;./;./3rd;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
+      <AdditionalOptions>/std:c++latest %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -152,13 +153,16 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="AiBanPick.cpp" />
     <ClCompile Include="Animation\AnimatioControler.cpp" />
     <ClCompile Include="Animation\AnimatonClip.cpp" />
     <ClCompile Include="DataTable\DataTable.cpp" />
     <ClCompile Include="Framework\DataTableMgr.cpp" />
+    <ClCompile Include="Framework\TeamMgr.cpp" />
     <ClCompile Include="GameObject\RectGo.cpp" />
     <ClCompile Include="GameObject\SoundGo.cpp" />
     <ClCompile Include="GameObject\TextGo.cpp" />
+    <ClCompile Include="Scene\SceneChampEdit.cpp" />
     <ClCompile Include="Scene\SceneGame.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
     </ClCompile>
@@ -192,14 +196,17 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="3rd\rapidcsv.h" />
+    <ClInclude Include="AiBanPick.h" />
     <ClInclude Include="Animation\AnimatioControler.h" />
     <ClInclude Include="Animation\AnimatonClip.h" />
     <ClInclude Include="DataTable\DataTable.h" />
     <ClInclude Include="Framework\DataTableMgr.h" />
+    <ClInclude Include="Framework\TeamMgr.h" />
     <ClInclude Include="GameObject\RectGo.h" />
     <ClInclude Include="GameObject\SpriteEffect.h" />
     <ClInclude Include="DataTable\StringTable.h" />
     <ClInclude Include="GameObject\UiButton.h" />
+    <ClInclude Include="Scene\SceneChampEdit.h" />
     <ClInclude Include="Universial\ObjectPool.h" />
     <ClInclude Include="GameObject\SoundGo.h" />
     <ClInclude Include="GameObject\TextGo.h" />

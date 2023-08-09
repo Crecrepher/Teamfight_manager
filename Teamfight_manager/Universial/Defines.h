@@ -22,6 +22,7 @@ enum class SceneId
 	Title,
 	Home,
 	Game,
+	ChampEdit,
 	Count
 };
 

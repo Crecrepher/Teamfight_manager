@@ -5,6 +5,7 @@
 #include "SceneTitile.h"
 #include "SceneHome.h"
 #include "SceneGame.h"
+#include "SceneChampEdit.h"
 
 #include "ResourceMgr.h"
 #include "DataTableMgr.h"
@@ -28,6 +29,7 @@ void SceneMgr::Init()
 	scenes.push_back(new SceneTitile());
 	scenes.push_back(new SceneHome());
 	scenes.push_back(new SceneGame());
+	scenes.push_back(new SceneChampEdit());
 
 	for (auto scene : scenes)
 	{

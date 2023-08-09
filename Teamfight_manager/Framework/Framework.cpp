@@ -5,6 +5,7 @@
 #include "Scene.h"
 #include "ResourceMgr.h"
 #include "DataTableMgr.h"
+#include "TeamMgr.h"
 
 Framework::Framework(int w, int h, const std::string& t)
     :screenWidth(w), screenHeight(h), title(t)
@@ -17,6 +18,7 @@ void Framework::Init(int width, int height, const std::string& title)
     RESOURCE_MGR.Init();
     DATATABLE_MGR.LoadAll();
     SCENE_MGR.Init();
+    TEAM_MGR.Init();
 }
 
 void Framework::Release()
@@ -41,10 +43,10 @@ void Framework::Run()
     clock.restart();
 
     sf::Image cursorImg;
-    cursorImg.loadFromFile("graphics/cursor_bright.png");
+    cursorImg.loadFromFile("graphics/Origin/Texture2D/mouse_curosr.png");
 
     sf::Cursor cursor;
-    if (cursor.loadFromPixels(cursorImg.getPixelsPtr(), cursorImg.getSize(), {0,0 /*cursorImg.getSize().x / 2, cursorImg.getSize().y / 2*/ }))
+    if (cursor.loadFromPixels(cursorImg.getPixelsPtr(), cursorImg.getSize(), {0,0}))
     {
         window.setMouseCursor(cursor);
     }

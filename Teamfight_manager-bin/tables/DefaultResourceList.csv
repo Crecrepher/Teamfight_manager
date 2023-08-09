@@ -1,1 +1,16 @@
-RESOURCE_TYPES 1.TEX 2.FONT 3.SOUND 4.ANI,RESOURCE_PATH
+RESOURCE_TYPES 0.TEX 1.FONT 2.SOUND 3.ANI,RESOURCE_PATH
+0,graphics/Origin/Texture2D/mouse_curosr.png
+0,graphics/Origin/Sprite/stadium.png
+0,graphics/Origin/Sprite/default_button_1.png
+0,graphics/Origin/Sprite/header_bg.png
+0,graphics/Origin/Sprite/header_calendar_icon.png
+0,graphics/Origin/Sprite/header_slot_bg.png
+0,graphics/Origin/Sprite/header_gold_icon.png
+1,fonts/Galmuri9.ttf
+1,fonts/Galmuri11.ttf
+1,fonts/Galmuri14.ttf
+1,fonts/LiberationSans.ttf
+1,fonts/NotoSans-Black.ttf
+1,fonts/NotoSans-Regular.ttf
+1,fonts/Perfect DOS VGA 437.ttf
+1,fonts/Silver.ttf
