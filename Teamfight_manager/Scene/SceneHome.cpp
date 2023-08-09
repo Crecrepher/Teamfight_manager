@@ -7,6 +7,7 @@
 #include "InputMgr.h"
 #include "ResourceMgr.h"
 #include "Framework.h"
+#include "TeamMgr.h"
 
 #include "SpriteGo.h"
 #include "TextGo.h"
@@ -38,6 +39,7 @@ void SceneHome::Init()
 	AddGoSprites();
 	AddGoUiButton();
 	AddGoText();
+
 	AddGo(new RectGo("UiShade"));
 
 	for (auto go : gameObjects)
@@ -116,7 +118,6 @@ void SceneHome::AddGoSprites()
 	AddGo(new SpriteGo("graphics/Origin/Sprite/header_gold_icon.png", "GoldUi"));
 	AddGo(new SpriteGo("graphics/Origin/Sprite/header_calendar_icon.png", "CalendarUi"));
 	AddGo(new SpriteGo("graphics/Origin/Sprite/header_league_bg.png", "LeagueUi"));
-
 	AddGo(new SpriteGo("graphics/Origin/Sprite/training_ui_bg.png", "TrainingUi"));
 	AddGo(new SpriteGo("graphics/Origin/Sprite/scroll_bar.png", "ScrollBar"));
 	for (int i = 0; i < 6; i++)
@@ -201,6 +202,11 @@ void SceneHome::AddGoText()
 	AddGo(new TextGo("MoneyInfoT"));
 }
 
+void SceneHome::AddGoText()
+{
+	AddGo(new TextGo("MoneyInfoT"));
+}
+
 void SceneHome::MakeMainUi()
 {
 
@@ -232,6 +238,7 @@ void SceneHome::MakeMainUi()
 	spr->sortLayer = 105;
 
 	SpriteGo* leagueUi = (SpriteGo*)FindGo("LeagueUi");
+
 	leagueUi->SetPosition(0, spr->GetSize().y * 2.f);
 	leagueUi->SetOrigin(Origins::TL);
 	leagueUi->SetSize(2, 2);
@@ -325,6 +332,7 @@ void SceneHome::MakeMainUi()
 		btText->text.setFillColor(sf::Color::White);
 		btText->text.setCharacterSize(20);
 		btText->SetOrigin(Origins::MC);
+
 		btText->SetPosition(bt->GetPosition().x + bt->GetSize().x + 15.f, bt->GetPosition().y - bt->GetSize().y);
 		btText->sortLayer = 101;
 	}
@@ -350,6 +358,7 @@ void SceneHome::MakeMainUi()
 	text->sortLayer = 107;
 
 }
+
 
 void SceneHome::MakeSubUi()
 {

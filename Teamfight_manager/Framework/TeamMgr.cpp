@@ -39,6 +39,7 @@ void TeamMgr::InitGrowTable()
 	trainingGrowTable[9] = { 2,4,8,16 };
 }
 
+
 void TeamMgr::ShowPlayer()
 {
 	std::cout << "보유 선수: " << playerNum<<"명" << std::endl;

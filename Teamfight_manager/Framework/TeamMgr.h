@@ -21,8 +21,8 @@ struct PlayerInfo
 	std::vector<int> characteristic; 
 	//특성 <특성코드>
 	int knownCharacter = 0; //특성 갯수
-
 	int potential = 0;
+
 	//------------------통계----------------//
 	int kill = 0;
 	int assist = 0;
@@ -90,6 +90,7 @@ protected:
 
 	int ableChamp = 9; //챔피언가능
 	int ableCharacteristic = 36; //특성갯수
+
 	int maxTrainingPoint = 3;
 	int money = 200;
 

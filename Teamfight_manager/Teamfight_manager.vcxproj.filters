@@ -100,9 +100,12 @@
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="Framework\TeamMgr.cpp">
+<<<<<<< HEAD
      <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="AiBanPick.cpp">
+=======
+>>>>>>> cefddb6 (임시 UI및 선수 영입, 확인)
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
@@ -200,8 +203,11 @@
     <ClInclude Include="Framework\TeamMgr.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
+<<<<<<< HEAD
     <ClInclude Include="AiBanPick.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
+=======
+>>>>>>> cefddb6 (임시 UI및 선수 영입, 확인)
   </ItemGroup>
 </Project>
