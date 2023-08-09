@@ -1,1 +1,4 @@
-RESOURCE_TYPES 1.TEX 2.FONT 3.SOUND 4.ANI,RESOURCE_PATH
+RESOURCE_TYPES 0.TEX 1.FONT 2.SOUND 3.ANI,RESOURCE_PATH
+0,graphics/Origin/Sprite/sponser_logo_new_16.png
+0,graphics/Origin/Sprite/soldier_0.png
+0,graphics/Origin/Sprite/teamfight_manager_title_bg.png
