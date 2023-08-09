@@ -96,6 +96,9 @@
     <ClCompile Include="GameObject\RectGo.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="AiBanPick.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Universial\stdafx.h">
@@ -183,6 +186,9 @@
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="GameObject\RectGo.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="AiBanPick.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>

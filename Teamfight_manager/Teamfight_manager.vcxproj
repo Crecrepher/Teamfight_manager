@@ -152,6 +152,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="AiBanPick.cpp" />
     <ClCompile Include="Animation\AnimatioControler.cpp" />
     <ClCompile Include="Animation\AnimatonClip.cpp" />
     <ClCompile Include="DataTable\DataTable.cpp" />
@@ -192,6 +193,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="3rd\rapidcsv.h" />
+    <ClInclude Include="AiBanPick.h" />
     <ClInclude Include="Animation\AnimatioControler.h" />
     <ClInclude Include="Animation\AnimatonClip.h" />
     <ClInclude Include="DataTable\DataTable.h" />
