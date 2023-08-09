@@ -134,6 +134,17 @@ void TeamMgr::DayPass()
 	
 }
 
+void TeamMgr::SetAiTeams(std::vector<AiTeam> aiTeam) 
+{ 
+	aiTeams = aiTeam;
+}
+
+std::vector<AiTeam> TeamMgr::GetAiTeamInfo()
+{ 
+	aiTeams;
+	return aiTeams; 
+}
+
 std::vector<TrainingInfo> TeamMgr::GetGrowStats(std::vector<TrainingInfo> playerTraining)
 {
 	std::vector<TrainingInfo> trainResult = playerTraining;

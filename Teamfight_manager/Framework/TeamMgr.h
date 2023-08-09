@@ -44,6 +44,14 @@ struct TrainingInfo
 	std::vector<int> trainingChamp = std::vector<int>(4);
 };
 
+struct AiTeam
+{
+	std::wstring name = L"";
+	std::vector<PlayerInfo> player = std::vector<PlayerInfo>(4);
+	int win = 0;
+	int lose = 0;
+};
+
 class TeamMgr : public Singleton<TeamMgr>
 {
 	friend Singleton<TeamMgr>;
@@ -56,6 +64,15 @@ public:
 		League,
 		Vacation,
 		EventLeague
+	};
+
+	enum class LeagueGrade
+	{
+		Amateur,
+		SemiPro,
+		SecondLeague,
+		FirstLeague,
+		WorldChamp
 	};
 
 protected:
@@ -78,6 +95,8 @@ protected:
 	//영입선수<영입가능/선수>
 	int recruit_able = 1;
 
+	std::vector<AiTeam> aiTeams;
+
 	std::vector<bool> gear;
 	//장비 [인덱스 = 장비코드] <보유여부>
 	int gearNum = 4;
@@ -86,8 +105,13 @@ protected:
 	std::vector<bool> facility; //40
 	//시설 [인덱스 = 시설코드] <보유여부>
 
+	LeagueGrade curGrade = LeagueGrade::Amateur;
+
 	int year = 2021;
 	int date = 0;
+
+	int win = 0;
+	int lose = 0;
 public:
 	void Init();
 	void InitGrowTable();
@@ -115,6 +139,9 @@ public:
 	Schedule GetSchedule(int date);
 
 	void DayPass();
+	LeagueGrade GetLeagueGrade() { return curGrade; }
+	void SetAiTeams(std::vector<AiTeam> aiTeam);
+	std::vector<AiTeam> GetAiTeamInfo();
 	std::vector<TrainingInfo> GetGrowStats(std::vector<TrainingInfo> playerTraining);
 	void LevelUpdate(int& xp, int& level);
 };

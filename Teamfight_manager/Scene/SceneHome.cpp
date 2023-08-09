@@ -59,6 +59,11 @@ void SceneHome::Enter()
 	Scene::Enter();
 	RESOURCE_MGR.LoadFromCsv("tables/HomeResourceList.csv");
 
+	if (TEAM_MGR.GetTodayDate() == 0)
+	{
+		NewYear();
+	}
+
 	MakeMainUi();
 	MakeSubUi();
 	UiTrainingOpen(false);
@@ -630,6 +635,24 @@ void SceneHome::MainUiFunc(int index)
 		}
 		std::cout << " ÀÔ´Ï´Ù." << std::endl;
 		break;
+	case 15:
+	{
+		std::vector<AiTeam> aiT = TEAM_MGR.GetAiTeamInfo();
+		for (int i = 0; i < 7; i++)
+		{
+			std::string name;
+			name.assign(aiT[i].name.begin(), aiT[i].name.end());
+			std::cout << name << std::endl;
+			for (int j = 0; j < 4; j++)
+			{
+				std::string pname;
+				pname.assign(aiT[i].player[j].name.begin(), aiT[i].player[j].name.end());
+				std::cout << pname << std::endl;
+			}
+			std::cout << std::endl;
+		}
+	}
+		break;
 	default:
 		break;
 	}
@@ -1163,6 +1186,33 @@ void SceneHome::Recruit(int grade, int slotNum)
 		break;
 	}
 	TEAM_MGR.Recruit(slotNum, player);
+}
+
+void SceneHome::NewYear()
+{
+	std::vector<AiTeam> newAiTeams = std::vector<AiTeam>(7);
+	for (int i = 0; i < 7; i++)
+	{
+		std::stringstream ss;
+		ss << "Team" << i+1;
+		std::string newName = ss.str();
+		newAiTeams[i].name.assign(newName.begin(), newName.end());
+	}
+	switch (TEAM_MGR.GetLeagueGrade())
+	{
+	case TeamMgr::LeagueGrade::Amateur:
+		for (int i = 0; i < 7; i++)
+		{
+			for (int j = 0; j < 4; j++)
+			{
+				MakeLocalPlayer(newAiTeams[i].player[j]);
+			}
+		}
+		break;
+	default:
+		break;
+	}
+	TEAM_MGR.SetAiTeams(newAiTeams);
 }
 
 void SceneHome::MakeLocalPlayer(PlayerInfo& player)

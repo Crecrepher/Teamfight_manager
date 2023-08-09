@@ -54,7 +54,9 @@ public:
 
 	void UpdateMoney();
 	void Recruit(int grade,int slotNum);
+	void NewYear();
 	void MakeLocalPlayer(PlayerInfo& player);
+	
 
 	void TestingCheats();
 };
