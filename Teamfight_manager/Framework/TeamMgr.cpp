@@ -131,7 +131,20 @@ void TeamMgr::DayPass()
 			LevelUpdate(playerTraining[i].xpChamp[j], player[i].proficiency[j].second);
 		}
 	}
-	
+
+	CheckQuest();
+}
+
+void TeamMgr::CheckQuest()
+{
+	for (int i = 0; i < usingSponsor; i++)
+	{
+		switch (sponsors[i].QuestCode)
+		{
+		default:
+			break;
+		}
+	}
 }
 
 void TeamMgr::SetAiTeams(std::vector<AiTeam> aiTeam) 

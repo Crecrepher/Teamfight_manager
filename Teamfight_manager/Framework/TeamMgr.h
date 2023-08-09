@@ -52,6 +52,15 @@ struct AiTeam
 	int lose = 0;
 };
 
+struct Sponsor
+{
+	std::wstring sponsorTextureId = L"";
+	int QuestCode = 0;
+	int QuestDifficulty = 0;
+	int RewardMoney = 1000;
+	std::vector<int> RewardParts = std::vector<int>(4);
+};
+
 class TeamMgr : public Singleton<TeamMgr>
 {
 	friend Singleton<TeamMgr>;
@@ -106,12 +115,16 @@ protected:
 	//시설 [인덱스 = 시설코드] <보유여부>
 
 	LeagueGrade curGrade = LeagueGrade::Amateur;
-
+	
 	int year = 2021;
 	int date = 0;
 
 	int win = 0;
 	int lose = 0;
+
+	std::vector<Sponsor> sponsors;
+	int openSponsorCode = 1;
+	int usingSponsor = 0;
 public:
 	void Init();
 	void InitGrowTable();
@@ -139,6 +152,7 @@ public:
 	Schedule GetSchedule(int date);
 
 	void DayPass();
+	void CheckQuest();
 	LeagueGrade GetLeagueGrade() { return curGrade; }
 	void SetAiTeams(std::vector<AiTeam> aiTeam);
 	std::vector<AiTeam> GetAiTeamInfo();

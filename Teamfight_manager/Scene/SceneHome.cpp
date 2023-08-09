@@ -1306,5 +1306,4 @@ void SceneHome::TestingCheats()
 	{
 		SCENE_MGR.ChangeScene(SceneId::Game);
 	}
-
 }
