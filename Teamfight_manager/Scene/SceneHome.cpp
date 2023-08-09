@@ -202,10 +202,6 @@ void SceneHome::AddGoText()
 	AddGo(new TextGo("MoneyInfoT"));
 }
 
-void SceneHome::AddGoText()
-{
-	AddGo(new TextGo("MoneyInfoT"));
-}
 
 void SceneHome::MakeMainUi()
 {
