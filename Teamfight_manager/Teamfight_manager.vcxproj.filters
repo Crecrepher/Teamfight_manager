@@ -30,6 +30,7 @@
     <ClCompile Include="GameObject\VertexArrayGo.cpp" />
     <ClCompile Include="Framework\TeamMgr.cpp" />
     <ClCompile Include="Scene\SceneChampEdit.cpp" />
+    <ClCompile Include="AiBanPick.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="3rd\rapidcsv.h" />
@@ -66,5 +67,6 @@
     <ClInclude Include="GameObject\VertexArrayGo.h" />
     <ClInclude Include="Framework\TeamMgr.h" />
     <ClInclude Include="Scene\SceneChampEdit.h" />
+    <ClInclude Include="AiBanPick.h" />
   </ItemGroup>
 </Project>

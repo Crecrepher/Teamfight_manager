@@ -42,6 +42,7 @@ public:
 	void MakeMainUi();
 	void MakeSubUi();
 	void MakeSubUiTraining();
+	void MakeSubUiSponsorContract();
 
 	void ReturnMainUiIndex(int& startNum, int& endNum, MainMenuType Type);
 	void MainUiOpen(MainMenuType Type);
@@ -52,12 +53,14 @@ public:
 	void UiTrainingPlayerSelect(int index);
 	void UiTrainingGaugeUpdate(int index);
 
+	void UiSponsorContractOpen(bool contract = false ,bool on = true);
+	void UiSponsorContractSelect(int index);
+
 	void UpdateMoney();
 	void Recruit(int grade,int slotNum);
 	void NewYear();
 	void MakeLocalPlayer(PlayerInfo& player);
 	
-
 	void TestingCheats();
 };
 
