@@ -74,6 +74,7 @@ void Framework::Run()
             INPUT_MGR.UpdateEvent(event);
         }
 
+
         if (window.isOpen())
 		{
 			Update(dt);

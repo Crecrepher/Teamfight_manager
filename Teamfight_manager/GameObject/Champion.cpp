@@ -2,6 +2,7 @@
 #include "Champion.h"
 #include "ResourceMgr.h"
 #include "SceneGame.h"
+#include "SceneMgr.h"
 
 Champion::Champion(const std::string id, const std::string n)
 	: SpriteGo(id, n)
@@ -16,7 +17,7 @@ void Champion::Init()
 {
 	SpriteGo::Init();
 
-	team = false;
+	team = Team::None;
 }
 
 
@@ -34,21 +35,22 @@ void Champion::Release()
 
 void Champion::Update(float dt)
 {
+	if (this->currentStance == ChampionStance::None)
+		return;
+
 	SpriteGo::Update(dt);
 
-	dt *= 10.f;
+	dt *= 5.f;
 
 	skillTimer += dt;
+	attackDelay -= dt*this->currentState.attackSpeed;
 
 	if (skillTimer >= skillCoolTime)
 	{
 		skillTimer = skillCoolTime;
 	}
 
-	if (this->currentStance == ChampionStance::None)
-		return;
-
-	if (this->hp <= 0)
+	if (this->hp <= 0 && this->currentStance!=ChampionStance::Dead)
 	{
 		ChampionDie();
 		return;
@@ -106,6 +108,10 @@ void Champion::Idle(float dt)
 	{
 		FindTaget();
 	}
+	else if (this->enemyTeam->empty())
+	{
+		this->taget = nullptr;
+	}
 
 	if (this->taget != nullptr)
 	{
@@ -149,16 +155,22 @@ void Champion::Action(float dt)
 		ChangeStance(ChampionStance::Skill);
 		return;
 	}
-	else if (abs(Utils::Distance(this->GetPosition(), this->taget->GetPosition())) <= this->currentState.attackRange)
+	else if (abs(Utils::Distance(this->GetPosition(), this->taget->GetPosition())) <= this->currentState.attackRange&&attackDelay<=0.f)
 	{
 		ChangeStance(ChampionStance::Attack);
 		return;
+	}
+	else
+	{
+		ChangeStance(ChampionStance::Idle);
 	}
 }
 
 void Champion::Attack(float dt)
 {
 	std::cout << "공격" << std::endl;
+	this->taget->Hit(this->currentState.attack);
+	attackDelay = 1.f;
 	ChangeStance(ChampionStance::Idle);
 }
 
@@ -207,8 +219,24 @@ void Champion::Dead(float dt)
 	if (this->reviveTimer <= 0)
 	{
 		this->hp = this->currentState.maxHp;
-		SetPosition(0, 0); // 리스폰 임시 포지션
-		SetActive(true);
+		auto it = std::find(cemetery->begin(), cemetery->end(), this);
+		this->myTeam->push_back(*it);
+		this->cemetery->erase(it);
+
+		switch (team)
+		{
+		case Team::Red:
+		{
+			SetPosition((Utils::RandomRange(420, 520)), (Utils::RandomRange(300, 450)));
+			break;
+		}
+		case Team::Blue:
+		{
+			SetPosition((Utils::RandomRange(750, 850)), (Utils::RandomRange(300, 450)));
+			break;
+		}
+		}
+		this->sprite.setColor(sf::Color(255, 255, 255, 255));
 		ChangeStance(ChampionStance::Idle);
 	}
 }
@@ -216,8 +244,12 @@ void Champion::Dead(float dt)
 void Champion::ChampionDie()
 {
 	this->reviveTimer = 3.f;
+	auto it = std::find(myTeam->begin(), myTeam->end(), this);
+	this->cemetery->push_back(*it);
+	this->myTeam->erase(it);
+	std::cout << "챔피언 죽음" << std::endl;
+	this->sprite.setColor(sf::Color(0, 0, 0, 0));
 	ChangeStance(ChampionStance::Dead);
-	SetActive(false);
 }
 
 void Champion::SetMyTeam(std::vector<Champion*>* myTeam)
@@ -228,6 +260,26 @@ void Champion::SetMyTeam(std::vector<Champion*>* myTeam)
 void Champion::SetEnemyTeam(std::vector<Champion*>* enemyTeam)
 {
 	this->enemyTeam = enemyTeam;
+}
+
+void Champion::SetDieChampion(std::vector<Champion*>* cemetery)
+{
+	this->cemetery = cemetery;
+}
+
+void Champion::Hit(float attack)
+{
+	float damage = (attack - this->currentState.defend);
+	if (damage <= 0.f)
+	{
+		damage = 0.f;
+	}
+
+	this->hp -= damage;
+	if (this->hp <= 0.f)
+	{
+		this->hp = 0.f;
+	}
 }
 
 void Champion::FindTaget()
@@ -317,6 +369,18 @@ void Champion::TagetOrderSR()
 
 void Champion::TagetOrderRH()
 {
+	if (!enemyTeam->empty())
+	{
+		float tagetRange = 9999.f;
+		for (auto enemy : *enemyTeam)
+		{
+			if (enemy->GetRowHealth() <= tagetRange)
+			{
+				tagetRange = enemy->GetRowHealth();
+				this->taget = enemy;
+			}
+		}
+	}
 }
 
 void Champion::TagetOrderH()
@@ -325,4 +389,21 @@ void Champion::TagetOrderH()
 
 void Champion::TagetOrderLR()
 {
+	if (!enemyTeam->empty())
+	{
+		float tagetRange = 0.f;
+		for (auto enemy : *enemyTeam)
+		{
+			if (abs(Utils::Distance(this->GetPosition(), enemy->GetPosition())) >= tagetRange)
+			{
+				tagetRange = abs(Utils::Distance(this->GetPosition(), enemy->GetPosition()));
+				this->taget = enemy;
+			}
+		}
+	}
+}
+
+float Champion::GetRowHealth()
+{
+	return (this->hp/this->currentState.maxHp);
 }

@@ -30,15 +30,15 @@ void ChampionMgr::LoadFromCsv(const std::string path)
 	}
 }
 
-State ChampionMgr::GetChampion(const std::string& id)
+State* ChampionMgr::GetChampion(const std::string& id)
 {
 	auto findChamp = champions.find(id);
+
 	if (findChamp == champions.end())
 	{
 		std::cout << "ERR : NOT EXIST CHAMPION" << std::endl;
-		State null{ "",0,0,0,0,0,0,0,0,(ChampionType)0 };
-		return null;
+		return nullptr;
 	}
 
-	return findChamp->second;
+	return &findChamp->second;
 }

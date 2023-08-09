@@ -40,8 +40,16 @@ void SceneGame::Init()
 
 	SpriteGo* bg = (SpriteGo*)AddGo(new SpriteGo("graphics/Origin/Texture2D/stadium.png"));
 	bg->sortLayer = -1;
+	bg->sortOrder = 2;
 	bg->SetPosition(centerPos);
 	bg->SetOrigin(Origins::MC);
+
+	SpriteGo* header = (SpriteGo*)AddGo(new SpriteGo("graphics/Origin/Sprite/header_bg#43707.png"));
+	header->sprite.setScale(2,2);
+	header->sortLayer = 101;
+	header->sortOrder = 1;
+	header->SetPosition(0, 0);
+	header->SetOrigin(Origins::TL);
 
 	championPool.OnCreate = [this](Champion* champion){
 		champion->ChangeStance(ChampionStance::None);
@@ -307,19 +315,16 @@ void SceneGame::PickPhase(float dt)
 	case Team::Red:
 	{
 		Champion* redChamp = championPool.Get();
-		redChamp->SetState(CHAMPION_MGR.GetChampion("swordman"));
-		redChamp->SetOrder(TagetingOrder::ShortRange);
+		redChamp->SetState(*CHAMPION_MGR.GetChampion("archer"));
 		redChamp->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/Origin/Sprite/archer_0.png"));
 		redChamp->SetPosition((Utils::RandomRange(420,520)), (Utils::RandomRange(300, 450)));
 		redChamp->SetEnemyTeam(&blueTeam);
 		redChamp->SetMyTeam(&redTeam);
+		redChamp->SetDieChampion(&cemetery);
 		redChamp->ChangeStance(ChampionStance::None);
 		redChamp->Reset();
 		redChamp->SetSacleX(1);
-		if (currentTurn == Turn::Player)
-		{
-			redChamp->SetPlayerTeam();
-		}
+		redChamp->SetTeamColor(Team::Red);
 		redTeam.push_back(redChamp);
 		AddGo(redChamp);
 		ChangeTeam();
@@ -329,19 +334,16 @@ void SceneGame::PickPhase(float dt)
 	case Team::Blue:
 	{
 		Champion* blueChamp = championPool.Get();
-		blueChamp->SetState(CHAMPION_MGR.GetChampion("archer"));
-		blueChamp->SetOrder(TagetingOrder::ShortRange);
+		blueChamp->SetState(*CHAMPION_MGR.GetChampion("archer"));
 		blueChamp->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/Origin/Sprite/archer_0.png"));
 		blueChamp->SetPosition((Utils::RandomRange(750, 850)), (Utils::RandomRange(300, 450)));
 		blueChamp->SetEnemyTeam(&redTeam);
 		blueChamp->SetMyTeam(&blueTeam);
+		blueChamp->SetDieChampion(&cemetery);
 		blueChamp->ChangeStance(ChampionStance::None);
 		blueChamp->Reset();
 		blueChamp->SetSacleX(-1);
-		if (currentTurn == Turn::Player)
-		{
-			blueChamp->SetPlayerTeam();
-		}
+		blueChamp->SetTeamColor(Team::Blue);
 		blueTeam.push_back(blueChamp);
 		AddGo(blueChamp);
 		ChangeTeam();
@@ -390,6 +392,7 @@ void SceneGame::BattlePhase(float dt)
 			for (auto team : redTeam)
 			{
 				RemoveGo(team);
+				team->SetTeamColor(Team::None);
 				championPool.Return(team);
 			}
 			redTeam.clear();
@@ -400,9 +403,21 @@ void SceneGame::BattlePhase(float dt)
 			for (auto team : blueTeam)
 			{
 				RemoveGo(team);
+				team->SetTeamColor(Team::None);
 				championPool.Return(team);
 			}
 			blueTeam.clear();
+		}
+
+		if (!cemetery.empty())
+		{
+			for (auto team : cemetery)
+			{
+				RemoveGo(team);
+				team->SetTeamColor(Team::None);
+				championPool.Return(team);
+			}
+			cemetery.clear();
 		}
 		ChangePhase(Phase::None);
 	}

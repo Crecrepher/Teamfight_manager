@@ -28,7 +28,7 @@ protected:
 	//std::vector<int> userSkill;
 
 	// ป๓ลย
-	bool team;
+	Team team;
 
 	ChampionStance currentStance;
 	TagetingOrder currentOrder;
@@ -39,11 +39,13 @@ protected:
 	float skillCoolTime=10.f;
 	float skillTimer;
 	float reviveTimer;
+	float attackDelay = 0.f;
 
 //	bool ActiveUltiSkill = true;
 
 	std::vector<Champion*>* enemyTeam;
 	std::vector<Champion*>* myTeam;
+	std::vector<Champion*>* cemetery;
 
 	Champion* taget=nullptr;
 
@@ -58,12 +60,14 @@ public:
 
 	void SetMyTeam(std::vector<Champion*>* myTeam);
 	void SetEnemyTeam(std::vector<Champion*>* enemyTeam);
+	void SetDieChampion(std::vector<Champion*>* cemetery);
 	void ChangeStance(ChampionStance stance);
 	void SetState(State path);
 	void SetOrder(TagetingOrder order) { this->currentOrder = order; }
 	void SetSacleX(float x);
 	void SetCoolTime(float t) { this->skillCoolTime = t; }
-	void SetPlayerTeam() { team = true; }
+	void SetTeamColor(Team color) { team = color; }
+	void Hit(float attack);
 
 	void FindTaget();
 	void TagetOrderSR();
@@ -72,6 +76,8 @@ public:
 	void TagetOrderRH();
 	void TagetOrderLR();
 
+	float GetRowHealth();
+
 	void Idle(float dt);
 	void Move(float dt);
 	void Action(float dt);
@@ -79,7 +85,6 @@ public:
 	void Skill(float dt);
 	void UltimateSkill(float dt);
 	void Dead(float dt);
-
 	void ChampionDie();
 };
 

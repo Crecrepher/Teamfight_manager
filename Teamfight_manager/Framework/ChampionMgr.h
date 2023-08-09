@@ -14,7 +14,7 @@ public:
 	void Init();
 	void LoadFromCsv(const std::string path);
 
-	State GetChampion(const std::string& id);
+	State* GetChampion(const std::string& id);
 };
 
 #define CHAMPION_MGR (ChampionMgr::Instance())

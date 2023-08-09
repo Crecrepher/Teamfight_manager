@@ -22,6 +22,8 @@ protected:
 	
 	std::vector<Champion*> redTeam;
 	std::vector<Champion*> blueTeam;
+	std::vector<Champion*> cemetery;
+
 public:
 	SceneGame();
 	virtual ~SceneGame() override;
