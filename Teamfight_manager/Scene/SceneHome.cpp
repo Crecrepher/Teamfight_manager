@@ -71,8 +71,8 @@ void SceneHome::Enter()
 	UiTrainingOpen(false);
 
 	MakeSubUiSponsorContract();
-	UiSponsorContractOpen(true);
-	
+	//UiSponsorContractOpen(true);
+	//
 
 	RectGo* rect = (RectGo*)FindGo("UiShade");
 	rect->SetSize(FRAMEWORK.GetWindowSize());
@@ -362,8 +362,10 @@ void SceneHome::MakeMainUi()
 			ss2 << "Text";
 			btText = (TextGo*)FindGo(ss2.str());
 			btText->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
+
 			auto stringtable = DATATABLE_MGR.Get<StringTable>(DataTable::Ids::String);
 			btText->text.setString(stringtable->GetW(ss2.str()));
+
 			btText->text.setFillColor(sf::Color::White);
 			btText->text.setCharacterSize(20);
 			btText->SetOrigin(Origins::MC);
