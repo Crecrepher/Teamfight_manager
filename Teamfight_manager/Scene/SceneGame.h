@@ -42,6 +42,7 @@ public:
 	void ChangeTurn();
 	void ChangeTeam();
 
+	void LeaguePhase(float dt);
 	void BanPhase(float dt);
 	void PickPhase(float dt);
 	void ReadyPhase(float dt);
@@ -49,6 +50,8 @@ public:
 
 	template <typename T>
 	void ClearObjectPool(ObjectPool<T>& pool);
+
+	void UiInit();
 };
 
 template<typename T>

@@ -342,6 +342,7 @@ void SceneHome::MakeMainUi()
 	bt->sortLayer = 101;
 	bt->OnClick = []() {
 		TEAM_MGR.DayPass();
+		SCENE_MGR.ChangeScene(SceneId::Game);
 	};
 
 	TextGo* text = (TextGo*)FindGo("MoneyInfoT");
