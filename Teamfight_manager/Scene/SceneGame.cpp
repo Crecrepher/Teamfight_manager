@@ -316,6 +316,8 @@ void SceneGame::PickPhase(float dt)
 	{
 		Champion* redChamp = championPool.Get();
 		redChamp->SetState(*CHAMPION_MGR.GetChampion("archer"));
+		redChamp->SetName(std::to_string((int)team) + "ÆÀ " + std::to_string(step) + "¼±¼ö");
+		redChamp->SetOrder(TagetingOrder::RowHealth);
 		redChamp->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/Origin/Sprite/archer_0.png"));
 		redChamp->SetPosition((Utils::RandomRange(420,520)), (Utils::RandomRange(300, 450)));
 		redChamp->SetEnemyTeam(&blueTeam);
@@ -334,7 +336,9 @@ void SceneGame::PickPhase(float dt)
 	case Team::Blue:
 	{
 		Champion* blueChamp = championPool.Get();
-		blueChamp->SetState(*CHAMPION_MGR.GetChampion("archer"));
+		blueChamp->SetState(*CHAMPION_MGR.GetChampion("swordman"));
+		blueChamp->SetOrder(TagetingOrder::CarryPlayer);
+		blueChamp->SetName(std::to_string((int)team) + "ÆÀ " + std::to_string(step) + "¼±¼ö");
 		blueChamp->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/Origin/Sprite/archer_0.png"));
 		blueChamp->SetPosition((Utils::RandomRange(750, 850)), (Utils::RandomRange(300, 450)));
 		blueChamp->SetEnemyTeam(&redTeam);

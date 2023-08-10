@@ -41,6 +41,12 @@ protected:
 	float reviveTimer;
 	float attackDelay = 0.f;
 
+	int kill = 0;
+	int death = 0;
+
+	float total_Damage = 0.f;
+	float total_OnHit = 0.f;
+
 //	bool ActiveUltiSkill = true;
 
 	std::vector<Champion*>* enemyTeam;
@@ -68,7 +74,9 @@ public:
 	void SetCoolTime(float t) { this->skillCoolTime = t; }
 	void SetTeamColor(Team color) { team = color; }
 	void Hit(float attack);
+	float GetHp() { return this->hp; }
 
+	// 타겟팅
 	void FindTaget();
 	void TagetOrderSR();
 	void TagetOrderCP();
@@ -86,5 +94,17 @@ public:
 	void UltimateSkill(float dt);
 	void Dead(float dt);
 	void ChampionDie();
+
+
+	// 선수에게 넘길 스테이터스
+	int GetKillScore() { return this->kill; }
+	int GetDeathScore() { return this->death; }
+	float GetTotalDamage() { return this->total_Damage; }
+	float GetTotalOnHit() { return this->total_OnHit; }
+
+	void SetDeathScore(int death) { this->death = death; }
+	void SetKillScore(int kill) { this->kill = kill; }
+	void SetTotalDamage(float damage) { this->total_Damage = damage; }
+	void SetTotlaOnHit(float onHit) { this->total_OnHit = onHit; }
 };
 

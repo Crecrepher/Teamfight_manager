@@ -20,12 +20,15 @@ void Champion::Init()
 	team = Team::None;
 }
 
-
 void Champion::Reset()
 {
 	SpriteGo::Reset();
 	this->hp = currentState.maxHp;
-	SetOrigin(Origins::BC);
+	this->death = 0;
+	this->kill = 0;
+	this->total_Damage = 0.f;
+	this->total_OnHit = 0.f;
+	SetOrigin(Origins::MC);
 }
 
 void Champion::Release()
@@ -39,8 +42,6 @@ void Champion::Update(float dt)
 		return;
 
 	SpriteGo::Update(dt);
-
-	dt *= 5.f;
 
 	skillTimer += dt;
 	attackDelay -= dt*this->currentState.attackSpeed;
@@ -132,6 +133,8 @@ void Champion::Idle(float dt)
 
 void Champion::Move(float dt)
 {
+	dt *= 5.f;
+
 	if (!this->enemyTeam->empty())
 	{
 		FindTaget();
@@ -150,7 +153,7 @@ void Champion::Move(float dt)
 
 void Champion::Action(float dt)
 {
-	if (abs(Utils::Distance(this->GetPosition(), this->taget->GetPosition())) <= this->currentState.attackRange && skillTimer == skillCoolTime)
+	if (abs(Utils::Distance(this->GetPosition(), this->taget->GetPosition())) <= this->currentState.attackRange && skillTimer >= skillCoolTime)
 	{
 		ChangeStance(ChampionStance::Skill);
 		return;
@@ -169,7 +172,19 @@ void Champion::Action(float dt)
 void Champion::Attack(float dt)
 {
 	std::cout << "°ø°Ý" << std::endl;
-	this->taget->Hit(this->currentState.attack);
+	float damage = this->currentState.attack - this->taget->currentState.defend;
+	if (damage <= 0.f)
+	{
+		damage = 0.f;
+	}
+	this->total_Damage += damage;
+	std::cout << this->GetName() << " ÀÔÈù ÇÇÇØ : " << this->total_Damage << std::endl;
+	this->taget->Hit(damage);
+	if (this->taget->GetHp() == 0)
+	{
+		this->kill++;
+		std::cout << this->GetName() << " Å³ : " << this->kill << std::endl;
+	}
 	attackDelay = 1.f;
 	ChangeStance(ChampionStance::Idle);
 }
@@ -244,10 +259,12 @@ void Champion::Dead(float dt)
 void Champion::ChampionDie()
 {
 	this->reviveTimer = 3.f;
+	this->death++;
 	auto it = std::find(myTeam->begin(), myTeam->end(), this);
 	this->cemetery->push_back(*it);
 	this->myTeam->erase(it);
-	std::cout << "Ã¨ÇÇ¾ð Á×À½" << std::endl;
+	std::cout << this->GetName() <<"Ã¨ÇÇ¾ð Á×À½" << std::endl;
+	std::cout << this->GetName() << " µ¥½º : " << this->death << std::endl;
 	this->sprite.setColor(sf::Color(0, 0, 0, 0));
 	ChangeStance(ChampionStance::Dead);
 }
@@ -269,13 +286,9 @@ void Champion::SetDieChampion(std::vector<Champion*>* cemetery)
 
 void Champion::Hit(float attack)
 {
-	float damage = (attack - this->currentState.defend);
-	if (damage <= 0.f)
-	{
-		damage = 0.f;
-	}
-
-	this->hp -= damage;
+	total_OnHit += attack;
+	std::cout << this->GetName() << " ´çÇÑ ÇÇÇØ : " << this->total_OnHit << std::endl;
+	this->hp -= attack;
 	if (this->hp <= 0.f)
 	{
 		this->hp = 0.f;
@@ -348,6 +361,27 @@ void Champion::FindTaget()
 
 void Champion::TagetOrderCP()
 {
+	if (!enemyTeam->empty())
+	{
+		float tagetRange = -1.f;
+		for (auto enemy : *enemyTeam)
+		{
+			float kda;
+			if (enemy->GetDeathScore() == 0)
+			{
+				kda = 100.f;
+			}
+			else
+			{
+				kda =enemy->GetKillScore() / enemy->GetDeathScore();
+			}
+			if (kda > tagetRange)
+			{
+				tagetRange = kda;
+				this->taget = enemy;
+			}
+		}
+	}
 }
 
 void Champion::TagetOrderSR()
