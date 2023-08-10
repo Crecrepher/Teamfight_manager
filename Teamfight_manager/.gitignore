@@ -12,7 +12,8 @@
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
-
+Teamfight_manager-d.exe
+Teamfight_manager-d.pdb
 # Mono auto generated files
 mono_crash.*
 
@@ -247,7 +248,8 @@ orleans.codegen.cs
 # Since there are multiple workflows, uncomment next line to ignore bower_components
 # (https://github.com/github/gitignore/pull/1529#issuecomment-104372622)
 #bower_components/
-
+Teamfight_manager-d.exe
+Teamfight_manager-d.pdb
 # RIA/Silverlight projects
 Generated_Code/
 
