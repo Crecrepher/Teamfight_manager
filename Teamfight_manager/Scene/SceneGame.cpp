@@ -395,6 +395,10 @@ void SceneGame::BattlePhase(float dt)
 		{
 			for (auto team : redTeam)
 			{
+				std::cout << team->GetName() << " 킬 : " << team->GetKillScore() << std::endl;
+				std::cout << team->GetName() << " 데스 : " << team->GetDeathScore() << std::endl;
+				std::cout << team->GetName() << " 입힌 피해 : " << team->GetTotalDamage() << std::endl;
+				std::cout << team->GetName() << " 당한 피해 : " << team->GetTotalOnHit() << std::endl;
 				RemoveGo(team);
 				team->SetTeamColor(Team::None);
 				championPool.Return(team);
@@ -406,6 +410,10 @@ void SceneGame::BattlePhase(float dt)
 		{
 			for (auto team : blueTeam)
 			{
+				std::cout << team->GetName() << " 킬 : " << team->GetKillScore() << std::endl;
+				std::cout << team->GetName() << " 데스 : " << team->GetDeathScore() << std::endl;
+				std::cout << team->GetName() << " 입힌 피해 : " << team->GetTotalDamage() << std::endl;
+				std::cout << team->GetName() << " 당한 피해 : " << team->GetTotalOnHit()<< std::endl;
 				RemoveGo(team);
 				team->SetTeamColor(Team::None);
 				championPool.Return(team);
@@ -417,6 +425,10 @@ void SceneGame::BattlePhase(float dt)
 		{
 			for (auto team : cemetery)
 			{
+				std::cout << team->GetName() << " 킬 : " << team->GetKillScore() << std::endl;
+				std::cout << team->GetName() << " 데스 : " << team->GetDeathScore() << std::endl;
+				std::cout << team->GetName() << " 입힌 피해 : " << team->GetTotalDamage() << std::endl;
+				std::cout << team->GetName() << " 당한 피해 : " << team->GetTotalOnHit() << std::endl;
 				RemoveGo(team);
 				team->SetTeamColor(Team::None);
 				championPool.Return(team);
