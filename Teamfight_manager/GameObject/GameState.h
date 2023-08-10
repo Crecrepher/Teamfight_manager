@@ -3,6 +3,7 @@
 enum class Phase
 {
 	None=-1,
+	League,
 	Ban,
 	Pick,
 	Ready,
