@@ -62,6 +62,7 @@ public:
 	void UiSponsorContractOpen(bool contract = false ,bool on = true);
 	void UiSponsorContractSelect(Sponsor sponsor, int index);
 	void SponsorContract(int index);
+	void UiSponsorSelect(int index);
 
 	void UpdateMoney();
 	void Recruit(int grade,int slotNum);

@@ -64,6 +64,10 @@ void SceneHome::Enter()
 	{
 		NewYear();
 	}
+	else if (TEAM_MGR.GetTodayDate() == 4)
+	{
+		UiSponsorContractOpen(true, true);
+	}
 
 	MakeMainUi();
 	MakeSubUi();
@@ -239,6 +243,7 @@ void SceneHome::AddGoUiButton()
 
 void SceneHome::AddGoText()
 {
+	AddGo(new TextGo("Calinder"));
 	AddGo(new TextGo("MoneyInfoT"));
 
 	AddGo(new TextGo("UiMenuTitleText"));
@@ -425,25 +430,48 @@ void SceneHome::MakeMainUi()
 	bt->SetPosition(FRAMEWORK.GetWindowSize().x - 30.f,
 		FRAMEWORK.GetWindowSize().y - 30.f);
 	bt->sortLayer = 101;
-	bt->OnClick = []() {
+	bt->OnClick = [this]() {
 		TEAM_MGR.DayPass();
+		UpdateMoney();
+		if (TEAM_MGR.GetTodayDate() == 0)
+		{
+			NewYear();
+		}
+		else if (TEAM_MGR.GetTodayDate() == 4)
+		{
+			UiSponsorContractOpen(true, true);
+		}
 		TeamMgr::Schedule schedule = TEAM_MGR.GetSchedule(TEAM_MGR.GetTodayDate() - 1);
 		if (schedule != TeamMgr::Schedule::Recruit &&
 			schedule != TeamMgr::Schedule::Vacation)
 		{
 			SCENE_MGR.ChangeScene(SceneId::Game);
 		}
+		TextGo* text = (TextGo*)FindGo("Calinder");
+		text->text.setString(std::to_string(TEAM_MGR.GetTodayYear()) + " / "
+			+ std::to_string(TEAM_MGR.GetTodayDate() / 4 + 1) + " Week "
+			+ std::to_string(TEAM_MGR.GetTodayDate() % 4 + 1));
 	};
 
 	TextGo* text = (TextGo*)FindGo("MoneyInfoT");
 	text->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
 	text->text.setString(std::to_string(TEAM_MGR.GetMoney()));
 	text->text.setFillColor(sf::Color::White);
-	text->text.setCharacterSize(20);
+	text->text.setCharacterSize(18);
 	text->SetOrigin(Origins::TL);
 	text->SetPosition(FRAMEWORK.GetWindowSize().x * 0.85f, 22.f);
 	text->sortLayer = 107;
 
+	text = (TextGo*)FindGo("Calinder");
+	text->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
+	text->text.setString(std::to_string(TEAM_MGR.GetTodayYear()) + " / "
+		+ std::to_string(TEAM_MGR.GetTodayDate() / 4 + 1) + " Week "
+		+ std::to_string(TEAM_MGR.GetTodayDate() % 4 + 1));
+	text->text.setFillColor(sf::Color::White);
+	text->text.setCharacterSize(18);
+	text->SetOrigin(Origins::TL);
+	text->SetPosition(845, 22);
+	text->sortLayer = 107;
 }
 
 
@@ -490,7 +518,6 @@ void SceneHome::MakeSubUi()
 	MakeSubUiTraining();
 	UiTrainingOpen(false);
 	MakeSubUiSponsorContract();
-	UiSponsorContractOpen(true, true);
 }
 
 void SceneHome::MakeSubUiTraining()
@@ -671,6 +698,26 @@ void SceneHome::MakeSubUiSponsorContract()
 		bt->SetSize(2,2);
 		bt->sortLayer = 111;
 		bt->SetActive(false);
+		bt->OnEnter = [bt,i,this]() {
+			for (int j = 0; j < 3; j++)
+			{
+				if (i == selectedSponsorIndex)
+				{
+					return;
+				}
+			}
+			bt->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/Origin/Sprite/sponsor_card_bg_1.png"));
+		};
+		bt->OnExit = [bt, i, this]() {
+			for (int j = 0; j < 3; j++)
+			{
+				if (i == selectedSponsorIndex)
+				{
+					return;
+				}
+			}
+			bt->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/Origin/Sprite/sponsor_card_bg_0.png"));
+		};
 		
 		ss.str("");
 		ss << "SponLogo" << i;
@@ -755,6 +802,7 @@ void SceneHome::MakeSubUiSponsorContract()
 	spr->SetActive(false);
 
 	UiButton* bt = (UiButton*)FindGo("SponsorContract");
+	bt->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/Origin/Sprite/default_button_0.png"));
 	bt->SetOrigin(Origins::MC);
 	bt->SetPosition(485,470);
 	bt->SetSize(2, 2);
@@ -1696,6 +1744,9 @@ void SceneHome::UiSponsorContractOpen(bool contract, bool on)
 	text = (TextGo*)FindGo("SponsorRewardMoneyUiText");
 	text->SetActive(false);
 
+	text = (TextGo*)FindGo("SponsorQuestNowText");
+	text->SetActive(false);
+
 	for (int i = 0; i < 4; i++)
 	{
 		std::stringstream ss;
@@ -1745,12 +1796,12 @@ void SceneHome::UiSponsorContractOpen(bool contract, bool on)
 			ss.str("");
 			ss << "graphics/Origin/Sprite/sponser_logo_" << sponsorType << ".png";
 			newSponsor[i].sponsorTextureId = ss.str();
-			newSponsor[i].QuestCode = Utils::RandomRange(0, TEAM_MGR.GetQuestCount()-1);
-			newSponsor[i].QuestDifficulty = Utils::RandomRange(0, 2);
-			newSponsor[i].RewardMoney = Utils::RandomRange(1000, 1500) + (newSponsor[i].QuestDifficulty*500) + (int)TEAM_MGR.GetLeagueGrade() * 1000;
+			newSponsor[i].questCode = Utils::RandomRange(0, TEAM_MGR.GetQuestCount()-1);
+			newSponsor[i].questDifficulty = Utils::RandomRange(0, 2);
+			newSponsor[i].rewardMoney = Utils::RandomRange(1000, 1500) + (newSponsor[i].questDifficulty*500) + (int)TEAM_MGR.GetLeagueGrade() * 1000;
 			for (int j = 0; j < 4; j++)
 			{
-				newSponsor[i].RewardParts[j] = Utils::RandomRange(7, 17) + (newSponsor[i].QuestDifficulty * 5) + (int)TEAM_MGR.GetLeagueGrade() * 5;
+				newSponsor[i].rewardParts[j] = Utils::RandomRange(7, 17) + (newSponsor[i].questDifficulty * 5) + (int)TEAM_MGR.GetLeagueGrade() * 5;
 			}
 		}
 
@@ -1790,6 +1841,7 @@ void SceneHome::UiSponsorContractOpen(bool contract, bool on)
 		text->SetActive(on);
 
 		text = (TextGo*)FindGo("SponsorContractAcceptText");
+		text->text.setFillColor(sf::Color::White);
 		text->SetActive(on);
 
 		text = (TextGo*)FindGo("SponsorContractLeftWarnText");
@@ -1803,16 +1855,45 @@ void SceneHome::UiSponsorContractOpen(bool contract, bool on)
 			ss << "UseSponlist" << i;
 			UiButton* SponBt = (UiButton*)FindGo(ss.str());
 			SponBt->SetActive(on);
-
-			ss.str("");
-			ss << "ListSponsorLogo" << i;
-			spr = (SpriteGo*)FindGo(ss.str());
-			spr->SetActive(on);
-
-			ss << "back";
-			spr = (SpriteGo*)FindGo(ss.str());
-			spr->SetActive(on);
-			if (i > 0)
+			SponBt->OnClick = [this,i]() {
+				if (TEAM_MGR.GetMaxSponsor() <= i)
+				{
+					return;
+				}
+				UiSponsorSelect(i);
+				for (int j = 0; j < 3; j++)
+				{
+					std::stringstream ss;
+					ss << "UseSponlist" << i;
+					UiButton* SponBt = (UiButton*)FindGo(ss.str());
+					if (j != selectedSponsorIndex)
+					{
+						SponBt->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/Origin/Sprite/type_ui_2.png"));
+					}
+					else
+					{
+						SponBt->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/Origin/Sprite/type_ui_0.png"));
+					}
+				}
+			};
+			SponBt->OnEnter = [SponBt,this, i]() {
+				if (TEAM_MGR.GetMaxSponsor() <= i ||
+					selectedSponsorIndex == i)
+				{
+					return;
+				}
+				SponBt->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/Origin/Sprite/type_ui_1.png"));
+			};
+			SponBt->OnExit = [SponBt, this, i]() {
+				if (TEAM_MGR.GetMaxSponsor() <= i ||
+					selectedSponsorIndex == i)
+				{
+					return;
+				}
+				SponBt->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/Origin/Sprite/type_ui_0.png"));
+			};
+			
+			if (i > 0 && i >= TEAM_MGR.GetMaxSponsor())
 			{
 				ss.str("");
 				ss << "LockIcon" << i - 1;
@@ -1823,14 +1904,36 @@ void SceneHome::UiSponsorContractOpen(bool contract, bool on)
 				TextGo* text = (TextGo*)FindGo(ss.str());
 				text->SetActive(on);
 			}
+			if (i < TEAM_MGR.GetMaxSponsor() && TEAM_MGR.GetSponsor(i).sponsorType != -1)
+			{
+				ss.str("");
+				ss << "ListSponsorLogo" << i;
+				spr = (SpriteGo*)FindGo(ss.str());
+				spr->SetActive(on);
+				spr->sprite.setTexture(*RESOURCE_MGR.GetTexture(TEAM_MGR.GetSponsor(i).sponsorTextureId));
 
-			ss.str("");
-			ss << "SponsorSlotText" << i;
-			TextGo* text = (TextGo*)FindGo(ss.str());
-			text->SetActive(on);
-			ss << "State";
-			text = (TextGo*)FindGo(ss.str());
-			text->SetActive(on);
+				ss << "back";
+				spr = (SpriteGo*)FindGo(ss.str());
+				spr->SetActive(on);
+
+				ss.str("");
+				ss << "SponsorSlotText" << i;
+				TextGo* text = (TextGo*)FindGo(ss.str());
+				text->SetActive(on);
+				text->text.setString(TEAM_MGR.GetSponsor(i).sponsorName);
+
+				ss << "State";
+				text = (TextGo*)FindGo(ss.str());
+				text->SetActive(on);
+				if (TEAM_MGR.GetSponsor(i).success)
+				{
+					text->text.setString(stringtable->GetW("Success"));
+				}
+				else
+				{
+					text->text.setString(stringtable->GetW("Processing"));
+				}
+			}
 		}
 
 		text = (TextGo*)FindGo("SponsorNameUi");
@@ -1870,12 +1973,27 @@ void SceneHome::UiSponsorContractSelect(Sponsor sponsor,int index)
 	text = (TextGo*)FindGo("SponsorQuest");
 	text->SetActive(true);
 	std::stringstream ss;
-	ss << "ContractConditions" << sponsor.QuestCode;
+	ss << "ContractConditions" << sponsor.questCode;
 	text->text.setString(stringtable->GetW(ss.str()));
+	switch (sponsor.questCode)
+	{
+	case 0:
+		text->text.setString(text->text.getString() + " " + std::to_string(3 - sponsor.questDifficulty));
+		break;
+	case 1:
+	case 2:
+		text->text.setString(text->text.getString() + " " + std::to_string(5 + sponsor.questDifficulty * 2));
+		break;
+	case 3:
+	case 4:
+		text->text.setString(text->text.getString() + " " + std::to_string(300 + sponsor.questDifficulty * 50));
+	default:
+		break;
+	}
 
 	text = (TextGo*)FindGo("SponsorMoney");
 	text->SetActive(true);
-	text->text.setString(std::to_string(sponsor.RewardMoney));
+	text->text.setString(std::to_string(sponsor.rewardMoney));
 
 	for (int i = 0; i < 4; i++)
 	{
@@ -1883,7 +2001,7 @@ void SceneHome::UiSponsorContractSelect(Sponsor sponsor,int index)
 		ss << "SponsorParts" << i;
 		text = (TextGo*)FindGo(ss.str());
 		text->SetActive(true);
-		text->text.setString("x" + std::to_string(sponsor.RewardParts[i]));
+		text->text.setString("x" + std::to_string(sponsor.rewardParts[i]));
 	}
 
 	for (int i = 0; i < 4; i++)
@@ -1987,6 +2105,14 @@ void SceneHome::NewYear()
 
 void SceneHome::SponsorContract(int index)
 {
+	for (size_t i = 0; i < 3; i++)
+	{
+		if (TEAM_MGR.GetSponsor(i).sponsorType == newSponsor[index].sponsorType)
+		{
+			return;
+		}
+	}
+
 	auto stringtable = DATATABLE_MGR.Get<StringTable>(DataTable::Ids::String);
 	TEAM_MGR.ContractSponsor(newSponsor[index]);
 
@@ -1994,12 +2120,109 @@ void SceneHome::SponsorContract(int index)
 	{
 		TextGo* text = (TextGo*)FindGo("SponsorContractLeftWarnText");
 		text->SetActive(false);
+		text = (TextGo*)FindGo("SponsorContractAcceptText");
+		text->text.setFillColor(sf::Color(100,100,100));
+		UiButton* bt = (UiButton*)FindGo("SponsorContract");
+		bt->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/Origin/Sprite/default_button_3.png"));
 	}
 	TextGo* text = (TextGo*)FindGo("SelectedSponsorCountText");
 	text->text.setString(stringtable->GetW("SelectedSponsor"));
 	text->text.setString(text->text.getString() + " "
 		+ std::to_string(TEAM_MGR.GetContractedSponsor()) + "/"
 		+ std::to_string(TEAM_MGR.GetMaxSponsor()));
+}
+
+void SceneHome::UiSponsorSelect(int index)
+{
+	Sponsor sponsor = TEAM_MGR.GetSponsor(index);
+	if (sponsor.sponsorType == -1)
+	{
+		return;
+	}
+	selectedSponsorIndex = index;
+	auto stringtable = DATATABLE_MGR.Get<StringTable>(DataTable::Ids::String);
+	SpriteGo* spr = (SpriteGo*)FindGo("SelectedLogo");
+	spr->SetActive(true);
+	spr->sprite.setTexture(*RESOURCE_MGR.GetTexture(sponsor.sponsorTextureId));
+
+	TextGo* text = (TextGo*)FindGo("SelectedSponsorName");
+	text->SetActive(true);
+	text->text.setString(sponsor.sponsorName);
+
+	text = (TextGo*)FindGo("SponsorQuest");
+	text->SetActive(true);
+	std::stringstream ss;
+	ss << "ContractConditions" << sponsor.questCode;
+	text->text.setString(stringtable->GetW(ss.str()));
+	switch (sponsor.questCode)
+	{
+	case 0:
+		text->text.setString(text->text.getString() + " " + std::to_string(3 - sponsor.questDifficulty));
+		break;
+	case 1:
+	case 2:
+		text->text.setString(text->text.getString() + " " + std::to_string(5 + sponsor.questDifficulty * 2));
+		break;
+	case 3:
+	case 4:
+		text->text.setString(text->text.getString() + " " + std::to_string(300 + sponsor.questDifficulty * 50));
+	default:
+		break;
+	}
+
+
+	text = (TextGo*)FindGo("SponsorMoney");
+	text->SetActive(true);
+	text->text.setString(std::to_string(sponsor.rewardMoney));
+
+	for (int i = 0; i < 4; i++)
+	{
+		std::stringstream ss;
+		ss << "SponsorParts" << i;
+		text = (TextGo*)FindGo(ss.str());
+		text->SetActive(true);
+		text->text.setString("x" + std::to_string(sponsor.rewardParts[i]));
+	}
+
+	for (int i = 0; i < 4; i++)
+	{
+		std::stringstream ss;
+		ss << "PartBack" << i;
+		spr = (UiButton*)FindGo(ss.str());
+		spr->SetActive(true);
+	}
+
+	spr = (SpriteGo*)FindGo("SoundChip");
+	spr->SetActive(true);
+
+	spr = (SpriteGo*)FindGo("KeyboardSwitch");
+	spr->SetActive(true);
+
+	spr = (SpriteGo*)FindGo("Screw");
+	spr->SetActive(true);
+
+	spr = (SpriteGo*)FindGo("FabricPiece");
+	spr->SetActive(true);
+
+	spr = (SpriteGo*)FindGo("SponLogoBack");
+	spr->SetActive(true);
+
+	spr = (SpriteGo*)FindGo("GoldUiEx");
+	spr->SetActive(true);
+
+	text = (TextGo*)FindGo("SponsorRewardMoneyUiText");
+	text->SetActive(true);
+
+	text = (TextGo*)FindGo("SponsorQuestUiText");
+	text->SetActive(true);
+
+	text = (TextGo*)FindGo("SponsorRewardUiText");
+	text->SetActive(true);
+
+	text = (TextGo*)FindGo("SponsorQuestNowText");
+	text->SetActive(true);
+	text->text.setString(stringtable->GetW("Now"));
+	text->text.setString(text->text.getString() +" " + std::to_string(TEAM_MGR.GetSponsor(index).currentProcess));
 }
 
 

@@ -112,6 +112,8 @@ TeamMgr::Schedule TeamMgr::GetSchedule(int date)
 void TeamMgr::DayPass()
 {
 	date++;
+	CheckQuest();
+
 	if (date >= 48)
 	{
 		date = 0;
@@ -119,6 +121,13 @@ void TeamMgr::DayPass()
 		for (int i = 0; i < playerNum; i++)
 		{
 			player[i].age++;
+		}
+		sponsors = std::vector<Sponsor>(3);
+		contractedSponsor = 0;
+		for (int i = 0; i < playerNum; i++)
+		{
+			player[i].kill = 0;
+			player[i].death = 0;
 		}
 	}
 
@@ -133,18 +142,78 @@ void TeamMgr::DayPass()
 			LevelUpdate(playerTraining[i].xpChamp[j], player[i].proficiency[j].second);
 		}
 	}
-
-	CheckQuest();
 }
 
 void TeamMgr::CheckQuest()
 {
 	for (int i = 0; i < contractedSponsor; i++)
 	{
-		switch (sponsors[i].QuestCode)
+		if (sponsors[i].success)
 		{
+			continue;
+		}
+		switch (sponsors[i].questCode)
+		{
+		case 0:
+			sponsors[i].currentProcess = curRank;
+			if (curRank <= 3 - sponsors[i].questDifficulty)
+			{
+				sponsors[i].success = true;
+			}
+			break;
+		case 1:
+			sponsors[i].currentProcess = winPerfect;
+			if (winPerfect >= 5 + sponsors[i].questDifficulty * 2)
+			{
+				sponsors[i].success = true;
+			}
+			break;
+		case 2:			
+			sponsors[i].currentProcess = winContinuity;
+			if (winPerfect >= 5 + sponsors[i].questDifficulty * 2)
+			{
+				sponsors[i].success = true;
+			}
+			break;
+		case 3:
+		{
+			int sumKill = 0;
+			for (int i = 0; i < playerNum; i++)
+			{
+				sumKill += player[i].kill;
+			}
+			sponsors[i].currentProcess = sumKill;
+			if (sumKill >= 300 + sponsors[i].questDifficulty * 50)
+			{
+				sponsors[i].success = true;
+			}
+		}
+			break;
+		case 4:
+		{
+			int sumDeath = 0;
+			for (int i = 0; i < playerNum; i++)
+			{
+				sumDeath += player[i].death;
+			}
+			sponsors[i].currentProcess = sumDeath;
+			if (sumDeath <= 300 + sponsors[i].questDifficulty * 50
+				&& date >= 46)
+			{
+				sponsors[i].success = true;
+			}
+		}
+			break;
 		default:
 			break;
+		}
+		if (sponsors[i].success)
+		{
+			EarnMoney(sponsors[i].rewardMoney);
+			for (int j = 0; j < 4; j++)
+			{
+				gearParts[j] += sponsors[i].rewardParts[j];
+			}
 		}
 	}
 }
@@ -217,5 +286,9 @@ void TeamMgr::ContractSponsor(Sponsor sponsor)
 		return;
 	}
 	sponsors[contractedSponsor] = sponsor;
+	if (sponsor.questCode == 0)
+	{
+		sponsors[contractedSponsor].currentProcess = 8;
+	}
 	contractedSponsor++;
 }
