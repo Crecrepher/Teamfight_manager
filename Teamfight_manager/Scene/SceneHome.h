@@ -20,8 +20,12 @@ protected:
 	bool backClick = true;
 	bool isMenuOn = false;
 
+	std::vector<Sponsor> newSponsor;
+	int selectedSponsorIndex = -1;
 	std::vector<TrainingInfo> gainTrainingInfo;
 	int maxTrainingPoint = 3;
+
+
 public:
 	SceneHome();
 	virtual ~SceneHome() override;
@@ -49,12 +53,15 @@ public:
 	void MainUiClose();
 	void MainUiFunc(int index);
 
+	void SubUiBaseOpen(int index,bool on = true);
+
 	void UiTrainingOpen(bool on = true);
 	void UiTrainingPlayerSelect(int index);
 	void UiTrainingGaugeUpdate(int index);
 
 	void UiSponsorContractOpen(bool contract = false ,bool on = true);
-	void UiSponsorContractSelect(int index);
+	void UiSponsorContractSelect(Sponsor sponsor, int index);
+	void SponsorContract(int index);
 
 	void UpdateMoney();
 	void Recruit(int grade,int slotNum);

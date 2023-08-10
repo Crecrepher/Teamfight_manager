@@ -9,6 +9,7 @@ void TeamMgr::Init()
 	recruiting_players = std::vector<std::pair<bool, PlayerInfo>>(4,{false,PlayerInfo()});
 	dayGrowTable = std::vector<std::vector<int>>(10);
 	trainingGrowTable = std::vector<std::vector<int>>(10);
+	sponsors = std::vector<Sponsor>(3);
 	InitGrowTable();
 	
 	return;
@@ -138,7 +139,7 @@ void TeamMgr::DayPass()
 
 void TeamMgr::CheckQuest()
 {
-	for (int i = 0; i < usingSponsor; i++)
+	for (int i = 0; i < contractedSponsor; i++)
 	{
 		switch (sponsors[i].QuestCode)
 		{
@@ -200,4 +201,21 @@ void TeamMgr::LevelUpdate(int& xp, int& level)
 		xp -= levelUpVal;
 		level++;
 	}
+}
+
+
+void TeamMgr::DeleteContractedSponsor() 
+{ 
+	sponsors = std::vector<Sponsor>(3);
+	contractedSponsor = 0;
+}
+
+void TeamMgr::ContractSponsor(Sponsor sponsor)
+{
+	if (MaxSponsor == contractedSponsor)
+	{
+		return;
+	}
+	sponsors[contractedSponsor] = sponsor;
+	contractedSponsor++;
 }

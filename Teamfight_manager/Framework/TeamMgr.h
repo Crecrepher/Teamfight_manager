@@ -54,7 +54,9 @@ struct AiTeam
 
 struct Sponsor
 {
-	std::wstring sponsorTextureId = L"";
+	int sponsorType = -1;
+	std::string sponsorTextureId = "";
+	std::wstring sponsorName = L"";
 	int QuestCode = 0;
 	int QuestDifficulty = 0;
 	int RewardMoney = 1000;
@@ -124,8 +126,9 @@ protected:
 	int lose = 0;
 
 	std::vector<Sponsor> sponsors;
-	int openSponsorCode = 1;
-	int usingSponsor = 0;
+	int MaxSponsor = 1;
+	int contractedSponsor = 0;
+	int sponsorQuestCount = 5;
 public:
 	void Init();
 	void InitGrowTable();
@@ -159,6 +162,12 @@ public:
 	std::vector<AiTeam> GetAiTeamInfo();
 	std::vector<TrainingInfo> GetGrowStats(std::vector<TrainingInfo> playerTraining);
 	void LevelUpdate(int& xp, int& level);
+
+	int GetQuestCount() { return sponsorQuestCount; }
+	int GetContractedSponsor() { return contractedSponsor; }
+	int GetMaxSponsor() { return MaxSponsor; }
+	void DeleteContractedSponsor();
+	void ContractSponsor(Sponsor sponsor);
 };
 
 #define TEAM_MGR (TeamMgr::Instance())

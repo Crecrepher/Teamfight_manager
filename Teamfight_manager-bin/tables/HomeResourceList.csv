@@ -141,3 +141,4 @@ RESOURCE_TYPES 0.TEX 1.FONT 2.SOUND 3.ANI,RESOURCE_PATH
 0,graphics/Origin/Sprite/fabric_piece.png
 0,graphics/Origin/Sprite/champ_bg #43858.png
 0,graphics/Origin/Sprite/upgrade_icon_bg.png
+0,graphics/Origin/Sprite/lock_icon.png
