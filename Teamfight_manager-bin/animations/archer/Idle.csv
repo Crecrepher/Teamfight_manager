@@ -1,0 +1,9 @@
+ID,FPS,LOOPTYPE,,
+Idle,10,1,,
+,,,,
+TEXTUREID,LEFT,TOP,WIDTH,HEIGHT
+graphics/CustomSprite/archer1.png,0,0,64,64
+graphics/CustomSprite/archer1.png,64,0,64,64
+graphics/CustomSprite/archer1.png,128,0,64,64
+graphics/CustomSprite/archer1.png,192,0,64,64
+graphics/CustomSprite/archer1.png,256,0,64,64

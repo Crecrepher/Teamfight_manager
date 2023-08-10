@@ -1,4 +1,5 @@
 #pragma once
+#include "AnimatioControler.h"
 
 enum class Phase
 {
@@ -59,7 +60,7 @@ enum class TagetingOrder
 	ShortRange,
 	LongRange,
 	CarryPlayer,
-	Healer,
+	Heal,
 	RowHealth,
 };
 
@@ -75,4 +76,5 @@ struct State
 	int skillCode1;
 	int skillCode2;
 	ChampionType type;
+	AnimatioControler animaition;
 };

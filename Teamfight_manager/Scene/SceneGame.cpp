@@ -316,15 +316,17 @@ void SceneGame::PickPhase(float dt)
 	{
 		Champion* redChamp = championPool.Get();
 		redChamp->SetState(*CHAMPION_MGR.GetChampion("archer"));
+		redChamp->UpdateState();
 		redChamp->SetName(std::to_string((int)team) + "ÆÀ " + std::to_string(step) + "¼±¼ö");
-		redChamp->SetOrder(TagetingOrder::RowHealth);
-		redChamp->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/Origin/Sprite/archer_0.png"));
+		redChamp->SetOrder(TagetingOrder::Default);
+		//redChamp->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/Origin/Sprite/archer_0.png"));
 		redChamp->SetPosition((Utils::RandomRange(420,520)), (Utils::RandomRange(300, 450)));
 		redChamp->SetEnemyTeam(&blueTeam);
 		redChamp->SetMyTeam(&redTeam);
 		redChamp->SetDieChampion(&cemetery);
 		redChamp->ChangeStance(ChampionStance::None);
 		redChamp->Reset();
+		redChamp->SetOrigin(Origins::MC);
 		redChamp->SetSacleX(1);
 		redChamp->SetTeamColor(Team::Red);
 		redTeam.push_back(redChamp);
@@ -336,16 +338,18 @@ void SceneGame::PickPhase(float dt)
 	case Team::Blue:
 	{
 		Champion* blueChamp = championPool.Get();
-		blueChamp->SetState(*CHAMPION_MGR.GetChampion("swordman"));
-		blueChamp->SetOrder(TagetingOrder::CarryPlayer);
+		blueChamp->SetState(*CHAMPION_MGR.GetChampion("archer"));
+		blueChamp->UpdateState();
+		blueChamp->SetOrder(TagetingOrder::Default);
 		blueChamp->SetName(std::to_string((int)team) + "ÆÀ " + std::to_string(step) + "¼±¼ö");
-		blueChamp->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/Origin/Sprite/archer_0.png"));
+		//blueChamp->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/Origin/Sprite/archer_0.png"));
 		blueChamp->SetPosition((Utils::RandomRange(750, 850)), (Utils::RandomRange(300, 450)));
 		blueChamp->SetEnemyTeam(&redTeam);
 		blueChamp->SetMyTeam(&blueTeam);
 		blueChamp->SetDieChampion(&cemetery);
 		blueChamp->ChangeStance(ChampionStance::None);
 		blueChamp->Reset();
+		blueChamp->SetOrigin(Origins::MC);
 		blueChamp->SetSacleX(-1);
 		blueChamp->SetTeamColor(Team::Blue);
 		blueTeam.push_back(blueChamp);
@@ -391,6 +395,11 @@ void SceneGame::BattlePhase(float dt)
 	battleTimer -= dt;
 	if (battleTimer <= 0)
 	{
+		for (auto unit : championPool.GetUseList())
+		{
+			unit->ChangeStance(ChampionStance::None);
+		}
+
 		if (!redTeam.empty())
 		{
 			for (auto team : redTeam)

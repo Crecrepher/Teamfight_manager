@@ -6,6 +6,7 @@ RESOURCE_TYPES 0.TEX 1.FONT 2.SOUND 3.ANI,RESOURCE_PATH
 0,graphics/Origin/Sprite/header_calendar_icon.png
 0,graphics/Origin/Sprite/header_slot_bg.png
 0,graphics/Origin/Sprite/header_gold_icon.png
+0,graphics/CustomSprite/archer1.png
 1,fonts/Galmuri9.ttf
 1,fonts/Galmuri11.ttf
 1,fonts/Galmuri14.ttf
@@ -14,3 +15,9 @@ RESOURCE_TYPES 0.TEX 1.FONT 2.SOUND 3.ANI,RESOURCE_PATH
 1,fonts/NotoSans-Regular.ttf
 1,fonts/Perfect DOS VGA 437.ttf
 1,fonts/Silver.ttf
+3,animations/archer/Idle.csv
+3,animations/archer/Move.csv
+3,animations/archer/Attack.csv
+3,animations/archer/Die.csv
+3,animations/archer/Skill.csv
+3,animations/archer/UtilSkill.csv

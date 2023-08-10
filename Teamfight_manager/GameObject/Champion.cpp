@@ -3,6 +3,7 @@
 #include "ResourceMgr.h"
 #include "SceneGame.h"
 #include "SceneMgr.h"
+#include "AnimatioControler.h"
 
 Champion::Champion(const std::string id, const std::string n)
 	: SpriteGo(id, n)
@@ -17,6 +18,17 @@ void Champion::Init()
 {
 	SpriteGo::Init();
 
+	this->champMgrState.charId = "";
+	this->champMgrState.maxHp = 0.f;
+	this->champMgrState.attack = 0.f;
+	this->champMgrState.defend = 0.f;
+	this->champMgrState.attackSpeed = 0.f;
+	this->champMgrState.attackRange = 0.f;
+	this->champMgrState.speed = 0.f;
+	this->champMgrState.skillCode1 = -1;
+	this->champMgrState.skillCode2 = -1;
+	this->champMgrState.type = ChampionType::None;
+
 	team = Team::None;
 }
 
@@ -28,6 +40,7 @@ void Champion::Reset()
 	this->kill = 0;
 	this->total_Damage = 0.f;
 	this->total_OnHit = 0.f;
+	this->currentState.animaition.SetTarget(&sprite);
 	SetOrigin(Origins::MC);
 }
 
@@ -43,6 +56,13 @@ void Champion::Update(float dt)
 
 	SpriteGo::Update(dt);
 
+	if (this->currentState.animaition.GetCurrentClipId() == "Die")
+	{
+		this->currentState.animaition.Update(dt);
+	}
+
+	UpdateState();
+
 	skillTimer += dt;
 	attackDelay -= dt*this->currentState.attackSpeed;
 
@@ -53,7 +73,15 @@ void Champion::Update(float dt)
 
 	if (this->hp <= 0 && this->currentStance!=ChampionStance::Dead)
 	{
-		ChampionDie();
+		if (this->currentState.animaition.GetCurrentClipId() != "Die")
+		{
+			this->currentState.animaition.Play("Die");
+		}
+
+		if (this->currentState.animaition.GetLastFrame())
+		{
+			ChampionDie();
+		}
 		return;
 	}
 
@@ -105,13 +133,34 @@ void Champion::ChangeStance(ChampionStance stance)
 
 void Champion::Idle(float dt)
 {
-	if (!this->enemyTeam->empty())
+	this->currentState.animaition.Update(dt);
+
+	if (this->currentState.animaition.GetCurrentClipId() != "Idle")
 	{
-		FindTaget();
+		this->currentState.animaition.Play("Idle");
 	}
-	else if (this->enemyTeam->empty())
+
+	if (this->currentState.charId == "priest")
 	{
-		this->taget = nullptr;
+		if (!this->myTeam->empty())
+		{
+			FindTaget();
+		}
+		else if (this->myTeam->empty())
+		{
+			this->taget = nullptr;
+		}
+	}
+	else
+	{
+		if (!this->enemyTeam->empty())
+		{
+			FindTaget();
+		}
+		else if (this->enemyTeam->empty())
+		{
+			this->taget = nullptr;
+		}
 	}
 
 	if (this->taget != nullptr)
@@ -133,6 +182,13 @@ void Champion::Idle(float dt)
 
 void Champion::Move(float dt)
 {
+	this->currentState.animaition.Update(dt);
+
+	if (this->currentState.animaition.GetCurrentClipId() != "Move")
+	{
+		this->currentState.animaition.Play("Move");
+	}
+
 	dt *= 5.f;
 
 	if (!this->enemyTeam->empty())
@@ -171,43 +227,86 @@ void Champion::Action(float dt)
 
 void Champion::Attack(float dt)
 {
-	std::cout << "공격" << std::endl;
-	float damage = this->currentState.attack - this->taget->currentState.defend;
-	if (damage <= 0.f)
+	this->currentState.animaition.Update(dt*this->currentState.attackSpeed);
+
+	if (this->currentState.animaition.GetCurrentClipId() != "Attack")
 	{
-		damage = 0.f;
+		this->currentState.animaition.Play("Attack");
 	}
-	this->total_Damage += damage;
-	std::cout << this->GetName() << " 입힌 피해 : " << this->total_Damage << std::endl;
-	this->taget->Hit(damage);
-	if (this->taget->GetHp() == 0)
+	if (this->currentState.animaition.GetLastFrame())
 	{
-		this->kill++;
-		std::cout << this->GetName() << " 킬 : " << this->kill << std::endl;
+		std::cout << "공격" << std::endl;
+		if (this->currentState.charId == "priest" && this->taget->currentState.maxHp != this->taget->hp)
+		{
+			float heal = this->currentState.attack;
+			if (heal >= this->taget->GetHp())
+			{
+				heal = this->taget->GetHp();
+			}
+			this->total_Damage += heal;
+			std::cout << this->GetName() << " 회복량 : " << this->total_Damage << std::endl;
+			Heal(heal);
+			std::cout << this->taget->GetName() << " hp : " << this->taget->hp << std::endl;
+		}
+		else if (this->currentState.charId != "priest")
+		{
+			float damage = (this->currentState.attack * 100 + 99 + this->taget->currentState.defend) / (100 + this->taget->currentState.defend);
+			if (damage <= 0.f)
+			{
+				damage = 0.f;
+			}
+			else if (damage >= this->taget->GetHp())
+			{
+				damage = this->taget->GetHp();
+			}
+			this->total_Damage += damage;
+			std::cout << this->GetName() << " 입힌 피해 : " << this->total_Damage << std::endl;
+			this->taget->Hit(damage);
+			if (this->taget->GetHp() == 0)
+			{
+				this->kill++;
+				std::cout << this->GetName() << " 킬 : " << this->kill << std::endl;
+			}
+		}
+		attackDelay = 1.f;
+		ChangeStance(ChampionStance::Idle);
 	}
-	attackDelay = 1.f;
-	ChangeStance(ChampionStance::Idle);
 }
 
 void Champion::Skill(float dt)
 {
-	std::cout << "스킬" << std::endl;
-	skillTimer = 0;
-	ChangeStance(ChampionStance::Idle);
+	this->currentState.animaition.Update(dt);
+
+	if (this->currentState.animaition.GetCurrentClipId() != "Skill")
+	{
+		this->currentState.animaition.Play("Skill");
+	}
+	if (this->currentState.animaition.GetLastFrame())
+	{
+		std::cout << "스킬" << std::endl;
+		skillTimer = 0;
+		ChangeStance(ChampionStance::Idle);
+	}
 }
 
 void Champion::SetState(State path)
 {
+	this->champMgrState.charId = path.charId;
 	this->currentState.charId = path.charId;
-	this->currentState.maxHp = path.maxHp;
-	this->currentState.attack = path.attack;
-	this->currentState.defend = path.defend;
-	this->currentState.attackSpeed = path.attackSpeed;
-	this->currentState.attackRange = path.attackRange;
-	this->currentState.speed = path.speed;
+	this->champMgrState.maxHp = path.maxHp;
+	this->champMgrState.attack = path.attack;
+	this->champMgrState.defend = path.defend;
+	this->champMgrState.attackSpeed = path.attackSpeed;
+	this->champMgrState.attackRange = path.attackRange;
+	this->champMgrState.speed = path.speed;
+	this->champMgrState.skillCode1 = path.skillCode1;
 	this->currentState.skillCode1 = path.skillCode1;
+	this->champMgrState.skillCode2 = path.skillCode2;
 	this->currentState.skillCode2 = path.skillCode2;
+	this->champMgrState.type = path.type;
 	this->currentState.type = path.type;
+	this->champMgrState.animaition = path.animaition;
+	this->currentState.animaition = path.animaition;
 }
 
 void Champion::SetSacleX(float x)
@@ -258,15 +357,25 @@ void Champion::Dead(float dt)
 
 void Champion::ChampionDie()
 {
-	this->reviveTimer = 3.f;
-	this->death++;
-	auto it = std::find(myTeam->begin(), myTeam->end(), this);
-	this->cemetery->push_back(*it);
-	this->myTeam->erase(it);
-	std::cout << this->GetName() <<"챔피언 죽음" << std::endl;
-	std::cout << this->GetName() << " 데스 : " << this->death << std::endl;
-	this->sprite.setColor(sf::Color(0, 0, 0, 0));
-	ChangeStance(ChampionStance::Dead);
+		this->reviveTimer = 3.f;
+		this->death++;
+		auto it = std::find(myTeam->begin(), myTeam->end(), this);
+		this->cemetery->push_back(*it);
+		this->myTeam->erase(it);
+		std::cout << this->GetName() << "챔피언 죽음" << std::endl;
+		std::cout << this->GetName() << " 데스 : " << this->death << std::endl;
+		this->sprite.setColor(sf::Color(0, 0, 0, 0));
+		ChangeStance(ChampionStance::Dead);
+}
+
+void Champion::UpdateState()
+{
+	this->currentState.maxHp = this->champMgrState.maxHp;
+	this->currentState.attack = this->champMgrState.attack;
+	this->currentState.defend = this->champMgrState.defend;
+	this->currentState.attackSpeed = this->champMgrState.attackSpeed;
+	this->currentState.attackRange = this->champMgrState.attackRange;
+	this->currentState.speed = this->champMgrState.speed;
 }
 
 void Champion::SetMyTeam(std::vector<Champion*>* myTeam)
@@ -289,10 +398,11 @@ void Champion::Hit(float attack)
 	total_OnHit += attack;
 	std::cout << this->GetName() << " 당한 피해 : " << this->total_OnHit << std::endl;
 	this->hp -= attack;
-	if (this->hp <= 0.f)
-	{
-		this->hp = 0.f;
-	}
+}
+
+void Champion::Heal(float heal)
+{
+	this->hp += heal;
 }
 
 void Champion::FindTaget()
@@ -301,33 +411,13 @@ void Champion::FindTaget()
 	{
 	case TagetingOrder::Default:
 	{
-		switch (this->currentState.type)
+		if (this->currentState.charId == "priest")
 		{
-		case ChampionType::Warrios:
+			TagetOrderH();
+		}
+		else
 		{
 			TagetOrderSR();
-			break;
-		}
-		case ChampionType::Ranger:
-		{
-			TagetOrderLR();
-			break;
-		}
-		case ChampionType::Assassin:
-		{
-			TagetOrderCP();
-			break;
-		}
-		case ChampionType::Mage:
-		{
-			TagetOrderSR();
-			break;
-		}
-		case ChampionType::Assist:
-		{
-			TagetOrderRH();
-			break;
-		}
 		}
 		break;
 	}
@@ -346,7 +436,7 @@ void Champion::FindTaget()
 		TagetOrderCP();
 		break;
 	}
-	case TagetingOrder::Healer:
+	case TagetingOrder::Heal:
 	{
 		TagetOrderH();
 		break;
@@ -419,6 +509,18 @@ void Champion::TagetOrderRH()
 
 void Champion::TagetOrderH()
 {
+	if (!myTeam->empty())
+	{
+		float tagetRange = 9999.f;
+		for (auto team : *myTeam)
+		{
+			if (team->GetRowHealth() <= tagetRange)
+			{
+				tagetRange = team->GetRowHealth();
+				this->taget = team;
+			}
+		}
+	}
 }
 
 void Champion::TagetOrderLR()

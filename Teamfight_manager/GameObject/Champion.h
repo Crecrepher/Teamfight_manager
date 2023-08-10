@@ -33,6 +33,7 @@ protected:
 	ChampionStance currentStance;
 	TagetingOrder currentOrder;
 	
+	State champMgrState;
 	State currentState;
 	
 	float hp;
@@ -74,6 +75,7 @@ public:
 	void SetCoolTime(float t) { this->skillCoolTime = t; }
 	void SetTeamColor(Team color) { team = color; }
 	void Hit(float attack);
+	void Heal(float heal);
 	float GetHp() { return this->hp; }
 
 	// 타겟팅
@@ -94,6 +96,7 @@ public:
 	void UltimateSkill(float dt);
 	void Dead(float dt);
 	void ChampionDie();
+	void UpdateState();
 
 
 	// 선수에게 넘길 스테이터스
