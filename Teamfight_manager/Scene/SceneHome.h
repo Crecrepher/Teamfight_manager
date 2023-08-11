@@ -47,6 +47,7 @@ public:
 	void MakeSubUi();
 	void MakeSubUiTraining();
 	void MakeSubUiSponsorContract();
+	void MakeSubUiEquip();
 
 	void ReturnMainUiIndex(int& startNum, int& endNum, MainMenuType Type);
 	void MainUiOpen(MainMenuType Type);

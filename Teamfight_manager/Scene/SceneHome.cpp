@@ -71,6 +71,7 @@ void SceneHome::Enter()
 
 	MakeMainUi();
 	MakeSubUi();
+
 }
 
 void SceneHome::Exit()
@@ -103,6 +104,7 @@ void SceneHome::Draw(sf::RenderWindow& window)
 
 void SceneHome::AddGoSprites()
 {
+	//Main
 	AddGo(new SpriteGo("graphics/Origin/Sprite/ground.png", "Ground"));
 	AddGo(new SpriteGo("graphics/Origin/Sprite/house_bg.png", "House"));
 	AddGo(new SpriteGo("graphics/Origin/Sprite/sky_day.png", "Sky"));
@@ -114,6 +116,7 @@ void SceneHome::AddGoSprites()
 	AddGo(new SpriteGo("graphics/Origin/Sprite/header_league_bg.png", "LeagueUi"));
 	AddGo(new SpriteGo("graphics/Origin/Sprite/training_ui_bg.png", "SubUiBack"));
 
+	//player
 	AddGo(new SpriteGo("graphics/Origin/Sprite/scroll_bar.png", "ScrollBar"));
 	for (int i = 0; i < 6; i++)
 	{
@@ -191,6 +194,8 @@ void SceneHome::AddGoSprites()
 	}
 	AddGo(new SpriteGo("graphics/Origin/Sprite/lock_icon.png", "LockIcon0"));
 	AddGo(new SpriteGo("graphics/Origin/Sprite/lock_icon.png", "LockIcon1"));
+
+	//Item
 }
 
 void SceneHome::AddGoUiButton()
@@ -518,6 +523,7 @@ void SceneHome::MakeSubUi()
 	MakeSubUiTraining();
 	UiTrainingOpen(false);
 	MakeSubUiSponsorContract();
+	MakeSubUiEquip();
 }
 
 void SceneHome::MakeSubUiTraining()
@@ -1087,6 +1093,10 @@ void SceneHome::MainUiClose()
 		TextGo* btText = (TextGo*)FindGo(ss.str());
 		btText->SetActive(false);
 	}
+}
+
+void SceneHome::MakeSubUiEquip()
+{
 }
 
 void SceneHome::MainUiFunc(int index)
@@ -1838,6 +1848,10 @@ void SceneHome::UiSponsorContractOpen(bool contract, bool on)
 		text->SetActive(on);
 
 		text = (TextGo*)FindGo("SelectedSponsorCountText");
+		text->text.setString(stringtable->GetW("SelectedSponsor"));
+		text->text.setString(text->text.getString() + " "
+			+ std::to_string(TEAM_MGR.GetContractedSponsor()) + "/"
+			+ std::to_string(TEAM_MGR.GetMaxSponsor()));
 		text->SetActive(on);
 
 		text = (TextGo*)FindGo("SponsorContractAcceptText");
