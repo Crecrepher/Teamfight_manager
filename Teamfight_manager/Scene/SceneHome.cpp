@@ -196,6 +196,21 @@ void SceneHome::AddGoSprites()
 	AddGo(new SpriteGo("graphics/Origin/Sprite/lock_icon.png", "LockIcon1"));
 
 	//Item
+	for (int i = 0; i < 3; i++)
+	{
+		std::stringstream ss;
+		ss << "Equipmake" << i;
+		if (i == 0)
+		{
+			AddGo(new SpriteGo("graphics/UiFix/equipment_making_slot_bg_0.png", ss.str()));
+		}
+		else
+		{
+			AddGo(new SpriteGo("graphics/Origin/Sprite/equipment_making_slot_locked_bg.png", ss.str()));
+		}
+	}
+	AddGo(new SpriteGo("graphics/Origin/Sprite/lock_icon.png", "ItemMakeLock0"));
+	AddGo(new SpriteGo("graphics/Origin/Sprite/lock_icon.png", "ItemMakeLock1"));
 }
 
 void SceneHome::AddGoUiButton()
@@ -243,7 +258,19 @@ void SceneHome::AddGoUiButton()
 		AddGo(new UiButton("graphics/Origin/Sprite/type_ui_0.png", ss.str()));
 	}
 
-
+	//Item
+	for (int i = 0; i < 4; i++)
+	{
+		std::stringstream ss;
+		ss << "EquipSlotB" << i;
+		AddGo(new UiButton("graphics/UiFix/equipment_slot_bg_0.png", ss.str()));
+	}
+	for (int i = 0; i < 3; i++)
+	{
+		std::stringstream ss;
+		ss << "EquipMakeB" << i;
+		AddGo(new UiButton("graphics/Origin/Sprite/important_button_0.png", ss.str()));
+	}
 }
 
 void SceneHome::AddGoText()
@@ -524,6 +551,8 @@ void SceneHome::MakeSubUi()
 	UiTrainingOpen(false);
 	MakeSubUiSponsorContract();
 	MakeSubUiEquip();
+	UiEquipOpen();
+
 }
 
 void SceneHome::MakeSubUiTraining()
@@ -1122,6 +1151,8 @@ void SceneHome::MainUiFunc(int index)
 	case 8:
 		UiSponsorContractOpen(false,true);
 		break;
+	case 9:
+		UiEquipOpen();
 	case 13:
 		std::cout << "오늘의 일정은 " ;
 		{
@@ -1295,9 +1326,6 @@ void SceneHome::UiTrainingOpen(bool on)
 
 	UiButton* bt = (UiButton*)FindGo("TrainPointReturnB");
 	bt->SetActive(false);
-
-	bt = (UiButton*)FindGo("TrainCloseB");
-	bt->SetActive(on);
 
 	RectGo* rect = (RectGo*)FindGo("UiShade");
 	rect->SetActive(on);
@@ -2331,4 +2359,13 @@ void SceneHome::TestingCheats()
 	{
 		SCENE_MGR.ChangeScene(SceneId::Game);
 	}
+}
+
+void SceneHome::UiEquipOpen(bool on)
+{
+	SubUiBaseOpen(9,on);
+	auto stringtable = DATATABLE_MGR.Get<StringTable>(DataTable::Ids::String);
+
+	SpriteGo* spr = (SpriteGo*)FindGo("SubUiBack");
+	spr->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/UiFix/equipment_bg.png"));
 }

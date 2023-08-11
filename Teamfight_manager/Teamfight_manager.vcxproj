@@ -206,7 +206,7 @@
     <ClInclude Include="GameObject\Champion.h" />
     <ClInclude Include="DataTable\DataTable.h" />
     <ClInclude Include="Framework\DataTableMgr.h" />
-    <ClInclude Include="GameObject\GameState.h" />
+    <ClInclude Include="Universial\GameState.h" />
     <ClInclude Include="GameObject\RectGo.h" />
     <ClInclude Include="GameObject\SpriteEffect.h" />
     <ClInclude Include="DataTable\StringTable.h" />
