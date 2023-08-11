@@ -7,10 +7,10 @@ MainB4Text,시스템
 MainB5Text,선수영입
 MainB6Text,훈련
 MainB7Text,선수단
-MainB8Text,역사
-MainB9Text,스폰서
-MainB10Text,장비
-MainB11Text,시설개선
+MainB8Text,스폰서
+MainB9Text,장비
+MainB10Text,시설개선
+MainB11Text,역사
 MainB12Text,소식함
 MainB13Text,일정
 MainB14Text,순위표
@@ -32,3 +32,43 @@ PlayerName6,Doran
 PlayerName7,Peanut
 PlayerName8,Chovy
 PlayerName9,BeryL
+SponContract,스폰서 계약
+SponContractDiscribe,이번 시즌의 스폰서 계약 후보 목록입니다. 어떤 스폰서와 계약할 지 결정해주세요.
+SelectedSponsor,선택한 스폰서
+DoContract,계약하기
+IsLeftSponContract,계약할 수 있는스폰서가 남아있습니다.
+ContractConditions,계약조건
+ContractConditions0,정규시즌 순위
+ContractConditions1,정규 시즌 2:0승 최소
+ContractConditions2,정규시즌 연승 최소
+ContractConditions3,정규시즌 킬 달성 최소
+ContractConditions4,정규시즌 데스 제한 최대
+ContractReward,목표 달성시 보상
+SupportMoney,지원금액:
+SponsorName,스폰서 이름
+State,상태
+Success,성공
+Fail,실패
+Processing,진행중
+CanSponsorExpend,시설 개선을 통해 스폰서 계약 슬롯을 확장할 수 있습니다.
+Now,현재
+Close,닫기
+SponsorName0,파인애플
+SponsorName1,쿠글
+SponsorName2,와이브로소프트
+SponsorName3,바디북
+SponsorName4,사오미
+SponsorName5,사디다스
+SponsorName6,맵시
+SponsorName7,유즈
+SponsorName8,루지텍
+SponsorName9,아이언시리즈
+SponsorName10,드위치
+SponsorName11,너튜브
+SponsorName12,인스타킬로그램
+SponsorName13,콘코드
+SponsorName14,업사이드
+SponsorName15,워토롤라
+SponsorName16,닌텐돈트
+SponsorName17,코니
+SponsorName18,와콘

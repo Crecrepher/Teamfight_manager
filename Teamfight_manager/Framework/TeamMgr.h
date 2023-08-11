@@ -28,6 +28,7 @@ struct PlayerInfo
 	int assist = 0;
 	int totalKill = 0;
 	int totalAssist = 0;
+	int death = 0;
 };
 
 struct TrainingInfo
@@ -54,11 +55,15 @@ struct AiTeam
 
 struct Sponsor
 {
-	std::wstring sponsorTextureId = L"";
-	int QuestCode = 0;
-	int QuestDifficulty = 0;
-	int RewardMoney = 1000;
-	std::vector<int> RewardParts = std::vector<int>(4);
+	int sponsorType = -1;
+	std::string sponsorTextureId = "";
+	std::wstring sponsorName = L"";
+	int questCode = 0;
+	int questDifficulty = 0;
+	int rewardMoney = 1000;
+	std::vector<int> rewardParts = std::vector<int>(4);
+	bool success = false;
+	int currentProcess = 0;
 };
 
 class TeamMgr : public Singleton<TeamMgr>
@@ -116,16 +121,20 @@ protected:
 	//시설 [인덱스 = 시설코드] <보유여부>
 
 	LeagueGrade curGrade = LeagueGrade::Amateur;
+	int curRank = 8;
 	
 	int year = 2021;
 	int date = 0;
 
 	int win = 0;
+	int winPerfect = 0;
+	int winContinuity = 0;
 	int lose = 0;
 
 	std::vector<Sponsor> sponsors;
-	int openSponsorCode = 1;
-	int usingSponsor = 0;
+	int MaxSponsor = 1;
+	int contractedSponsor = 0;
+	int sponsorQuestCount = 5;
 public:
 	void Init();
 	void InitGrowTable();
@@ -159,6 +168,13 @@ public:
 	std::vector<AiTeam> GetAiTeamInfo();
 	std::vector<TrainingInfo> GetGrowStats(std::vector<TrainingInfo> playerTraining);
 	void LevelUpdate(int& xp, int& level);
+
+	int GetQuestCount() { return sponsorQuestCount; }
+	int GetContractedSponsor() { return contractedSponsor; }
+	int GetMaxSponsor() { return MaxSponsor; }
+	Sponsor GetSponsor(int index) { return sponsors[index]; }
+	void DeleteContractedSponsor();
+	void ContractSponsor(Sponsor sponsor);
 };
 
 #define TEAM_MGR (TeamMgr::Instance())
