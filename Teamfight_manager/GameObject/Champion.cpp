@@ -35,12 +35,14 @@ void Champion::Init()
 void Champion::Reset()
 {
 	SpriteGo::Reset();
+	this->sprite.setColor(sf::Color::White);
 	this->hp = currentState.maxHp;
 	this->death = 0;
 	this->kill = 0;
 	this->total_Damage = 0.f;
 	this->total_OnHit = 0.f;
 	this->currentState.animaition.SetTarget(&sprite);
+	this->currentState.animaition.Play("Idle");
 	SetOrigin(Origins::MC);
 }
 
@@ -250,7 +252,8 @@ void Champion::Attack(float dt)
 		}
 		else if (this->currentState.charId != "priest")
 		{
-			float damage = (this->currentState.attack * 100 + 99 + this->taget->currentState.defend) / (100 + this->taget->currentState.defend);
+			float damage = (this->currentState.attack * 100 + 99 + 
+				this->taget->currentState.defend) / (100 + this->taget->currentState.defend);
 			if (damage <= 0.f)
 			{
 				damage = 0.f;

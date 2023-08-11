@@ -319,7 +319,6 @@ void SceneGame::PickPhase(float dt)
 		redChamp->UpdateState();
 		redChamp->SetName(std::to_string((int)team) + "ÆÀ " + std::to_string(step) + "¼±¼ö");
 		redChamp->SetOrder(TagetingOrder::Default);
-		//redChamp->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/Origin/Sprite/archer_0.png"));
 		redChamp->SetPosition((Utils::RandomRange(420,520)), (Utils::RandomRange(300, 450)));
 		redChamp->SetEnemyTeam(&blueTeam);
 		redChamp->SetMyTeam(&redTeam);
@@ -342,7 +341,6 @@ void SceneGame::PickPhase(float dt)
 		blueChamp->UpdateState();
 		blueChamp->SetOrder(TagetingOrder::Default);
 		blueChamp->SetName(std::to_string((int)team) + "ÆÀ " + std::to_string(step) + "¼±¼ö");
-		//blueChamp->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/Origin/Sprite/archer_0.png"));
 		blueChamp->SetPosition((Utils::RandomRange(750, 850)), (Utils::RandomRange(300, 450)));
 		blueChamp->SetEnemyTeam(&redTeam);
 		blueChamp->SetMyTeam(&blueTeam);
@@ -392,12 +390,16 @@ void SceneGame::ReadyPhase(float dt)
 
 void SceneGame::BattlePhase(float dt)
 {
+	for (auto unit : championPool.GetUseList())
+	{
+		unit->sortOrder;
+	}
 	battleTimer -= dt;
 	if (battleTimer <= 0)
 	{
 		for (auto unit : championPool.GetUseList())
 		{
-			unit->ChangeStance(ChampionStance::None);
+			
 		}
 
 		if (!redTeam.empty())
