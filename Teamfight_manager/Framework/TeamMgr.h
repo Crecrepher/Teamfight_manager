@@ -93,7 +93,8 @@ public:
 		HeadSet,
 		Controller,
 		Chair,
-		Costume
+		Uniform,
+		TypeCount,
 	};
 	enum class ItemEffect
 	{

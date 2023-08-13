@@ -281,7 +281,6 @@ void SceneHome::AddGoText()
 	AddGo(new TextGo("UiMenuTitleText"));
 	AddGo(new TextGo("UiMenuCloseText"));
 
-
 	AddGo(new TextGo("SponsorContractDescribe"));
 	AddGo(new TextGo("SelectedSponsorCountText"));
 	AddGo(new TextGo("SponsorContractAcceptText"));
@@ -552,7 +551,6 @@ void SceneHome::MakeSubUi()
 	MakeSubUiSponsorContract();
 	MakeSubUiEquip();
 	UiEquipOpen();
-
 }
 
 void SceneHome::MakeSubUiTraining()
@@ -1126,6 +1124,51 @@ void SceneHome::MainUiClose()
 
 void SceneHome::MakeSubUiEquip()
 {
+	SpriteGo* spr;
+	UiButton* bt;
+	for (int i = 0; i < 3; i++)
+	{
+		std::stringstream ss;
+		ss << "Equipmake" << i;
+		spr = (SpriteGo*)FindGo(ss.str());
+		spr->SetOrigin(Origins::MC);
+		spr->SetPosition(710, 255+(i*100));
+		spr->SetSize(2, 2);
+		spr->sortLayer = 111;
+
+		ss.str("");
+		ss << "EquipMakeB" << i;
+		bt = (UiButton*)FindGo(ss.str());
+		bt->SetOrigin(Origins::MC);
+		bt->SetPosition(spr->GetPosition().x+140, spr->GetPosition().y);
+		bt->SetSize(1.5, 1.5);
+		bt->sortLayer = 111;
+
+		if (i > 0)
+		{
+			ss.str("");
+			ss << "ItemMakeLock" << i-1;
+			SpriteGo* lockIco = (SpriteGo*)FindGo(ss.str());
+			lockIco->SetOrigin(Origins::MC);
+			lockIco->SetPosition(spr->GetPosition().x, spr->GetPosition().y-12.f);
+			lockIco->SetSize(5, 5);
+			lockIco->sortLayer = 111;
+		}
+
+	}
+
+	for (int i = 0; i < 4; i++)
+	{
+		std::stringstream ss;
+		ss << "EquipSlotB" << i;
+		bt = (UiButton*)FindGo(ss.str());
+		bt = (UiButton*)FindGo(ss.str());
+		bt->SetOrigin(Origins::TL);
+		bt->SetPosition(42, 210+(i*75));
+		bt->SetSize(2, 2);
+		bt->sortLayer = 111;
+	}
+	
 }
 
 void SceneHome::MainUiFunc(int index)
