@@ -1,0 +1,8 @@
+ID,FPS,LOOPTYPE,,
+Move,10,1,,
+,,,,
+TEXTUREID,LEFT,TOP,WIDTH,HEIGHT
+graphics/CustomSprite/pyromancer_96pix.png,480,0,96,96
+graphics/CustomSprite/pyromancer_96pix.png,576,0,96,96
+graphics/CustomSprite/pyromancer_96pix.png,0,96,96,96
+graphics/CustomSprite/pyromancer_96pix.png,96,96,96,96

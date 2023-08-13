@@ -1,0 +1,12 @@
+ID,FPS,LOOPTYPE,,
+Move,10,1,,
+,,,,
+TEXTUREID,LEFT,TOP,WIDTH,HEIGHT
+graphics/CustomSprite/pythoness_32pix.png,0,0,32,32
+graphics/CustomSprite/pythoness_64pix.png,320,0,64,64
+graphics/CustomSprite/pythoness_64pix.png,384,0,64,64
+graphics/CustomSprite/pythoness_64pix.png,0,64,64,64
+graphics/CustomSprite/pythoness_32pix.png,32,0,32,32
+graphics/CustomSprite/pythoness_64pix.png,64,64,64,64
+graphics/CustomSprite/pythoness_64pix.png,128,64,64,64
+graphics/CustomSprite/pythoness_64pix.png,192,64,64,64

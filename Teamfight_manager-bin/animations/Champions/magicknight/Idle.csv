@@ -1,0 +1,9 @@
+ID,FPS,LOOPTYPE,,
+Idle,10,1,,
+,,,,
+TEXTUREID,LEFT,TOP,WIDTH,HEIGHT
+graphics/CustomSprite/magicknight_96pix.png,0,0,96,96
+graphics/CustomSprite/magicknight_96pix.png,96,0,96,96
+graphics/CustomSprite/magicknight_96pix.png,192,0,96,96
+graphics/CustomSprite/magicknight_96pix.png,288,0,96,96
+graphics/CustomSprite/magicknight_96pix.png,384,0,96,96
