@@ -292,3 +292,5 @@ RESOURCE_TYPES 0.TEX 1.FONT 2.SOUND 3.ANI,RESOURCE_PATH
 0,graphics/Origin/Sprite/material_item_bg_1.png
 0,graphics/Origin/Sprite/material_item_bg_2.png
 0,graphics/Origin/Sprite/equipment_making_slot_locked_bg.png
+0,graphics/Origin/Sprite/equipment_making_slot_bg_0.png
+0,graphics/Origin/Sprite/equipment_making_slot_bg_1.png
