@@ -322,6 +322,35 @@ void SceneHome::AddGoText()
 	AddGo(new TextGo("UsingEquipUiText"));
 	AddGo(new TextGo("MakeEquipUiText"));
 	AddGo(new TextGo("CurPartsEquipUiText"));
+	for (int i = 0; i < 4; i++)
+	{
+		std::stringstream ss;
+		ss << "EquipItemNameSlot" << i;
+		AddGo(new TextGo(ss.str()));
+		ss << "Stat";
+		AddGo(new TextGo(ss.str()));
+		ss.str("");
+		ss << "EquipItemType" << i;
+		AddGo(new TextGo(ss.str()));
+		ss.str("");
+		ss << "HavePartsText" << i;
+		AddGo(new TextGo(ss.str()));
+	}
+	for (int i = 0; i < 3; i++)
+	{
+		std::stringstream ss;
+		ss << "MakeItemPartsText" << i;
+		AddGo(new TextGo(ss.str()));
+		ss.str("");
+		ss << "MakeItemBText"<<i;
+		AddGo(new TextGo(ss.str()));
+	}
+	for (int i = 0; i < 2; i++)
+	{
+		std::stringstream ss;
+		ss << "CanCraftExText" << i;
+		AddGo(new TextGo(ss.str()));
+	}
 
 }
 
@@ -1131,8 +1160,68 @@ void SceneHome::MainUiClose()
 
 void SceneHome::MakeSubUiEquip()
 {
+	auto stringtable = DATATABLE_MGR.Get<StringTable>(DataTable::Ids::String);
 	SpriteGo* spr;
 	UiButton* bt;
+	TextGo* text;
+	for (int i = 0; i < 4; i++)
+	{
+		std::stringstream ss;
+		ss << "EquipSlotB" << i;
+		bt = (UiButton*)FindGo(ss.str());
+		bt->SetOrigin(Origins::TL);
+		bt->SetPosition(42, 210 + (i * 75));
+		bt->SetSize(2, 2);
+		bt->sortLayer = 111;
+
+		ss.str("");
+		ss << "EquipItemNameSlot" << i;
+		text = (TextGo*)FindGo(ss.str());
+		text->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
+		text->text.setString(stringtable->GetW("Headset0"));
+		text->text.setCharacterSize(20);
+		text->SetOrigin(Origins::TL);
+		text->SetPosition(bt->GetPosition().x+75, bt->GetPosition().y +10);
+		text->sortLayer = 112;
+
+		ss << "Stat";
+		text = (TextGo*)FindGo(ss.str());
+		text->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
+		text->text.setString("Àåºñ ½ºÅÝ");
+		text->text.setCharacterSize(14);
+		text->SetOrigin(Origins::TL);
+		text->SetPosition(bt->GetPosition().x + 75, bt->GetPosition().y + 30);
+		text->sortLayer = 112;
+
+		ss.str("");
+		ss << "EquipItemType" << i;
+		text = (TextGo*)FindGo(ss.str());
+		text->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
+		switch (i)
+		{
+		case 0:
+			text->text.setString(stringtable->GetW("Headset"));
+			break;
+		case 1:
+			text->text.setString(stringtable->GetW("Controller"));
+			break;
+		case 2:
+			text->text.setString(stringtable->GetW("Chair"));
+			break;
+		case 3:
+			text->text.setString(stringtable->GetW("Uniform"));
+			break;
+		}
+		text->text.setCharacterSize(14);
+		text->SetOrigin(Origins::TR);
+		text->SetPosition(bt->GetPosition().x + 75, bt->GetPosition().y + 10);
+		text->sortLayer = 112;
+
+		ss.str("");
+		ss << "HavePartsText" << i;
+		AddGo(new TextGo(ss.str()));
+	}
+
 	for (int i = 0; i < 3; i++)
 	{
 		std::stringstream ss;
@@ -1163,19 +1252,6 @@ void SceneHome::MakeSubUiEquip()
 		}
 
 	}
-
-	for (int i = 0; i < 4; i++)
-	{
-		std::stringstream ss;
-		ss << "EquipSlotB" << i;
-		bt = (UiButton*)FindGo(ss.str());
-		bt = (UiButton*)FindGo(ss.str());
-		bt->SetOrigin(Origins::TL);
-		bt->SetPosition(42, 210+(i*75));
-		bt->SetSize(2, 2);
-		bt->sortLayer = 111;
-	}
-	
 }
 
 void SceneHome::MainUiFunc(int index)
