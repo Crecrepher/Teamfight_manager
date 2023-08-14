@@ -38,7 +38,7 @@ void SceneGame::Init()
 	uiView.setSize(windowSize);
 	uiView.setCenter(centerPos);
 
-	SpriteGo* bg = (SpriteGo*)AddGo(new SpriteGo("graphics/Origin/Texture2D/stadium.png"));
+	SpriteGo* bg = (SpriteGo*)AddGo(new SpriteGo("graphics/Origin/Texture2D/stadium.png","1"));
 	bg->sortLayer = -1;
 	bg->sortOrder = 2;
 	bg->SetPosition(centerPos);
@@ -116,6 +116,13 @@ void SceneGame::Update(float dt)
 	sf::Vector2f uiMousePos = ScreenToUiPos(mousePos);
 	banSheet->SetPosition(uiMousePos);
 
+	if (INPUT_MGR.GetKeyDown(sf::Keyboard::Q))
+	{
+		SpriteGo* sgo = (SpriteGo*)FindGo("Ban Bg 2:2");
+		sgo->SetActive(false);
+		sgo = (SpriteGo*)FindGo("1");
+		sgo->SetActive(true);
+	}
 	switch (currentPhase)
 	{
 	case Phase::None:
