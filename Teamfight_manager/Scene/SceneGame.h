@@ -3,6 +3,7 @@
 #include "ObjectPool.h"
 #include "Champion.h"
 #include "GameState.h"
+#include "AnimatioControler.h"
 
 class SceneGame : public Scene
 {
@@ -24,6 +25,9 @@ protected:
 	std::vector<Champion*> blueTeam;
 	std::vector<Champion*> cemetery;
 
+	SpriteGo banSheet;
+	AnimatioControler banAnimation;
+
 public:
 	SceneGame();
 	virtual ~SceneGame() override;
@@ -42,6 +46,7 @@ public:
 	void ChangeTurn();
 	void ChangeTeam();
 
+	void LeaguePhase(float dt);
 	void BanPhase(float dt);
 	void PickPhase(float dt);
 	void ReadyPhase(float dt);
@@ -49,6 +54,10 @@ public:
 
 	template <typename T>
 	void ClearObjectPool(ObjectPool<T>& pool);
+
+	void UiInit();
+	void ButtonInit();
+	void lineUpFalse();
 };
 
 template<typename T>

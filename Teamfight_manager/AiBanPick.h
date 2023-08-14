@@ -40,5 +40,9 @@ public:
     void isBan(const Champion& highStatChampion, bool isAiMistake);
     void isPick(const Champion& highStatChampion, bool isAiMistake);
 
+    const std::vector<Champion>& getChampions() const
+    {
+        return champions;
+    }
 };
 
