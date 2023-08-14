@@ -15,6 +15,8 @@
 #include "UiButton.h"
 #include "RectGo.h"
 
+#include "AiBanPick.h"// 임시 추가
+
 SceneHome::SceneHome() : Scene(SceneId::Home)
 {
 	resourceListPath = "tables/HomeResourceList.csv";
@@ -657,6 +659,22 @@ void SceneHome::MainUiFunc(int index)
 			}
 			std::cout << std::endl;
 		}
+	}
+		break;
+	case 16:
+	{
+		AiBanPick banPick;
+
+		banPick.printStats(banPick.getChampions());
+
+		Champion highStatChampion = banPick.CompareHighStatChampion(banPick.getChampions()[0], banPick.getChampions()[1]);
+
+		Champion secondStatChampion = banPick.CompareSecondStatChampion(banPick.getChampions()[0], banPick.getChampions()[1]);
+
+
+		banPick.isBan(highStatChampion, true);
+		banPick.isPick(secondStatChampion, false);
+
 	}
 		break;
 	default:

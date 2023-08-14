@@ -9,6 +9,7 @@ void TeamMgr::Init()
 	recruiting_players = std::vector<std::pair<bool, PlayerInfo>>(4,{false,PlayerInfo()});
 	dayGrowTable = std::vector<std::vector<int>>(10);
 	trainingGrowTable = std::vector<std::vector<int>>(10);
+	roster = std::vector<PlayerInfo>(6);
 	InitGrowTable();
 	
 	return;
@@ -151,6 +152,11 @@ void TeamMgr::CheckQuest()
 void TeamMgr::SetAiTeams(std::vector<AiTeam> aiTeam) 
 { 
 	aiTeams = aiTeam;
+}
+
+std::vector<PlayerInfo> TeamMgr::GetRoster()
+{
+	return roster;
 }
 
 std::vector<AiTeam> TeamMgr::GetAiTeamInfo()
