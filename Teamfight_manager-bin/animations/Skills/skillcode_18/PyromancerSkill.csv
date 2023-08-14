@@ -1,0 +1,17 @@
+ID,FPS,LOOPTYPE,,
+Skill,10,0,,
+,,,,
+TEXTUREID,LEFT,TOP,WIDTH,HEIGHT
+graphics/CustomSprite/pyromancer_96pix.png,480,288,96,96
+graphics/CustomSprite/pyromancer_96pix.png,576,288,96,96
+graphics/CustomSprite/pyromancer_96pix.png,0,384,96,96
+graphics/CustomSprite/pyromancer_96pix.png,96,384,96,96
+graphics/CustomSprite/pyromancer_96pix.png,192,384,96,96
+graphics/CustomSprite/pyromancer_96pix.png,288,384,96,96
+graphics/CustomSprite/pyromancer_96pix.png,384,384,96,96
+graphics/CustomSprite/pyromancer_96pix.png,480,384,96,96
+graphics/CustomSprite/pyromancer_96pix.png,576,384,96,96
+graphics/CustomSprite/pyromancer_96pix.png,0,480,96,96
+graphics/CustomSprite/pyromancer_96pix.png,96,480,96,96
+graphics/CustomSprite/pyromancer_96pix.png,192,480,96,96
+graphics/CustomSprite/pyromancer_96pix.png,288,480,96,96

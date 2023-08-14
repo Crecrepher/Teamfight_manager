@@ -1,0 +1,13 @@
+ID,FPS,LOOPTYPE,,
+UltiSkill,10,0,,
+,,,,
+TEXTUREID,LEFT,TOP,WIDTH,HEIGHT
+graphics/CustomSprite/ninja_64pix.png,256,320,64,64
+graphics/CustomSprite/ninja_64pix.png,320,320,64,64
+graphics/CustomSprite/ninja_64pix.png,384,320,64,64
+graphics/CustomSprite/ninja_64pix.png,0,384,64,64
+graphics/CustomSprite/ninja_64pix.png,64,384,64,64
+graphics/CustomSprite/ninja_64pix.png,128,384,64,64
+graphics/CustomSprite/ninja_64pix.png,192,384,64,64
+graphics/CustomSprite/ninja_64pix.png,256,384,64,64
+graphics/CustomSprite/ninja_64pix.png,320,384,64,64

@@ -1,0 +1,10 @@
+ID,FPS,LOOPTYPE,,
+UltiSkill,10,0,,
+,,,,
+TEXTUREID,LEFT,TOP,WIDTH,HEIGHT
+graphics/CustomSprite/pythoness_64pix.png,0,256,64,64
+graphics/CustomSprite/pythoness_64pix.png,64,256,64,64
+graphics/CustomSprite/pythoness_64pix.png,128,256,64,64
+graphics/CustomSprite/pythoness_64pix.png,192,256,64,64
+graphics/CustomSprite/pythoness_32pix.png,288,0,32,32
+graphics/CustomSprite/pythoness_32pix.png,320,0,32,32

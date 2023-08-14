@@ -1,0 +1,17 @@
+ID,FPS,LOOPTYPE,,
+Die,10,0,,
+,,,,
+TEXTUREID,LEFT,TOP,WIDTH,HEIGHT
+graphics/CustomSprite/icemage_96pix.png,96,192,96,96
+graphics/CustomSprite/icemage_96pix.png,192,192,96,96
+graphics/CustomSprite/icemage_96pix.png,288,192,96,96
+graphics/CustomSprite/icemage_96pix.png,384,192,96,96
+graphics/CustomSprite/icemage_96pix.png,480,192,96,96
+graphics/CustomSprite/icemage_96pix.png,576,192,96,96
+graphics/CustomSprite/icemage_96pix.png,0,288,96,96
+graphics/CustomSprite/icemage_96pix.png,96,288,96,96
+graphics/CustomSprite/icemage_96pix.png,192,288,96,96
+graphics/CustomSprite/icemage_96pix.png,288,288,96,96
+graphics/CustomSprite/icemage_96pix.png,384,288,96,96
+graphics/CustomSprite/icemage_96pix.png,480,288,96,96
+graphics/CustomSprite/icemage_96pix.png,576,288,96,96

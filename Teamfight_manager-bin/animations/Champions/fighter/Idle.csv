@@ -1,0 +1,9 @@
+ID,FPS,LOOPTYPE,,
+Idle,10,1,,
+,,,,
+TEXTUREID,LEFT,TOP,WIDTH,HEIGHT
+graphics/CustomSprite/fighter_64pix.png,0,0,64,64
+graphics/CustomSprite/fighter_64pix.png,64,0,64,64
+graphics/CustomSprite/fighter_64pix.png,128,0,64,64
+graphics/CustomSprite/fighter_64pix.png,192,0,64,64
+graphics/CustomSprite/fighter_64pix.png,256,0,64,64

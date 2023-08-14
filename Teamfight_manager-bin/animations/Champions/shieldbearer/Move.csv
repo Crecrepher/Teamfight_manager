@@ -1,0 +1,12 @@
+ID,FPS,LOOPTYPE,,
+Move,10,1,,
+,,,,
+TEXTUREID,LEFT,TOP,WIDTH,HEIGHT
+graphics/CustomSprite/shieldbearer_64pix.png,0,64,64,64
+graphics/CustomSprite/shieldbearer_128pix.png,384,0,128,128
+graphics/CustomSprite/shieldbearer_128pix.png,512,0,128,128
+graphics/CustomSprite/shieldbearer_128pix.png,640,0,128,128
+graphics/CustomSprite/shieldbearer_64pix.png,64,64,64,64
+graphics/CustomSprite/shieldbearer_128pix.png,768,0,128,128
+graphics/CustomSprite/shieldbearer_128pix.png,0,128,128,128
+graphics/CustomSprite/shieldbearer_128pix.png,128,128,128,128

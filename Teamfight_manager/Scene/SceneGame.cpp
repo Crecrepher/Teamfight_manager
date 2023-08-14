@@ -362,7 +362,13 @@ void SceneGame::PickPhase(float dt)
 	{
 		readyTimer = 1.f;
 
+		for (auto unit : championPool.GetUseList())
+		{
+			unit->sortOrder = unit->GetPosition().y;
+		}
+
 		ChangePhase(Phase::Ready);
+
 	}
 	else if (mode == Mode::Sqaud&&step==8)
 	{
@@ -392,16 +398,12 @@ void SceneGame::BattlePhase(float dt)
 {
 	for (auto unit : championPool.GetUseList())
 	{
-		unit->sortOrder;
+		unit->sortOrder=unit->GetPosition().y;
 	}
+
 	battleTimer -= dt;
 	if (battleTimer <= 0)
 	{
-		for (auto unit : championPool.GetUseList())
-		{
-			
-		}
-
 		if (!redTeam.empty())
 		{
 			for (auto team : redTeam)

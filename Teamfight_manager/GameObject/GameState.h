@@ -78,3 +78,8 @@ struct State
 	ChampionType type;
 	AnimatioControler animaition;
 };
+
+struct Skill
+{
+	AnimatioControler animaition;
+};

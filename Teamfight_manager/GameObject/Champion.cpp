@@ -57,6 +57,7 @@ void Champion::Update(float dt)
 		return;
 
 	SpriteGo::Update(dt);
+	this->SetOrigin(Origins::MC);
 
 	if (this->currentState.animaition.GetCurrentClipId() == "Die")
 	{
@@ -78,6 +79,7 @@ void Champion::Update(float dt)
 		if (this->currentState.animaition.GetCurrentClipId() != "Die")
 		{
 			this->currentState.animaition.Play("Die");
+			return;
 		}
 
 		if (this->currentState.animaition.GetLastFrame())
@@ -140,6 +142,7 @@ void Champion::Idle(float dt)
 	if (this->currentState.animaition.GetCurrentClipId() != "Idle")
 	{
 		this->currentState.animaition.Play("Idle");
+		return;
 	}
 
 	if (this->currentState.charId == "priest")
@@ -167,7 +170,6 @@ void Champion::Idle(float dt)
 
 	if (this->taget != nullptr)
 	{
-		//std::cout << abs(Utils::Distance(this->GetPosition(), this->taget->GetPosition())) << std::endl;
 		SetSacleX(Utils::Normalize(taget->GetPosition() - this->position).x);
 		if (abs(Utils::Distance(this->GetPosition(), this->taget->GetPosition())) > this->currentState.attackRange)
 		{
@@ -189,6 +191,7 @@ void Champion::Move(float dt)
 	if (this->currentState.animaition.GetCurrentClipId() != "Move")
 	{
 		this->currentState.animaition.Play("Move");
+		return;
 	}
 
 	dt *= 5.f;
@@ -224,6 +227,7 @@ void Champion::Action(float dt)
 	else
 	{
 		ChangeStance(ChampionStance::Idle);
+		return;
 	}
 }
 
@@ -231,14 +235,25 @@ void Champion::Attack(float dt)
 {
 	this->currentState.animaition.Update(dt*this->currentState.attackSpeed);
 
+	if (this->currentState.charId == "priest" && this->taget->currentState.maxHp == this->taget->hp)
+	{
+		return;
+	}
+	else if (this->currentState.charId == "priest" && this->taget->hp == 0)
+	{
+		return;
+	}
+
 	if (this->currentState.animaition.GetCurrentClipId() != "Attack")
 	{
 		this->currentState.animaition.Play("Attack");
+		return;
 	}
+
 	if (this->currentState.animaition.GetLastFrame())
 	{
 		std::cout << "°ø°Ý" << std::endl;
-		if (this->currentState.charId == "priest" && this->taget->currentState.maxHp != this->taget->hp)
+		if (this->currentState.charId == "priest")
 		{
 			float heal = this->currentState.attack;
 			if (heal >= this->taget->GetHp())
@@ -273,6 +288,7 @@ void Champion::Attack(float dt)
 		}
 		attackDelay = 1.f;
 		ChangeStance(ChampionStance::Idle);
+		return;
 	}
 }
 
@@ -280,15 +296,17 @@ void Champion::Skill(float dt)
 {
 	this->currentState.animaition.Update(dt);
 
-	if (this->currentState.animaition.GetCurrentClipId() != "Skill")
+	if (this->currentState.animaition.GetCurrentClipId() != "UltiSkill")
 	{
-		this->currentState.animaition.Play("Skill");
+		this->currentState.animaition.Play("UltiSkill");
+		return;
 	}
 	if (this->currentState.animaition.GetLastFrame())
 	{
 		std::cout << "½ºÅ³" << std::endl;
 		skillTimer = 0;
 		ChangeStance(ChampionStance::Idle);
+		return;
 	}
 }
 
@@ -355,20 +373,22 @@ void Champion::Dead(float dt)
 		}
 		this->sprite.setColor(sf::Color(255, 255, 255, 255));
 		ChangeStance(ChampionStance::Idle);
+		return;
 	}
 }
 
 void Champion::ChampionDie()
 {
-		this->reviveTimer = 3.f;
-		this->death++;
-		auto it = std::find(myTeam->begin(), myTeam->end(), this);
-		this->cemetery->push_back(*it);
-		this->myTeam->erase(it);
-		std::cout << this->GetName() << "Ã¨ÇÇ¾ð Á×À½" << std::endl;
-		std::cout << this->GetName() << " µ¥½º : " << this->death << std::endl;
-		this->sprite.setColor(sf::Color(0, 0, 0, 0));
-		ChangeStance(ChampionStance::Dead);
+	this->reviveTimer = 3.f;
+	this->death++;
+	auto it = std::find(myTeam->begin(), myTeam->end(), this);
+	this->cemetery->push_back(*it);
+	this->myTeam->erase(it);
+	std::cout << this->GetName() << "Ã¨ÇÇ¾ð Á×À½" << std::endl;
+	std::cout << this->GetName() << " µ¥½º : " << this->death << std::endl;
+	this->sprite.setColor(sf::Color(0, 0, 0, 0));
+	ChangeStance(ChampionStance::Dead);
+	return;
 }
 
 void Champion::UpdateState()
@@ -466,7 +486,7 @@ void Champion::TagetOrderCP()
 			}
 			else
 			{
-				kda =enemy->GetKillScore() / enemy->GetDeathScore();
+				kda = enemy->GetKillScore() / enemy->GetDeathScore();
 			}
 			if (kda > tagetRange)
 			{
@@ -517,8 +537,17 @@ void Champion::TagetOrderH()
 		float tagetRange = 9999.f;
 		for (auto team : *myTeam)
 		{
+			if (team == this)
+			{
+				continue;
+			}
+
 			if (team->GetRowHealth() <= tagetRange)
 			{
+				if (team->GetRowHealth() == 0)
+				{
+					this->taget = nullptr;
+				}
 				tagetRange = team->GetRowHealth();
 				this->taget = team;
 			}
