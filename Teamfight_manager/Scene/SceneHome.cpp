@@ -316,6 +316,13 @@ void SceneHome::AddGoText()
 	AddGo(new TextGo("SponsorQuestNowText"));
 	AddGo(new TextGo("SponsorRewardUiText"));
 	AddGo(new TextGo("SponsorRewardMoneyUiText"));
+
+
+	//Equip
+	AddGo(new TextGo("UsingEquipUiText"));
+	AddGo(new TextGo("MakeEquipUiText"));
+	AddGo(new TextGo("CurPartsEquipUiText"));
+
 }
 
 
