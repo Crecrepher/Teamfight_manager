@@ -3,6 +3,7 @@
 #include "ResourceMgr.h"
 #include "SceneGame.h"
 #include "SceneMgr.h"
+#include "SkillMgr.h"
 #include "AnimatioControler.h"
 
 Champion::Champion(const std::string id, const std::string n)
@@ -41,6 +42,7 @@ void Champion::Reset()
 	this->kill = 0;
 	this->total_Damage = 0.f;
 	this->total_OnHit = 0.f;
+	this->currentState.animaition = this->champMgrState.animaition;
 	this->currentState.animaition.SetTarget(&sprite);
 	this->currentState.animaition.Play("Idle");
 	SetOrigin(Origins::MC);
@@ -65,19 +67,24 @@ void Champion::Update(float dt)
 	}
 
 	UpdateState();
+	
+	this->skillTimer += dt;
+	this->attackDelay -= dt * this->currentState.attackSpeed;
 
-	skillTimer += dt;
-	attackDelay -= dt*this->currentState.attackSpeed;
-
-	if (skillTimer >= skillCoolTime)
+	if (this->skillTimer >= this->currentSkill[0].skillCoolTime)
 	{
-		skillTimer = skillCoolTime;
+		this->skillTimer = this->currentSkill[0].skillCoolTime;
 	}
 
 	if (this->hp <= 0 && this->currentStance!=ChampionStance::Dead)
 	{
 		if (this->currentState.animaition.GetCurrentClipId() != "Die")
 		{
+			this->currentState.animaition = this->champMgrState.animaition;
+			this->currentState.animaition.SetTarget(&this->sprite);
+			auto it = std::find(myTeam->begin(), myTeam->end(), this);
+			this->cemetery->push_back(*it);
+			this->myTeam->erase(it);
 			this->currentState.animaition.Play("Die");
 			return;
 		}
@@ -194,8 +201,6 @@ void Champion::Move(float dt)
 		return;
 	}
 
-	dt *= 5.f;
-
 	if (!this->enemyTeam->empty())
 	{
 		FindTaget();
@@ -209,17 +214,19 @@ void Champion::Move(float dt)
 			return;
 		}
 	}
-	SetPosition(this->position + Utils::Normalize(taget->GetPosition() - this->position) * this->currentState.speed * dt);
+	SetPosition(this->position + Utils::Normalize(taget->GetPosition() - this->position) * this->currentState.speed * dt *5.f);
 }
 
 void Champion::Action(float dt)
 {
-	if (abs(Utils::Distance(this->GetPosition(), this->taget->GetPosition())) <= this->currentState.attackRange && skillTimer >= skillCoolTime)
+	if (abs(Utils::Distance(this->GetPosition(), this->taget->GetPosition())) <= this->currentState.attackRange && this->skillTimer >= this->currentSkill[0].skillCoolTime)
 	{
+		this->currentState.animaition = this->currentSkill[0].animaition;
+		this->currentState.animaition.SetTarget(&this->sprite);
 		ChangeStance(ChampionStance::Skill);
 		return;
 	}
-	else if (abs(Utils::Distance(this->GetPosition(), this->taget->GetPosition())) <= this->currentState.attackRange&&attackDelay<=0.f)
+	else if (abs(Utils::Distance(this->GetPosition(), this->taget->GetPosition())) <= this->currentState.attackRange&&this->attackDelay<=0.f)
 	{
 		ChangeStance(ChampionStance::Attack);
 		return;
@@ -294,17 +301,22 @@ void Champion::Attack(float dt)
 
 void Champion::Skill(float dt)
 {
-	this->currentState.animaition.Update(dt);
+	this->currentState.animaition.Update(dt * this->currentState.attackSpeed);
 
-	if (this->currentState.animaition.GetCurrentClipId() != "UltiSkill")
+	if (this->currentState.animaition.GetCurrentClipId() != "Skill")
 	{
-		this->currentState.animaition.Play("UltiSkill");
+		this->currentState.animaition.Play("Skill");
 		return;
 	}
+
+	SKILL_MGR.ActiveSkill(this->currentState.skillCode1, this);
+
 	if (this->currentState.animaition.GetLastFrame())
 	{
 		std::cout << "½ºÅ³" << std::endl;
-		skillTimer = 0;
+		this->skillTimer = 0; 
+		this->currentState.animaition = this->champMgrState.animaition;
+		this->currentState.animaition.SetTarget(&this->sprite);
 		ChangeStance(ChampionStance::Idle);
 		return;
 	}
@@ -328,6 +340,23 @@ void Champion::SetState(State path)
 	this->currentState.type = path.type;
 	this->champMgrState.animaition = path.animaition;
 	this->currentState.animaition = path.animaition;
+}
+
+void Champion::SetSkill(ChampionSkill code)
+{
+	this->skillMgrSkill = code;
+	this->currentSkill.push_back(this->skillMgrSkill);
+}
+
+void Champion::ReleaseSkill()
+{
+	if (this->currentSkill.empty())
+	{
+		return;
+	}
+	
+	this->currentSkill.clear();
+	return;
 }
 
 void Champion::SetSacleX(float x)
@@ -381,9 +410,6 @@ void Champion::ChampionDie()
 {
 	this->reviveTimer = 3.f;
 	this->death++;
-	auto it = std::find(myTeam->begin(), myTeam->end(), this);
-	this->cemetery->push_back(*it);
-	this->myTeam->erase(it);
 	std::cout << this->GetName() << "Ã¨ÇÇ¾ð Á×À½" << std::endl;
 	std::cout << this->GetName() << " µ¥½º : " << this->death << std::endl;
 	this->sprite.setColor(sf::Color(0, 0, 0, 0));

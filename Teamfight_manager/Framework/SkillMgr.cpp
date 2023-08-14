@@ -13,7 +13,9 @@ void SkillMgr::LoadFromCsv(const std::string path)
 	rapidcsv::Document doc(path);
 
 	std::vector<int> code = doc.GetColumn<int>(0);
-	std::vector<std::string> animation = doc.GetColumn<std::string>(1);
+	std::vector<std::string> skillId = doc.GetColumn<std::string>(1);
+	std::vector<float> skillCoolTime = doc.GetColumn<float>(2);
+	std::vector<std::string> animation = doc.GetColumn<std::string>(3);
 
 	for (size_t i = 0; i < code.size(); ++i)
 	{
@@ -26,7 +28,41 @@ void SkillMgr::LoadFromCsv(const std::string path)
 		{
 			temp.AddClip(*RESOURCE_MGR.GetAnimationClip(aniPath[j]));
 		}
-		Skills.insert({ code[i],{ temp } });
+		ChampionSkills.insert({ code[i],{ skillId[i], skillCoolTime[i], temp}});
+	}
+}
+
+ChampionSkill* SkillMgr::GetSkill(const int code)
+{
+	auto findSkill = ChampionSkills.find(code);
+
+	if (findSkill == ChampionSkills.end())
+	{
+		std::cout << "ERR : NOT EXIST SKILL" << std::endl;
+		return nullptr;
 	}
 
+	return &findSkill->second;
+}
+
+void SkillMgr::ActiveSkill(int code, Champion* champ)
+{
+	switch (code)
+	{
+	case 1:
+	{
+		ArcherSkill(champ);
+		break;
+	}
+	}
+}
+
+void SkillMgr::passiveSkill(int code, Champion* champ)
+{
+}
+
+void SkillMgr::ArcherSkill(Champion* champ)
+{
+	//SKILL_MGR.ActiveSkill(champ->GetCurretState().skillCode1, champ);
+	return;
 }

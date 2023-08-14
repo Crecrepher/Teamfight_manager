@@ -34,10 +34,13 @@ protected:
 	TagetingOrder currentOrder;
 	
 	State champMgrState;
+	ChampionSkill skillMgrSkill;
+
 	State currentState;
+	std::vector<ChampionSkill> currentSkill;
+
 	
 	float hp;
-	float skillCoolTime=10.f;
 	float skillTimer;
 	float reviveTimer;
 	float attackDelay = 0.f;
@@ -70,9 +73,10 @@ public:
 	void SetDieChampion(std::vector<Champion*>* cemetery);
 	void ChangeStance(ChampionStance stance);
 	void SetState(State path);
+	void SetSkill(ChampionSkill code);
+	void ReleaseSkill();
 	void SetOrder(TagetingOrder order) { this->currentOrder = order; }
 	void SetSacleX(float x);
-	void SetCoolTime(float t) { this->skillCoolTime = t; }
 	void SetTeamColor(Team color) { team = color; }
 	void Hit(float attack);
 	void Heal(float heal);
@@ -98,6 +102,9 @@ public:
 	void ChampionDie();
 	void UpdateState();
 
+
+	State GetCurretState() { return this->currentState; }
+	std::vector<ChampionSkill> GetCurrSkill() { return this->currentSkill; }
 
 	// 선수에게 넘길 스테이터스
 	int GetKillScore() { return this->kill; }

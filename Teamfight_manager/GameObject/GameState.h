@@ -79,7 +79,9 @@ struct State
 	AnimatioControler animaition;
 };
 
-struct Skill
+struct ChampionSkill
 {
+	std::string skillId;
+	float skillCoolTime;
 	AnimatioControler animaition;
 };

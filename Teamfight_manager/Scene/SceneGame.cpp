@@ -7,6 +7,7 @@
 #include "InputMgr.h"
 #include "ResourceMgr.h"
 #include "ChampionMgr.h"
+#include "SkillMgr.h"
 #include "Framework.h"
 
 #include "SpriteGo.h"
@@ -315,7 +316,7 @@ void SceneGame::PickPhase(float dt)
 	case Team::Red:
 	{
 		Champion* redChamp = championPool.Get();
-		redChamp->SetState(*CHAMPION_MGR.GetChampion("archer"));
+		redChamp->SetState(*CHAMPION_MGR.GetChampion("soldier"));
 		redChamp->UpdateState();
 		redChamp->SetName(std::to_string((int)team) + "팀 " + std::to_string(step) + "선수");
 		redChamp->SetOrder(TagetingOrder::Default);
@@ -323,8 +324,9 @@ void SceneGame::PickPhase(float dt)
 		redChamp->SetEnemyTeam(&blueTeam);
 		redChamp->SetMyTeam(&redTeam);
 		redChamp->SetDieChampion(&cemetery);
+		redChamp->SetSkill(*SKILL_MGR.GetSkill(redChamp->GetCurretState().skillCode1));
+		redChamp->SetSkill(*SKILL_MGR.GetSkill(redChamp->GetCurretState().skillCode2));
 		redChamp->ChangeStance(ChampionStance::None);
-		redChamp->Reset();
 		redChamp->SetOrigin(Origins::MC);
 		redChamp->SetSacleX(1);
 		redChamp->SetTeamColor(Team::Red);
@@ -337,7 +339,7 @@ void SceneGame::PickPhase(float dt)
 	case Team::Blue:
 	{
 		Champion* blueChamp = championPool.Get();
-		blueChamp->SetState(*CHAMPION_MGR.GetChampion("archer"));
+		blueChamp->SetState(*CHAMPION_MGR.GetChampion("swordman"));
 		blueChamp->UpdateState();
 		blueChamp->SetOrder(TagetingOrder::Default);
 		blueChamp->SetName(std::to_string((int)team) + "팀 " + std::to_string(step) + "선수");
@@ -345,8 +347,9 @@ void SceneGame::PickPhase(float dt)
 		blueChamp->SetEnemyTeam(&redTeam);
 		blueChamp->SetMyTeam(&blueTeam);
 		blueChamp->SetDieChampion(&cemetery);
+		blueChamp->SetSkill(*SKILL_MGR.GetSkill(blueChamp->GetCurretState().skillCode1));
+		blueChamp->SetSkill(*SKILL_MGR.GetSkill(blueChamp->GetCurretState().skillCode2));
 		blueChamp->ChangeStance(ChampionStance::None);
-		blueChamp->Reset();
 		blueChamp->SetOrigin(Origins::MC);
 		blueChamp->SetSacleX(-1);
 		blueChamp->SetTeamColor(Team::Blue);
@@ -364,6 +367,7 @@ void SceneGame::PickPhase(float dt)
 
 		for (auto unit : championPool.GetUseList())
 		{
+			unit->Reset();
 			unit->sortOrder = unit->GetPosition().y;
 		}
 
@@ -412,6 +416,7 @@ void SceneGame::BattlePhase(float dt)
 				std::cout << team->GetName() << " 데스 : " << team->GetDeathScore() << std::endl;
 				std::cout << team->GetName() << " 입힌 피해 : " << team->GetTotalDamage() << std::endl;
 				std::cout << team->GetName() << " 당한 피해 : " << team->GetTotalOnHit() << std::endl;
+				team->ReleaseSkill();
 				RemoveGo(team);
 				team->SetTeamColor(Team::None);
 				championPool.Return(team);
@@ -427,6 +432,7 @@ void SceneGame::BattlePhase(float dt)
 				std::cout << team->GetName() << " 데스 : " << team->GetDeathScore() << std::endl;
 				std::cout << team->GetName() << " 입힌 피해 : " << team->GetTotalDamage() << std::endl;
 				std::cout << team->GetName() << " 당한 피해 : " << team->GetTotalOnHit()<< std::endl;
+				team->ReleaseSkill();
 				RemoveGo(team);
 				team->SetTeamColor(Team::None);
 				championPool.Return(team);
@@ -442,6 +448,7 @@ void SceneGame::BattlePhase(float dt)
 				std::cout << team->GetName() << " 데스 : " << team->GetDeathScore() << std::endl;
 				std::cout << team->GetName() << " 입힌 피해 : " << team->GetTotalDamage() << std::endl;
 				std::cout << team->GetName() << " 당한 피해 : " << team->GetTotalOnHit() << std::endl;
+				team->ReleaseSkill();
 				RemoveGo(team);
 				team->SetTeamColor(Team::None);
 				championPool.Return(team);
