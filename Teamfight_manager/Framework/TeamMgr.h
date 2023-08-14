@@ -88,7 +88,24 @@ public:
 		FirstLeague,
 		WorldChamp
 	};
-
+	enum class ItemType
+	{
+		HeadSet,
+		Controller,
+		Chair,
+		Uniform,
+		TypeCount,
+	};
+	enum class ItemEffect
+	{
+		Atk,
+		Def,
+		AtkSpeed,
+		CoolDown,
+		HpDrain,
+		Proficiency,
+		ChampProficiency,
+	};
 protected:
 	TeamMgr() = default;
 	virtual	~TeamMgr() = default;

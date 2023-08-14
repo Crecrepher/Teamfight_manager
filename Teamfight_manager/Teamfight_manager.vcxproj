@@ -156,6 +156,7 @@
     <ClCompile Include="AiBanPick.cpp" />
     <ClCompile Include="Animation\AnimatioControler.cpp" />
     <ClCompile Include="Animation\AnimatonClip.cpp" />
+    <ClCompile Include="DataTable\ItemTable.cpp" />
     <ClCompile Include="Framework\ChampionMgr.cpp" />
     <ClCompile Include="Framework\TeamMgr.cpp" />
     <ClCompile Include="GameObject\Champion.cpp" />
@@ -202,12 +203,13 @@
     <ClInclude Include="AiBanPick.h" />
     <ClInclude Include="Animation\AnimatioControler.h" />
     <ClInclude Include="Animation\AnimatonClip.h" />
+    <ClInclude Include="DataTable\ItemTable.h" />
     <ClInclude Include="Framework\ChampionMgr.h" />
     <ClInclude Include="Framework\TeamMgr.h" />
     <ClInclude Include="GameObject\Champion.h" />
     <ClInclude Include="DataTable\DataTable.h" />
     <ClInclude Include="Framework\DataTableMgr.h" />
-    <ClInclude Include="GameObject\GameState.h" />
+    <ClInclude Include="Universial\GameState.h" />
     <ClInclude Include="GameObject\RectGo.h" />
     <ClInclude Include="GameObject\SpriteEffect.h" />
     <ClInclude Include="DataTable\StringTable.h" />

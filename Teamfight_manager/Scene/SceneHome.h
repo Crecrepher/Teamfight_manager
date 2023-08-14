@@ -65,6 +65,8 @@ public:
 	void SponsorContract(int index);
 	void UiSponsorSelect(int index);
 
+	void UiEquipOpen(bool on = true);
+
 	void UpdateMoney();
 	void Recruit(int grade,int slotNum);
 	void NewYear();

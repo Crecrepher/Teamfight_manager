@@ -196,6 +196,21 @@ void SceneHome::AddGoSprites()
 	AddGo(new SpriteGo("graphics/Origin/Sprite/lock_icon.png", "LockIcon1"));
 
 	//Item
+	for (int i = 0; i < 3; i++)
+	{
+		std::stringstream ss;
+		ss << "Equipmake" << i;
+		if (i == 0)
+		{
+			AddGo(new SpriteGo("graphics/UiFix/equipment_making_slot_bg_0.png", ss.str()));
+		}
+		else
+		{
+			AddGo(new SpriteGo("graphics/Origin/Sprite/equipment_making_slot_locked_bg.png", ss.str()));
+		}
+	}
+	AddGo(new SpriteGo("graphics/Origin/Sprite/lock_icon.png", "ItemMakeLock0"));
+	AddGo(new SpriteGo("graphics/Origin/Sprite/lock_icon.png", "ItemMakeLock1"));
 }
 
 void SceneHome::AddGoUiButton()
@@ -243,7 +258,19 @@ void SceneHome::AddGoUiButton()
 		AddGo(new UiButton("graphics/Origin/Sprite/type_ui_0.png", ss.str()));
 	}
 
-
+	//Item
+	for (int i = 0; i < 4; i++)
+	{
+		std::stringstream ss;
+		ss << "EquipSlotB" << i;
+		AddGo(new UiButton("graphics/UiFix/equipment_slot_bg_0.png", ss.str()));
+	}
+	for (int i = 0; i < 3; i++)
+	{
+		std::stringstream ss;
+		ss << "EquipMakeB" << i;
+		AddGo(new UiButton("graphics/Origin/Sprite/important_button_0.png", ss.str()));
+	}
 }
 
 void SceneHome::AddGoText()
@@ -253,7 +280,6 @@ void SceneHome::AddGoText()
 
 	AddGo(new TextGo("UiMenuTitleText"));
 	AddGo(new TextGo("UiMenuCloseText"));
-
 
 	AddGo(new TextGo("SponsorContractDescribe"));
 	AddGo(new TextGo("SelectedSponsorCountText"));
@@ -290,6 +316,13 @@ void SceneHome::AddGoText()
 	AddGo(new TextGo("SponsorQuestNowText"));
 	AddGo(new TextGo("SponsorRewardUiText"));
 	AddGo(new TextGo("SponsorRewardMoneyUiText"));
+
+
+	//Equip
+	AddGo(new TextGo("UsingEquipUiText"));
+	AddGo(new TextGo("MakeEquipUiText"));
+	AddGo(new TextGo("CurPartsEquipUiText"));
+
 }
 
 
@@ -524,6 +557,7 @@ void SceneHome::MakeSubUi()
 	UiTrainingOpen(false);
 	MakeSubUiSponsorContract();
 	MakeSubUiEquip();
+	UiEquipOpen();
 }
 
 void SceneHome::MakeSubUiTraining()
@@ -1097,6 +1131,51 @@ void SceneHome::MainUiClose()
 
 void SceneHome::MakeSubUiEquip()
 {
+	SpriteGo* spr;
+	UiButton* bt;
+	for (int i = 0; i < 3; i++)
+	{
+		std::stringstream ss;
+		ss << "Equipmake" << i;
+		spr = (SpriteGo*)FindGo(ss.str());
+		spr->SetOrigin(Origins::MC);
+		spr->SetPosition(710, 255+(i*100));
+		spr->SetSize(2, 2);
+		spr->sortLayer = 111;
+
+		ss.str("");
+		ss << "EquipMakeB" << i;
+		bt = (UiButton*)FindGo(ss.str());
+		bt->SetOrigin(Origins::MC);
+		bt->SetPosition(spr->GetPosition().x+140, spr->GetPosition().y);
+		bt->SetSize(1.5, 1.5);
+		bt->sortLayer = 111;
+
+		if (i > 0)
+		{
+			ss.str("");
+			ss << "ItemMakeLock" << i-1;
+			SpriteGo* lockIco = (SpriteGo*)FindGo(ss.str());
+			lockIco->SetOrigin(Origins::MC);
+			lockIco->SetPosition(spr->GetPosition().x, spr->GetPosition().y-12.f);
+			lockIco->SetSize(5, 5);
+			lockIco->sortLayer = 111;
+		}
+
+	}
+
+	for (int i = 0; i < 4; i++)
+	{
+		std::stringstream ss;
+		ss << "EquipSlotB" << i;
+		bt = (UiButton*)FindGo(ss.str());
+		bt = (UiButton*)FindGo(ss.str());
+		bt->SetOrigin(Origins::TL);
+		bt->SetPosition(42, 210+(i*75));
+		bt->SetSize(2, 2);
+		bt->sortLayer = 111;
+	}
+	
 }
 
 void SceneHome::MainUiFunc(int index)
@@ -1122,6 +1201,8 @@ void SceneHome::MainUiFunc(int index)
 	case 8:
 		UiSponsorContractOpen(false,true);
 		break;
+	case 9:
+		UiEquipOpen();
 	case 13:
 		std::cout << "오늘의 일정은 " ;
 		{
@@ -1295,9 +1376,6 @@ void SceneHome::UiTrainingOpen(bool on)
 
 	UiButton* bt = (UiButton*)FindGo("TrainPointReturnB");
 	bt->SetActive(false);
-
-	bt = (UiButton*)FindGo("TrainCloseB");
-	bt->SetActive(on);
 
 	RectGo* rect = (RectGo*)FindGo("UiShade");
 	rect->SetActive(on);
@@ -2331,4 +2409,13 @@ void SceneHome::TestingCheats()
 	{
 		SCENE_MGR.ChangeScene(SceneId::Game);
 	}
+}
+
+void SceneHome::UiEquipOpen(bool on)
+{
+	SubUiBaseOpen(9,on);
+	auto stringtable = DATATABLE_MGR.Get<StringTable>(DataTable::Ids::String);
+
+	SpriteGo* spr = (SpriteGo*)FindGo("SubUiBack");
+	spr->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/UiFix/equipment_bg.png"));
 }

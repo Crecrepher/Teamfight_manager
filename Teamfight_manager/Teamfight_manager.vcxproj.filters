@@ -32,6 +32,7 @@
     <ClCompile Include="Scene\SceneChampEdit.cpp" />
     <ClCompile Include="AiBanPick.cpp" />
     <ClCompile Include="Framework\SkillMgr.cpp" />
+    <ClCompile Include="DataTable\ItemTable.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="3rd\rapidcsv.h" />
@@ -41,7 +42,7 @@
     <ClInclude Include="GameObject\Champion.h" />
     <ClInclude Include="DataTable\DataTable.h" />
     <ClInclude Include="Framework\DataTableMgr.h" />
-    <ClInclude Include="GameObject\GameState.h" />
+    <ClInclude Include="Universial\GameState.h" />
     <ClInclude Include="GameObject\RectGo.h" />
     <ClInclude Include="GameObject\SpriteEffect.h" />
     <ClInclude Include="DataTable\StringTable.h" />
@@ -70,5 +71,6 @@
     <ClInclude Include="Scene\SceneChampEdit.h" />
     <ClInclude Include="AiBanPick.h" />
     <ClInclude Include="Framework\SkillMgr.h" />
+    <ClInclude Include="DataTable\ItemTable.h" />
   </ItemGroup>
 </Project>
