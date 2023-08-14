@@ -1187,7 +1187,7 @@ void SceneHome::MakeSubUiEquip()
 		ss << "Stat";
 		text = (TextGo*)FindGo(ss.str());
 		text->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
-		text->text.setString("Àåºñ ½ºÅÝ");
+		text->text.setString(L"Àåºñ ½ºÅÝ");
 		text->text.setCharacterSize(14);
 		text->SetOrigin(Origins::TL);
 		text->SetPosition(bt->GetPosition().x + 75, bt->GetPosition().y + 30);
@@ -1214,8 +1214,9 @@ void SceneHome::MakeSubUiEquip()
 		}
 		text->text.setCharacterSize(14);
 		text->SetOrigin(Origins::TR);
-		text->SetPosition(bt->GetPosition().x + 75, bt->GetPosition().y + 10);
+		text->SetPosition(bt->GetPosition().x + 400, bt->GetPosition().y + 10);
 		text->sortLayer = 112;
+		text->text.setFillColor(sf::Color(100, 100, 100));
 
 		ss.str("");
 		ss << "HavePartsText" << i;
