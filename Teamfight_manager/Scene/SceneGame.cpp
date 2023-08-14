@@ -935,7 +935,7 @@ void SceneGame::UiInit()
 	swapLine->SetOrigin(Origins::TL);
 	swapLine->SetActive(false);
 
-	// 플레이어 컨디션
+	// 플레이어 컨디션 //
 	{
 		SpriteGo* playerCondition0 = (SpriteGo*)AddGo(new SpriteGo("graphics/LeagueSystem/Lineup/player_condition_0.png", "Player Condition0"));
 		playerCondition0->sprite.setScale(2, 2);
