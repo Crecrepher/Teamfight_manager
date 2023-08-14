@@ -86,7 +86,7 @@ Switch,스위치
 Screw,나사
 Fabric,천 조각
 Headset,해드셋
-Cntroller,컨트롤러
+Controller,컨트롤러
 Chair,의자
 Uniform,유니폼
 CanCraftExpend,시설 개선을 통해 제작 슬롯을 확장할 수 있습니다.
@@ -232,8 +232,3 @@ Uniform28,레이싱 슈트
 Uniform29,비키니
 Uniform30,미이라
 Uniform31,거북이 등껍질
-LineUp1,선발 명단
-LineUp2,다음
-LineUp3,특성 보기
-LineUp4,출전 선수
-LineUp5,후보 선수
