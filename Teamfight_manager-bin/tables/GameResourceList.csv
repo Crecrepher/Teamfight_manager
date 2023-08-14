@@ -76,3 +76,18 @@ RESOURCE_TYPES 1.TEX 2.FONT 3.SOUND 4.ANI,RESOURCE_PATH
 0,graphics/LeagueSystem/Lineup/lineup_ui_team_title_bg_3.png
 0,graphics/LeagueSystem/Lineup/Black_0.png
 0,graphics/LeagueSystem/Lineup/draft_slot_0.png
+<<<<<<< HEAD
+=======
+0,graphics/LeagueSystem/Lineup/draft_arrow1.png
+0,graphics/LeagueSystem/Lineup/draft_arrow2.png
+0,graphics/LeagueSystem/Lineup/lineup_ui_bg_swap.png
+0,graphics/LeagueSystem/Banpick/banpick_22_bg.png
+0,graphics/LeagueSystem/Banpick/turn_arrow_icon_blue.png
+0,graphics/LeagueSystem/Banpick/turn_arrow_icon_red.png
+0,graphics/LeagueSystem/Banpick/mastery_change_arrow.png
+0,graphics/LeagueSystem/Banpick/swap_arrow_icon.png
+0,graphics/LeagueSystem/Banpick/champion_slot_hover_white.png
+0,graphics/LeagueSystem/Banpick/champion_slot_hover_blue.png
+0,graphics/LeagueSystem/Banpick/champion_slot_hover_red.png
+0,graphics/LeagueSystem/Banpick/banpick_sheet.png
+>>>>>>> e1234829c394dfccf82db0e06054abd0a04faeed

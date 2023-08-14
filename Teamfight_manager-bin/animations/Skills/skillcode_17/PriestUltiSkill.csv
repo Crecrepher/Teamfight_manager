@@ -1,0 +1,14 @@
+ID,FPS,LOOPTYPE,,
+UltiSkill,10,0,,
+,,,,
+TEXTUREID,LEFT,TOP,WIDTH,HEIGHT
+graphics/CustomSprite/priest_64pix.png,0,384,64,64
+graphics/CustomSprite/priest_128pix.png,896,0,128,128
+graphics/CustomSprite/priest_64pix.png,64,384,64,64
+graphics/CustomSprite/priest_64pix.png,128,384,64,64
+graphics/CustomSprite/priest_64pix.png,192,384,64,64
+graphics/CustomSprite/priest_64pix.png,256,384,64,64
+graphics/CustomSprite/priest_64pix.png,320,384,64,64
+graphics/CustomSprite/priest_64pix.png,384,384,64,64
+graphics/CustomSprite/priest_64pix.png,0,448,64,64
+graphics/CustomSprite/priest_64pix.png,64,448,64,64

@@ -1,0 +1,11 @@
+ID,FPS,LOOPTYPE,,
+UltiSkill,10,0,,
+,,,,
+TEXTUREID,LEFT,TOP,WIDTH,HEIGHT
+graphics/CustomSprite/knight_96pix.png,192,480,96,96
+graphics/CustomSprite/knight_96pix.png,288,480,96,96
+graphics/CustomSprite/knight_96pix.png,384,480,96,96
+graphics/CustomSprite/knight_96pix.png,480,480,96,96
+graphics/CustomSprite/knight_96pix.png,576,480,96,96
+graphics/CustomSprite/knight_96pix.png,0,576,96,96
+graphics/CustomSprite/knight_96pix.png,96,576,96,96

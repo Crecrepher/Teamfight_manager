@@ -1,0 +1,12 @@
+ID,FPS,LOOPTYPE,,
+Skill,10,0,,
+,,,,
+TEXTUREID,LEFT,TOP,WIDTH,HEIGHT
+graphics/CustomSprite/swordman_64pix.png,256,128,64,64
+graphics/CustomSprite/swordman_64pix.png,320,128,64,64
+graphics/CustomSprite/swordman_64pix.png,384,128,64,64
+graphics/CustomSprite/swordman_128pix.png,0,0,128,128
+graphics/CustomSprite/swordman_128pix.png,128,0,128,128
+graphics/CustomSprite/swordman_128pix.png,256,0,128,128
+graphics/CustomSprite/swordman_128pix.png,384,0,128,128
+graphics/CustomSprite/swordman_128pix.png,512,0,128,128

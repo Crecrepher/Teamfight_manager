@@ -1,15 +1,15 @@
-Champion_State 0.ID,1.MAXHP,2.ATTACK,3.DEFFEND,4.ATTACK_SPEED,5.ATTACK_RANGE,6.SPEED,7.SKILLCODE_1,8.SKILLCODE_2,9.CHAMPION_TYPE
-archer,100,42,5,0.67,120,3,0,0,1
-fighter,190,10,40,1.18,35,7,0,0,0
-knight,200,21,60,0.67,37,5,0,0,0
-monk,210,20,40,0.71,35,5,0,0,4
-ninja,120,25,10,0.95,40,8,0,0,2
-priest,65,30,3,0.69,130,3,0,0,4
-pyromancer,80,45,3,0.50,100,3,0,0,3
-swordman,130,15,30,0.83,45,6,0,0,0
-pythoness,65,22,3,0.91,150,3,0,0,4
-berserker,200,6,10,0.63,45,3,0,0,0
-soldier,65,40,0,0.67,150,3,0,0,1
-icemage,100,15,5,0.83,100,3,0,0,3
-magicknight,130,35,30,0.74,50,5,0,0,0
-shieldbearer,220,20,60,0.67,35,4,0,0,0
+Champion_State 0.ID,1.MAXHP,2.ATTACK,3.DEFFEND,4.ATTACK_SPEED,5.ATTACK_RANGE,6.SPEED,7.SKILLCODE_1,8.SKILLCODE_2,9.CHAMPION_TYPE,
+archer,100,42,5,0.67,120,3,0,0,1,animations/Champions/Archer.csv
+fighter,190,10,40,1.18,35,7,0,0,0,animations/Champions/Fighter.csv
+knight,200,21,60,0.67,37,5,0,0,0,animations/Champions/Knight.csv
+monk,210,20,40,0.71,35,5,0,0,4,animations/Champions/Monk.csv
+ninja,120,25,10,0.95,40,8,0,0,2,animations/Champions/Ninja.csv
+priest,65,30,3,0.69,130,3,0,0,4,animations/Champions/Priest.csv
+pyromancer,80,45,3,0.5,100,3,0,0,3,animations/Champions/Pyromancer.csv
+swordman,130,15,30,0.83,45,6,0,0,0,animations/Champions/Swordman.csv
+pythoness,65,22,3,0.91,150,3,0,0,4,animations/Champions/Pythoness.csv
+berserker,200,6,10,0.63,45,3,0,0,0,animations/Champions/Berserker.csv
+soldier,65,40,0,0.67,150,3,0,0,1,animations/Champions/Soldier.csv
+icemage,100,15,5,0.83,100,3,0,0,3,animations/Champions/Icemage.csv
+magicknight,130,35,30,0.74,50,5,0,0,0,animations/Champions/Magicknight.csv
+shieldbearer,220,20,60,0.67,35,4,0,0,0,animations/Champions/Shieldbearer.csv

@@ -114,3 +114,12 @@ void AnimatioControler::SetFrame(const AnimationFrame& frame)
 	target->setTexture(*tex);
 	target->setTextureRect(frame.texCoord);
 }
+
+bool AnimatioControler::GetLastFrame()
+{
+	if (currentFrame == totalFrame-1)
+	{
+		return true;
+	}
+	return false;
+}

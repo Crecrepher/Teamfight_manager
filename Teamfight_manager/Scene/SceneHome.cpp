@@ -15,6 +15,8 @@
 #include "UiButton.h"
 #include "RectGo.h"
 
+#include "AiBanPick.h"// 임시 추가
+
 SceneHome::SceneHome() : Scene(SceneId::Home)
 {
 	resourceListPath = "tables/HomeResourceList.csv";
@@ -27,7 +29,6 @@ SceneHome::~SceneHome()
 void SceneHome::Init()
 {
 	Release();
-
 	sf::Vector2f windowSize = FRAMEWORK.GetWindowSize();
 	sf::Vector2f centerPos = windowSize * 0.5f;
 
@@ -65,17 +66,13 @@ void SceneHome::Enter()
 	{
 		NewYear();
 	}
+	else if (TEAM_MGR.GetTodayDate() == 4)
+	{
+		UiSponsorContractOpen(true, true);
+	}
 
 	MakeMainUi();
 	MakeSubUi();
-	UiTrainingOpen(false);
-
-	RectGo* rect = (RectGo*)FindGo("UiShade");
-	rect->SetSize(FRAMEWORK.GetWindowSize());
-	rect->sortLayer = 110;
-	rect->sortOrder = -1;
-	rect->rectangle.setFillColor(sf::Color(0, 0, 0, 150));
-
 
 }
 
@@ -109,6 +106,7 @@ void SceneHome::Draw(sf::RenderWindow& window)
 
 void SceneHome::AddGoSprites()
 {
+	//Main
 	AddGo(new SpriteGo("graphics/Origin/Sprite/ground.png", "Ground"));
 	AddGo(new SpriteGo("graphics/Origin/Sprite/house_bg.png", "House"));
 	AddGo(new SpriteGo("graphics/Origin/Sprite/sky_day.png", "Sky"));
@@ -118,7 +116,9 @@ void SceneHome::AddGoSprites()
 	AddGo(new SpriteGo("graphics/Origin/Sprite/header_gold_icon.png", "GoldUi"));
 	AddGo(new SpriteGo("graphics/Origin/Sprite/header_calendar_icon.png", "CalendarUi"));
 	AddGo(new SpriteGo("graphics/Origin/Sprite/header_league_bg.png", "LeagueUi"));
-	AddGo(new SpriteGo("graphics/Origin/Sprite/training_ui_bg.png", "TrainingUi"));
+	AddGo(new SpriteGo("graphics/Origin/Sprite/training_ui_bg.png", "SubUiBack"));
+
+	//player
 	AddGo(new SpriteGo("graphics/Origin/Sprite/scroll_bar.png", "ScrollBar"));
 	for (int i = 0; i < 6; i++)
 	{
@@ -164,6 +164,55 @@ void SceneHome::AddGoSprites()
 	AddGo(new SpriteGo("graphics/Origin/Sprite/attack_icon.png", "IconAtk1"));
 	AddGo(new SpriteGo("graphics/Origin/Sprite/defense_icon.png", "IconDef0"));
 	AddGo(new SpriteGo("graphics/Origin/Sprite/defense_icon.png", "IconDef1"));
+
+	//Sponsor
+	for (int i = 0; i < 9; i++)
+	{
+		std::stringstream ss;
+		ss << "SponLogo" << i;
+		AddGo(new SpriteGo("graphics/Origin/Sprite/sponser_logo_0.png", ss.str()));
+	}
+	AddGo(new SpriteGo("graphics/Origin/Sprite/sponser_logo_0.png", "SelectedLogo"));
+	AddGo(new SpriteGo("graphics/Origin/Sprite/header_gold_icon.png", "GoldUiEx"));
+	AddGo(new SpriteGo("graphics/Origin/Sprite/keyboard_switch.png", "KeyboardSwitch"));
+	AddGo(new SpriteGo("graphics/Origin/Sprite/sound_chip.png", "SoundChip"));
+	AddGo(new SpriteGo("graphics/Origin/Sprite/screw.png", "Screw"));
+	AddGo(new SpriteGo("graphics/Origin/Sprite/fabric_piece.png", "FabricPiece"));
+	for (int i = 0; i < 4; i++)
+	{
+		std::stringstream ss;
+		ss << "PartBack" << i;
+		AddGo(new SpriteGo("graphics/Origin/Sprite/upgrade_icon_bg.png", ss.str()));
+	}
+	AddGo(new SpriteGo("graphics/Origin/Sprite/champ_bg #43858.png", "SponLogoBack"));
+
+	for (size_t i = 0; i < 3; i++)
+	{
+		std::stringstream ss;
+		ss << "ListSponsorLogo" << i;
+		AddGo(new SpriteGo("graphics/Origin/Sprite/sponser_logo_0.png", ss.str()));
+		ss << "back";
+		AddGo(new SpriteGo("graphics/Origin/Sprite/champ_bg #43858.png", ss.str()));
+	}
+	AddGo(new SpriteGo("graphics/Origin/Sprite/lock_icon.png", "LockIcon0"));
+	AddGo(new SpriteGo("graphics/Origin/Sprite/lock_icon.png", "LockIcon1"));
+
+	//Item
+	for (int i = 0; i < 3; i++)
+	{
+		std::stringstream ss;
+		ss << "Equipmake" << i;
+		if (i == 0)
+		{
+			AddGo(new SpriteGo("graphics/UiFix/equipment_making_slot_bg_0.png", ss.str()));
+		}
+		else
+		{
+			AddGo(new SpriteGo("graphics/Origin/Sprite/equipment_making_slot_locked_bg.png", ss.str()));
+		}
+	}
+	AddGo(new SpriteGo("graphics/Origin/Sprite/lock_icon.png", "ItemMakeLock0"));
+	AddGo(new SpriteGo("graphics/Origin/Sprite/lock_icon.png", "ItemMakeLock1"));
 }
 
 void SceneHome::AddGoUiButton()
@@ -195,11 +244,87 @@ void SceneHome::AddGoUiButton()
 		ss << "TrainingPointUpB" << i;
 		AddGo(new UiButton("graphics/Origin/Sprite/training_point_arrow_button_2.png", ss.str()));
 	}
+
+	for (int i = 0; i < 9; i++)
+	{
+		std::stringstream ss;
+		ss << "SponSlot" << i;
+		AddGo(new UiButton("graphics/Origin/Sprite/sponsor_card_bg_0.png", ss.str()));
+	}
+	AddGo(new UiButton("graphics/Origin/Sprite/default_button_0.png", "SponsorContract"));
+
+	for (int i = 0; i < 3; i++)
+	{
+		std::stringstream ss;
+		ss << "UseSponlist" << i;
+		AddGo(new UiButton("graphics/Origin/Sprite/type_ui_0.png", ss.str()));
+	}
+
+	//Item
+	for (int i = 0; i < 4; i++)
+	{
+		std::stringstream ss;
+		ss << "EquipSlotB" << i;
+		AddGo(new UiButton("graphics/UiFix/equipment_slot_bg_0.png", ss.str()));
+	}
+	for (int i = 0; i < 3; i++)
+	{
+		std::stringstream ss;
+		ss << "EquipMakeB" << i;
+		AddGo(new UiButton("graphics/Origin/Sprite/important_button_0.png", ss.str()));
+	}
 }
 
 void SceneHome::AddGoText()
 {
+	AddGo(new TextGo("Calinder"));
 	AddGo(new TextGo("MoneyInfoT"));
+
+	AddGo(new TextGo("UiMenuTitleText"));
+	AddGo(new TextGo("UiMenuCloseText"));
+
+	AddGo(new TextGo("SponsorContractDescribe"));
+	AddGo(new TextGo("SelectedSponsorCountText"));
+	AddGo(new TextGo("SponsorContractAcceptText"));
+	AddGo(new TextGo("SponsorContractLeftWarnText"));
+	for (int i = 0; i < 9; i++)
+	{
+		std::stringstream ss;
+		ss << "SponsorName" << i;
+		AddGo(new TextGo(ss.str()));
+	}
+	AddGo(new TextGo("SelectedSponsorName"));
+	AddGo(new TextGo("SponsorQuest"));
+	AddGo(new TextGo("SponsorMoney"));
+	for (int i = 0; i < 4; i++)
+	{
+		std::stringstream ss;
+		ss << "SponsorParts" << i;
+		AddGo(new TextGo(ss.str()));
+	}
+	AddGo(new TextGo("SponsorNameUi"));
+	AddGo(new TextGo("SponsorStateUi"));
+	for (int i = 0; i < 3; i++)
+	{
+		std::stringstream ss;
+		ss << "SponsorSlotText" << i;
+		AddGo(new TextGo(ss.str()));
+		ss << "State";
+		AddGo(new TextGo(ss.str()));
+	}
+	AddGo(new TextGo("SponsorLockText0"));
+	AddGo(new TextGo("SponsorLockText1"));
+	AddGo(new TextGo("SponsorQuestUiText"));
+	AddGo(new TextGo("SponsorQuestNowText"));
+	AddGo(new TextGo("SponsorRewardUiText"));
+	AddGo(new TextGo("SponsorRewardMoneyUiText"));
+
+
+	//Equip
+	AddGo(new TextGo("UsingEquipUiText"));
+	AddGo(new TextGo("MakeEquipUiText"));
+	AddGo(new TextGo("CurPartsEquipUiText"));
+
 }
 
 
@@ -234,7 +359,6 @@ void SceneHome::MakeMainUi()
 	spr->sortLayer = 105;
 
 	SpriteGo* leagueUi = (SpriteGo*)FindGo("LeagueUi");
-
 	leagueUi->SetPosition(0, spr->GetSize().y * 2.f);
 	leagueUi->SetOrigin(Origins::TL);
 	leagueUi->SetSize(2, 2);
@@ -282,6 +406,10 @@ void SceneHome::MakeMainUi()
 			FRAMEWORK.GetWindowSize().y - 30.f);
 		bt->sortLayer = 100;
 		bt->OnClick = [this, i]() {
+			if (isMenuOn)
+			{
+				return;
+			}
 			MainUiClose();
 			MainUiOpen((MainMenuType)i);
 			backClick = false;
@@ -310,8 +438,10 @@ void SceneHome::MakeMainUi()
 			ss2 << "Text";
 			btText = (TextGo*)FindGo(ss2.str());
 			btText->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
+
 			auto stringtable = DATATABLE_MGR.Get<StringTable>(DataTable::Ids::String);
 			btText->text.setString(stringtable->GetW(ss2.str()));
+
 			btText->text.setFillColor(sf::Color::White);
 			btText->text.setCharacterSize(20);
 			btText->SetOrigin(Origins::MC);
@@ -340,31 +470,105 @@ void SceneHome::MakeMainUi()
 	bt->SetPosition(FRAMEWORK.GetWindowSize().x - 30.f,
 		FRAMEWORK.GetWindowSize().y - 30.f);
 	bt->sortLayer = 101;
-	bt->OnClick = []() {
+	bt->OnClick = [this]() {
 		TEAM_MGR.DayPass();
+<<<<<<< HEAD
 		SCENE_MGR.ChangeScene(SceneId::Game);
+=======
+		UpdateMoney();
+		if (TEAM_MGR.GetTodayDate() == 0)
+		{
+			NewYear();
+		}
+		else if (TEAM_MGR.GetTodayDate() == 4)
+		{
+			UiSponsorContractOpen(true, true);
+		}
+		TeamMgr::Schedule schedule = TEAM_MGR.GetSchedule(TEAM_MGR.GetTodayDate() - 1);
+		if (schedule != TeamMgr::Schedule::Recruit &&
+			schedule != TeamMgr::Schedule::Vacation)
+		{
+			SCENE_MGR.ChangeScene(SceneId::Game);
+		}
+		TextGo* text = (TextGo*)FindGo("Calinder");
+		text->text.setString(std::to_string(TEAM_MGR.GetTodayYear()) + " / "
+			+ std::to_string(TEAM_MGR.GetTodayDate() / 4 + 1) + " Week "
+			+ std::to_string(TEAM_MGR.GetTodayDate() % 4 + 1));
+>>>>>>> e1234829c394dfccf82db0e06054abd0a04faeed
 	};
 
 	TextGo* text = (TextGo*)FindGo("MoneyInfoT");
 	text->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
 	text->text.setString(std::to_string(TEAM_MGR.GetMoney()));
 	text->text.setFillColor(sf::Color::White);
-	text->text.setCharacterSize(20);
+	text->text.setCharacterSize(18);
 	text->SetOrigin(Origins::TL);
 	text->SetPosition(FRAMEWORK.GetWindowSize().x * 0.85f, 22.f);
 	text->sortLayer = 107;
 
+	text = (TextGo*)FindGo("Calinder");
+	text->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
+	text->text.setString(std::to_string(TEAM_MGR.GetTodayYear()) + " / "
+		+ std::to_string(TEAM_MGR.GetTodayDate() / 4 + 1) + " Week "
+		+ std::to_string(TEAM_MGR.GetTodayDate() % 4 + 1));
+	text->text.setFillColor(sf::Color::White);
+	text->text.setCharacterSize(18);
+	text->SetOrigin(Origins::TL);
+	text->SetPosition(845, 22);
+	text->sortLayer = 107;
 }
 
 
 void SceneHome::MakeSubUi()
 {
+	auto stringtable = DATATABLE_MGR.Get<StringTable>(DataTable::Ids::String);
+	UiButton* bt = (UiButton*)FindGo("TrainCloseB");
+	bt->SetOrigin(Origins::MC);
+	bt->SetPosition(1175, 555);
+	bt->SetSize(2, 2);
+	bt->sortLayer = 111;
+	bt->OnClick = [this]() {
+		isMenuOn = false;
+		UiTrainingOpen(false);
+		UiSponsorContractOpen(true, false);
+		UiSponsorContractOpen(false, false);
+	};
+
+	TextGo* text = (TextGo*)FindGo("UiMenuTitleText");
+	text->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
+	text->text.setString(L"메뉴 제목");
+	text->text.setCharacterSize(35);
+	text->SetOrigin(Origins::MC);
+	text->SetPosition(FRAMEWORK.GetWindowSize().x / 2.f, 80);
+	text->sortLayer = 112;
+	text->SetActive(false);
+
+	text = (TextGo*)FindGo("UiMenuCloseText");
+	text->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
+	text->text.setString(stringtable->GetW("Close"));
+	text->text.setCharacterSize(20);
+	text->SetOrigin(Origins::MC);
+	text->SetPosition(bt->GetPosition().x, bt->GetPosition().y-3);
+	text->sortLayer = 112;
+	text->SetActive(false);
+
+	
+	RectGo* rect = (RectGo*)FindGo("UiShade");
+	rect->SetSize(FRAMEWORK.GetWindowSize());
+	rect->sortLayer = 110;
+	rect->sortOrder = -1;
+	rect->rectangle.setFillColor(sf::Color(0, 0, 0, 150));
+
 	MakeSubUiTraining();
+	UiTrainingOpen(false);
+	MakeSubUiSponsorContract();
+	MakeSubUiEquip();
+	UiEquipOpen();
 }
 
 void SceneHome::MakeSubUiTraining()
 {
-	SpriteGo* spr = (SpriteGo*)FindGo("TrainingUi");
+	SpriteGo* spr = (SpriteGo*)FindGo("SubUiBack");
 	spr->SetOrigin(Origins::MC);
 	spr->SetPosition(FRAMEWORK.GetWindowSize().x * 0.5f,
 		FRAMEWORK.GetWindowSize().y * 0.44f);
@@ -510,16 +714,6 @@ void SceneHome::MakeSubUiTraining()
 	bt->SetSize(1.5, 1.2);
 	bt->sortLayer = 111;
 
-	bt = (UiButton*)FindGo("TrainCloseB");
-	bt->SetOrigin(Origins::MC);
-	bt->SetPosition(1175, 555);
-	bt->SetSize(2, 2);
-	bt->sortLayer = 111;
-	bt->OnClick = [this]() {
-		isMenuOn = false;
-		UiTrainingOpen(false);
-	};
-
 	for (int i = 0; i < 12; i++)
 	{
 		std::stringstream ss;
@@ -533,6 +727,348 @@ void SceneHome::MakeSubUiTraining()
 			UiTrainingPlayerSelect(i);
 		};
 	}
+}
+
+void SceneHome::MakeSubUiSponsorContract()
+{
+	auto stringtable = DATATABLE_MGR.Get<StringTable>(DataTable::Ids::String);
+	SpriteGo* spr;
+
+	for (int i = 0; i < 9; i++)
+	{
+		std::stringstream ss;
+		ss << "SponSlot" << i;
+		UiButton* bt = (UiButton*)FindGo(ss.str());
+		bt->SetOrigin(Origins::TL);
+		bt->SetPosition(65+((bt->GetSize().x*2+5) *(i%3)), 175+ ((bt->GetSize().y * 2+5) * (i / 3)));
+		bt->SetSize(2,2);
+		bt->sortLayer = 111;
+		bt->SetActive(false);
+		bt->OnEnter = [bt,i,this]() {
+			for (int j = 0; j < 3; j++)
+			{
+				if (i == selectedSponsorIndex)
+				{
+					return;
+				}
+			}
+			bt->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/Origin/Sprite/sponsor_card_bg_1.png"));
+		};
+		bt->OnExit = [bt, i, this]() {
+			for (int j = 0; j < 3; j++)
+			{
+				if (i == selectedSponsorIndex)
+				{
+					return;
+				}
+			}
+			bt->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/Origin/Sprite/sponsor_card_bg_0.png"));
+		};
+		
+		ss.str("");
+		ss << "SponLogo" << i;
+		spr = (SpriteGo*)FindGo(ss.str());
+		spr->SetOrigin(Origins::TL);
+		spr->SetPosition(bt->GetPosition().x+6, bt->GetPosition().y+8);
+		spr->SetSize(2, 2);
+		spr->sortLayer = 112;
+		spr->SetActive(false);
+
+		ss.str("");
+		ss << "SponsorName" << i;
+		TextGo* text = (TextGo*)FindGo(ss.str());
+		text->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
+		text->text.setString(L"스폰서 이름");
+		text->text.setCharacterSize(25);
+		text->SetOrigin(Origins::ML);
+		text->SetPosition(bt->GetPosition().x + 76, bt->GetPosition().y + 35);
+		text->sortLayer = 112;
+		text->SetActive(false);
+	}
+
+	spr = (SpriteGo*)FindGo("SponLogoBack");
+	spr->SetOrigin(Origins::TL);
+	spr->SetPosition(950,195);
+	spr->SetSize(2.3,2.3);
+	spr->sortLayer = 111;
+	spr->SetActive(false);
+
+	spr = (SpriteGo*)FindGo("SelectedLogo");
+	spr->SetOrigin(Origins::TL);
+	spr->SetPosition(950, 195);
+	spr->SetSize(2, 2);
+	spr->sortLayer = 112;
+	spr->SetActive(false);
+
+	spr = (SpriteGo*)FindGo("GoldUiEx");
+	spr->SetOrigin(Origins::MC);
+	spr->SetPosition(1225, 407);
+	spr->SetSize(2, 2);
+	spr->sortLayer = 112;
+	spr->SetActive(false);
+
+	for (int i = 0; i < 4; i++)
+	{
+		std::stringstream ss;
+		ss << "PartBack" << i;
+		spr = (UiButton*)FindGo(ss.str());
+		spr->SetOrigin(Origins::TL);
+		spr->SetPosition(950+72*i, 425);
+		spr->SetSize(1.7, 1.7);
+		spr->sortLayer = 112;
+		spr->SetActive(false);
+	}
+
+	spr = (SpriteGo*)FindGo("SoundChip");
+	spr->SetOrigin(Origins::TL);
+	spr->SetPosition(950, 430);
+	spr->SetSize(1, 1);
+	spr->sortLayer = 113;
+	spr->SetActive(false);
+
+	spr = (SpriteGo*)FindGo("KeyboardSwitch");
+	spr->SetOrigin(Origins::TL);
+	spr->SetPosition(950 + 72, 430);
+	spr->SetSize(1, 1);
+	spr->sortLayer = 113;
+	spr->SetActive(false);
+
+	spr = (SpriteGo*)FindGo("Screw");
+	spr->SetOrigin(Origins::TL);
+	spr->SetPosition(950 + 74 * 2, 430);
+	spr->SetSize(1, 1);
+	spr->sortLayer = 113;
+	spr->SetActive(false);
+
+	spr = (SpriteGo*)FindGo("FabricPiece");
+	spr->SetOrigin(Origins::TL);
+	spr->SetPosition(950 + 73 * 3, 430);
+	spr->SetSize(1, 1);
+	spr->sortLayer = 113;
+	spr->SetActive(false);
+
+	UiButton* bt = (UiButton*)FindGo("SponsorContract");
+	bt->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/Origin/Sprite/default_button_0.png"));
+	bt->SetOrigin(Origins::MC);
+	bt->SetPosition(485,470);
+	bt->SetSize(2, 2);
+	bt->sortLayer = 111;
+	bt->OnClick = [this]() {
+		if (selectedSponsorIndex != -1)
+		{
+			SponsorContract(selectedSponsorIndex);
+		}
+	};
+	bt->SetActive(false);
+
+	for (int i = 0; i < 3; i++)
+	{
+		std::stringstream ss;
+		ss << "UseSponlist" << i;
+		UiButton* SponBt = (UiButton*)FindGo(ss.str());
+		SponBt->SetOrigin(Origins::TL);
+		SponBt->SetPosition(45, 190+100*i);
+		SponBt->SetSize(5.85f, 4.f);
+		SponBt->sortLayer = 111;
+		SponBt->OnClick = [this]() {
+
+		};
+		SponBt->SetActive(false);
+
+		ss.str("");
+		ss << "ListSponsorLogo" << i;
+		spr = (SpriteGo*)FindGo(ss.str());
+		spr->SetOrigin(Origins::TL);
+		spr->SetPosition(SponBt->GetPosition().x + 15, SponBt->GetPosition().y + 15);
+		spr->SetSize(2, 2);
+		spr->sortLayer = 113;
+		spr->SetActive(false);
+
+		ss << "back";
+		spr = (SpriteGo*)FindGo(ss.str());
+		spr->SetOrigin(Origins::TL);
+		spr->SetPosition(SponBt->GetPosition().x+15, SponBt->GetPosition().y+15);
+		spr->SetSize(2.4, 2.4);
+		spr->sortLayer = 112;
+		spr->SetActive(false);
+		if (i > 0)
+		{
+			ss.str("");
+			ss << "LockIcon" << i-1;
+			spr = (SpriteGo*)FindGo(ss.str());
+			spr->SetOrigin(Origins::MC);
+			spr->SetPosition(SponBt->GetPosition().x + 430, SponBt->GetPosition().y + 40);
+			spr->SetSize(4, 4);
+			spr->sortLayer = 113;
+			spr->SetActive(false);
+			ss.str("");
+			ss << "SponsorLockText" << i - 1;
+			TextGo* text = (TextGo*)FindGo(ss.str());
+			text->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
+			text->text.setString(stringtable->GetW("CanSponsorExpend"));
+			text->text.setCharacterSize(17);
+			text->SetOrigin(Origins::MC);
+			text->SetPosition(spr->GetPosition().x, spr->GetPosition().y+35);
+			text->sortLayer = 112;
+			text->SetActive(false);
+		}
+
+		ss.str("");
+		ss << "SponsorSlotText" << i;
+		TextGo* text = (TextGo*)FindGo(ss.str());
+		text->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
+		text->text.setString(stringtable->GetW("SponsorName0"));
+		text->text.setCharacterSize(20);
+		text->SetOrigin(Origins::ML);
+		text->SetPosition(SponBt->GetPosition().x + 90, SponBt->GetPosition().y + 47);
+		text->sortLayer = 112;
+		text->SetActive(false);
+		ss << "State";
+		text = (TextGo*)FindGo(ss.str());
+		text->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
+		text->text.setString(stringtable->GetW("Processing"));
+		text->text.setCharacterSize(20);
+		text->SetOrigin(Origins::MC);
+		text->SetPosition(SponBt->GetPosition().x + 740, SponBt->GetPosition().y + 47);
+		text->sortLayer = 112;
+		text->SetActive(false);
+	}
+
+	TextGo* text = (TextGo*)FindGo("SelectedSponsorName");
+	text->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
+	text->text.setString(L"스폰서 이름");
+	text->text.setCharacterSize(16);
+	text->SetOrigin(Origins::ML);
+	text->SetPosition(1020, 210);
+	text->sortLayer = 112;
+	text->SetActive(false);
+
+	text = (TextGo*)FindGo("SponsorQuest");
+	text->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
+	text->text.setString(L"- 요구사항");
+	text->text.setCharacterSize(16);
+	text->SetOrigin(Origins::ML);
+	text->SetPosition(953, 270);
+	text->sortLayer = 112;
+	text->SetActive(false);
+
+	text = (TextGo*)FindGo("SponsorMoney");
+	text->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
+	text->text.setString("1000");
+	text->text.setCharacterSize(16);
+	text->SetOrigin(Origins::MR);
+	text->SetPosition(1200, 405);
+	text->sortLayer = 112;
+	text->SetActive(false);
+
+	text = (TextGo*)FindGo("SponsorNameUi");
+	text->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
+	text->text.setString(stringtable->GetW("SponsorName"));
+	text->text.setCharacterSize(20);
+	text->SetOrigin(Origins::MC);
+	text->SetPosition(335,160);
+	text->sortLayer = 112;
+	text->SetActive(false);
+
+	text = (TextGo*)FindGo("SponsorStateUi");
+	text->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
+	text->text.setString(stringtable->GetW("State"));
+	text->text.setCharacterSize(20);
+	text->SetOrigin(Origins::MC);
+	text->SetPosition(780, 160);
+	text->sortLayer = 112;
+	text->SetActive(false);
+	
+	for (int i = 0; i < 4; i++)
+	{
+		std::stringstream ss;
+		ss << "SponsorParts" << i;
+		text = (TextGo*)FindGo(ss.str());
+		text->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
+		text->text.setString("x10");
+		text->text.setCharacterSize(14);
+		text->SetOrigin(Origins::BL);
+		text->SetPosition(987+72*i, 455);
+		text->sortLayer = 112;
+		text->SetActive(false);
+	}
+
+	text = (TextGo*)FindGo("SponsorQuestUiText");
+	text->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
+	text->text.setString(stringtable->GetW("ContractConditions"));
+	text->text.setCharacterSize(20);
+	text->SetOrigin(Origins::MC);
+	text->SetPosition(1090, 160);
+	text->sortLayer = 112;
+	text->SetActive(false);
+
+	text = (TextGo*)FindGo("SponsorQuestNowText");
+	text->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
+	text->text.setString(stringtable->GetW("Now"));
+	text->text.setCharacterSize(20);
+	text->text.setFillColor(sf::Color::Yellow);
+	text->SetOrigin(Origins::ML);
+	text->SetPosition(950, 320);
+	text->sortLayer = 112;
+	text->SetActive(false);
+
+	text = (TextGo*)FindGo("SponsorRewardUiText");
+	text->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
+	text->text.setString(stringtable->GetW("ContractReward"));
+	text->text.setCharacterSize(20);
+	text->SetOrigin(Origins::MC);
+	text->SetPosition(1090, 360);
+	text->sortLayer = 112;
+	text->SetActive(false);
+
+	text = (TextGo*)FindGo("SponsorRewardMoneyUiText");
+	text->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
+	text->text.setString(stringtable->GetW("SupportMoney"));
+	text->text.setCharacterSize(20);
+	text->SetOrigin(Origins::ML);
+	text->SetPosition(950, 405);
+	text->sortLayer = 112;
+	text->SetActive(false);
+
+	text = (TextGo*)FindGo("SponsorContractDescribe");
+	text->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
+	text->text.setString(stringtable->GetW("SponContractDiscribe"));
+	text->text.setCharacterSize(20);
+	text->SetOrigin(Origins::ML);
+	text->SetPosition(65, 155);
+	text->sortLayer = 112;
+	text->SetActive(false);
+
+	text = (TextGo*)FindGo("SelectedSponsorCountText");
+	text->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
+	text->text.setString(stringtable->GetW("SelectedSponsor"));
+	text->text.setString(text->text.getString() + " "
+		+ std::to_string(TEAM_MGR.GetContractedSponsor()) + "/"
+		+ std::to_string(TEAM_MGR.GetMaxSponsor()));
+	text->text.setCharacterSize(20);
+	text->SetOrigin(Origins::TL);
+	text->SetPosition(77, 470);
+	text->sortLayer = 112;
+	text->SetActive(false);
+
+	text = (TextGo*)FindGo("SponsorContractAcceptText");
+	text->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
+	text->text.setString(stringtable->GetW("DoContract"));
+	text->text.setCharacterSize(20);
+	text->SetOrigin(Origins::MC);
+	text->SetPosition(485, 470);
+	text->sortLayer = 114;
+	text->SetActive(false);
+
+	text = (TextGo*)FindGo("SponsorContractLeftWarnText");
+	text->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
+	text->text.setString(stringtable->GetW("IsLeftSponContract"));
+	text->text.setCharacterSize(18);
+	text->text.setFillColor(sf::Color::Red);
+	text->SetOrigin(Origins::TR);
+	text->SetPosition(883, 470);
+	text->sortLayer = 112;
+	text->SetActive(false);
 }
 
 void SceneHome::ReturnMainUiIndex(int& startNum, int& endNum, MainMenuType Type)
@@ -571,6 +1107,10 @@ void SceneHome::MainUiOpen(MainMenuType Type)
 	ReturnMainUiIndex(startNum, endNum, Type);
 	for (int i = startNum; i < endNum; i++)
 	{
+		if (i == 11 || i == 12)
+		{
+			continue;
+		}
 		std::stringstream ss;
 		ss << "MainB" << i;
 		UiButton* bt = (UiButton*)FindGo(ss.str());
@@ -595,6 +1135,55 @@ void SceneHome::MainUiClose()
 	}
 }
 
+void SceneHome::MakeSubUiEquip()
+{
+	SpriteGo* spr;
+	UiButton* bt;
+	for (int i = 0; i < 3; i++)
+	{
+		std::stringstream ss;
+		ss << "Equipmake" << i;
+		spr = (SpriteGo*)FindGo(ss.str());
+		spr->SetOrigin(Origins::MC);
+		spr->SetPosition(710, 255+(i*100));
+		spr->SetSize(2, 2);
+		spr->sortLayer = 111;
+
+		ss.str("");
+		ss << "EquipMakeB" << i;
+		bt = (UiButton*)FindGo(ss.str());
+		bt->SetOrigin(Origins::MC);
+		bt->SetPosition(spr->GetPosition().x+140, spr->GetPosition().y);
+		bt->SetSize(1.5, 1.5);
+		bt->sortLayer = 111;
+
+		if (i > 0)
+		{
+			ss.str("");
+			ss << "ItemMakeLock" << i-1;
+			SpriteGo* lockIco = (SpriteGo*)FindGo(ss.str());
+			lockIco->SetOrigin(Origins::MC);
+			lockIco->SetPosition(spr->GetPosition().x, spr->GetPosition().y-12.f);
+			lockIco->SetSize(5, 5);
+			lockIco->sortLayer = 111;
+		}
+
+	}
+
+	for (int i = 0; i < 4; i++)
+	{
+		std::stringstream ss;
+		ss << "EquipSlotB" << i;
+		bt = (UiButton*)FindGo(ss.str());
+		bt = (UiButton*)FindGo(ss.str());
+		bt->SetOrigin(Origins::TL);
+		bt->SetPosition(42, 210+(i*75));
+		bt->SetSize(2, 2);
+		bt->sortLayer = 111;
+	}
+	
+}
+
 void SceneHome::MainUiFunc(int index)
 {
 	if (isMenuOn)
@@ -615,6 +1204,11 @@ void SceneHome::MainUiFunc(int index)
 	case 7:
 		TEAM_MGR.ShowPlayer();
 		break;
+	case 8:
+		UiSponsorContractOpen(false,true);
+		break;
+	case 9:
+		UiEquipOpen();
 	case 13:
 		std::cout << "오늘의 일정은 " ;
 		{
@@ -659,6 +1253,22 @@ void SceneHome::MainUiFunc(int index)
 		}
 	}
 		break;
+	case 16:
+	{
+		AiBanPick banPick;
+
+		banPick.printStats(banPick.getChampions());
+
+		Champion highStatChampion = banPick.CompareHighStatChampion(banPick.getChampions()[0], banPick.getChampions()[1]);
+
+		Champion secondStatChampion = banPick.CompareSecondStatChampion(banPick.getChampions()[0], banPick.getChampions()[1]);
+
+
+		banPick.isBan(highStatChampion, true);
+		banPick.isPick(secondStatChampion, false);
+
+	}
+		break;
 	default:
 		break;
 	}
@@ -666,10 +1276,43 @@ void SceneHome::MainUiFunc(int index)
 	//나중에 주석풀기
 }
 
+void SceneHome::SubUiBaseOpen(int index, bool on)
+{
+	auto stringtable = DATATABLE_MGR.Get<StringTable>(DataTable::Ids::String);
+
+	SpriteGo* spr = (SpriteGo*)FindGo("SubUiBack");
+	spr->SetActive(on);
+
+	UiButton* bt = (UiButton*)FindGo("TrainCloseB");
+	bt->SetOrigin(Origins::MC);
+	bt->SetPosition(1175, 555);
+	bt->SetSize(2, 2);
+	bt->sortLayer = 111;
+	bt->OnClick = [this]() {
+		isMenuOn = false;
+		UiTrainingOpen(false);
+		UiSponsorContractOpen(true, false);
+		UiSponsorContractOpen(false, false);
+	};
+
+	TextGo* text = (TextGo*)FindGo("UiMenuTitleText");
+	text->SetActive(on);
+	std::stringstream ss;
+	ss << "MainB" << index << "Text";
+	text->text.setString(stringtable->GetW(ss.str()));
+
+	text = (TextGo*)FindGo("UiMenuCloseText");
+	text->SetActive(on);
+
+	RectGo* rect = (RectGo*)FindGo("UiShade");
+	rect->SetActive(on);
+}
+
 void SceneHome::UiTrainingOpen(bool on)
 {
-	SpriteGo* spr = (SpriteGo*)FindGo("TrainingUi");
-	spr->SetActive(on);
+	SubUiBaseOpen(6,on);
+	SpriteGo* spr = (SpriteGo*)FindGo("SubUiBack");
+	spr->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/Origin/Sprite/training_ui_bg.png"));
 
 	for (int i = 0; i < 6; i++)
 	{
@@ -755,9 +1398,6 @@ void SceneHome::UiTrainingOpen(bool on)
 
 	UiButton* bt = (UiButton*)FindGo("TrainPointReturnB");
 	bt->SetActive(false);
-
-	bt = (UiButton*)FindGo("TrainCloseB");
-	bt->SetActive(on);
 
 	RectGo* rect = (RectGo*)FindGo("UiShade");
 	rect->SetActive(on);
@@ -1158,6 +1798,362 @@ void SceneHome::UiTrainingGaugeUpdate(int index)
 	}
 }
 
+void SceneHome::UiSponsorContractOpen(bool contract, bool on)
+{
+	selectedSponsorIndex = -1;
+	auto stringtable = DATATABLE_MGR.Get<StringTable>(DataTable::Ids::String);
+	SubUiBaseOpen(8, on);
+
+	SpriteGo* spr = (SpriteGo*)FindGo("SubUiBack");
+	spr->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/Origin/Sprite/sponsor_ui_bg.png"));
+
+	spr = (SpriteGo*)FindGo("SponLogoBack");
+	spr->SetActive(false);
+
+	spr = (SpriteGo*)FindGo("SelectedLogo");
+	spr->SetActive(false);
+
+	spr = (SpriteGo*)FindGo("GoldUiEx");
+	spr->SetActive(false);
+
+	for (int i = 0; i < 4; i++)
+	{
+		std::stringstream ss;
+		ss << "PartBack" << i;
+		spr = (UiButton*)FindGo(ss.str());
+		spr->SetActive(false);
+	}
+
+	spr = (SpriteGo*)FindGo("SoundChip");
+	spr->SetActive(false);
+
+	spr = (SpriteGo*)FindGo("KeyboardSwitch");
+	spr->SetActive(false);
+
+	spr = (SpriteGo*)FindGo("Screw");
+	spr->SetActive(false);
+
+	spr = (SpriteGo*)FindGo("FabricPiece");
+	spr->SetActive(false);
+
+	TextGo* text = (TextGo*)FindGo("SelectedSponsorName");
+	text->SetActive(false);
+
+	text = (TextGo*)FindGo("SponsorQuest");
+	text->SetActive(false);
+
+	text = (TextGo*)FindGo("SponsorMoney");
+	text->SetActive(false);
+
+	text = (TextGo*)FindGo("SponsorQuestUiText");
+	text->SetActive(false);
+
+	text = (TextGo*)FindGo("SponsorRewardUiText");
+	text->SetActive(false);
+
+	text = (TextGo*)FindGo("SponsorRewardMoneyUiText");
+	text->SetActive(false);
+
+	text = (TextGo*)FindGo("SponsorQuestNowText");
+	text->SetActive(false);
+
+	for (int i = 0; i < 4; i++)
+	{
+		std::stringstream ss;
+		ss << "SponsorParts" << i;
+		text = (TextGo*)FindGo(ss.str());
+		text->SetActive(false);
+	}
+
+	UiButton* bt = (UiButton*)FindGo("TrainCloseB");
+	bt->SetActive(on);
+
+	RectGo* rect = (RectGo*)FindGo("UiShade");
+	rect->SetActive(on);
+
+	if (contract)
+	{
+		
+		text = (TextGo*)FindGo("UiMenuTitleText");
+		text->text.setString(stringtable->GetW("SponContract"));
+
+		newSponsor = std::vector<Sponsor>(9);
+
+		for (int i = 0; i < 9; i++)
+		{
+			int sponsorType = 0;
+			while (true)
+			{
+				bool sameCheck = true;
+				sponsorType = Utils::RandomRange(0, 18);
+				for (int j = 0; j < i; j++)
+				{
+					if (sponsorType == newSponsor[j].sponsorType)
+					{
+						sameCheck = false;
+						break;
+					}
+				}
+				if (sameCheck)
+				{
+					break;
+				}
+			}
+			newSponsor[i].sponsorType = sponsorType;
+			std::stringstream ss;
+			ss << "SponsorName" << sponsorType;
+			newSponsor[i].sponsorName = stringtable->GetW(ss.str());
+			ss.str("");
+			ss << "graphics/Origin/Sprite/sponser_logo_" << sponsorType << ".png";
+			newSponsor[i].sponsorTextureId = ss.str();
+			newSponsor[i].questCode = Utils::RandomRange(0, TEAM_MGR.GetQuestCount()-1);
+			newSponsor[i].questDifficulty = Utils::RandomRange(0, 2);
+			newSponsor[i].rewardMoney = Utils::RandomRange(1000, 1500) + (newSponsor[i].questDifficulty*500) + (int)TEAM_MGR.GetLeagueGrade() * 1000;
+			for (int j = 0; j < 4; j++)
+			{
+				newSponsor[i].rewardParts[j] = Utils::RandomRange(7, 17) + (newSponsor[i].questDifficulty * 5) + (int)TEAM_MGR.GetLeagueGrade() * 5;
+			}
+		}
+
+		for (int i = 0; i < 9; i++)
+		{
+			std::stringstream ss;
+			ss << "SponSlot" << i;
+			UiButton* bt = (UiButton*)FindGo(ss.str());
+			bt->SetActive(on);
+			bt->OnClick = [this,i]() {
+				UiSponsorContractSelect(newSponsor[i],i);
+			};
+
+			ss.str("");
+			ss << "SponLogo" << i;
+			spr = (SpriteGo*)FindGo(ss.str());
+			spr->SetActive(on);
+			spr->sprite.setTexture(*RESOURCE_MGR.GetTexture(newSponsor[i].sponsorTextureId));
+
+			ss.str("");
+			ss << "SponsorName" << i;
+			TextGo* text = (TextGo*)FindGo(ss.str());
+			text->SetActive(on);
+			text->text.setString(newSponsor[i].sponsorName);
+		}
+		bt = (UiButton*)FindGo("SponsorContract");
+		bt->SetOrigin(Origins::MC);
+		bt->SetPosition(485, 470);
+		bt->SetSize(2, 2);
+		bt->sortLayer = 111;
+		bt->SetActive(on);
+
+		text = (TextGo*)FindGo("SponsorContractDescribe");
+		text->SetActive(on);
+
+		text = (TextGo*)FindGo("SelectedSponsorCountText");
+		text->text.setString(stringtable->GetW("SelectedSponsor"));
+		text->text.setString(text->text.getString() + " "
+			+ std::to_string(TEAM_MGR.GetContractedSponsor()) + "/"
+			+ std::to_string(TEAM_MGR.GetMaxSponsor()));
+		text->SetActive(on);
+
+		text = (TextGo*)FindGo("SponsorContractAcceptText");
+		text->text.setFillColor(sf::Color::White);
+		text->SetActive(on);
+
+		text = (TextGo*)FindGo("SponsorContractLeftWarnText");
+		text->SetActive(on);
+	}
+	else
+	{
+		for (int i = 0; i < 3; i++)
+		{
+			std::stringstream ss;
+			ss << "UseSponlist" << i;
+			UiButton* SponBt = (UiButton*)FindGo(ss.str());
+			SponBt->SetActive(on);
+			SponBt->OnClick = [this,i]() {
+				if (TEAM_MGR.GetMaxSponsor() <= i)
+				{
+					return;
+				}
+				UiSponsorSelect(i);
+				for (int j = 0; j < 3; j++)
+				{
+					std::stringstream ss;
+					ss << "UseSponlist" << i;
+					UiButton* SponBt = (UiButton*)FindGo(ss.str());
+					if (j != selectedSponsorIndex)
+					{
+						SponBt->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/Origin/Sprite/type_ui_2.png"));
+					}
+					else
+					{
+						SponBt->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/Origin/Sprite/type_ui_0.png"));
+					}
+				}
+			};
+			SponBt->OnEnter = [SponBt,this, i]() {
+				if (TEAM_MGR.GetMaxSponsor() <= i ||
+					selectedSponsorIndex == i)
+				{
+					return;
+				}
+				SponBt->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/Origin/Sprite/type_ui_1.png"));
+			};
+			SponBt->OnExit = [SponBt, this, i]() {
+				if (TEAM_MGR.GetMaxSponsor() <= i ||
+					selectedSponsorIndex == i)
+				{
+					return;
+				}
+				SponBt->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/Origin/Sprite/type_ui_0.png"));
+			};
+			
+			if (i > 0 && i >= TEAM_MGR.GetMaxSponsor())
+			{
+				ss.str("");
+				ss << "LockIcon" << i - 1;
+				spr = (SpriteGo*)FindGo(ss.str());
+				spr->SetActive(on);
+				ss.str("");
+				ss << "SponsorLockText" << i - 1;
+				TextGo* text = (TextGo*)FindGo(ss.str());
+				text->SetActive(on);
+			}
+			if (i < TEAM_MGR.GetMaxSponsor() && TEAM_MGR.GetSponsor(i).sponsorType != -1)
+			{
+				ss.str("");
+				ss << "ListSponsorLogo" << i;
+				spr = (SpriteGo*)FindGo(ss.str());
+				spr->SetActive(on);
+				spr->sprite.setTexture(*RESOURCE_MGR.GetTexture(TEAM_MGR.GetSponsor(i).sponsorTextureId));
+
+				ss << "back";
+				spr = (SpriteGo*)FindGo(ss.str());
+				spr->SetActive(on);
+
+				ss.str("");
+				ss << "SponsorSlotText" << i;
+				TextGo* text = (TextGo*)FindGo(ss.str());
+				text->SetActive(on);
+				text->text.setString(TEAM_MGR.GetSponsor(i).sponsorName);
+
+				ss << "State";
+				text = (TextGo*)FindGo(ss.str());
+				text->SetActive(on);
+				if (TEAM_MGR.GetSponsor(i).success)
+				{
+					text->text.setString(stringtable->GetW("Success"));
+				}
+				else
+				{
+					text->text.setString(stringtable->GetW("Processing"));
+				}
+			}
+		}
+
+		text = (TextGo*)FindGo("SponsorNameUi");
+		text->SetActive(on);
+
+		text = (TextGo*)FindGo("SponsorStateUi");
+		text->SetActive(on);
+	}
+}
+
+void SceneHome::UiSponsorContractSelect(Sponsor sponsor,int index)
+{
+	selectedSponsorIndex = index;
+	auto stringtable = DATATABLE_MGR.Get<StringTable>(DataTable::Ids::String);
+	for (int i = 0; i < 9; i++)
+	{
+		std::stringstream ss;
+		ss << "SponSlot" << i;
+		UiButton* bt = (UiButton*)FindGo(ss.str());
+		if (i == index)
+		{
+			bt->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/Origin/Sprite/sponsor_card_bg_2.png"));
+		}
+		else
+		{
+			bt->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/Origin/Sprite/sponsor_card_bg_0.png"));
+		}
+	}
+	SpriteGo* spr = (SpriteGo*)FindGo("SelectedLogo");
+	spr->SetActive(true);
+	spr->sprite.setTexture(*RESOURCE_MGR.GetTexture(sponsor.sponsorTextureId));
+
+	TextGo* text = (TextGo*)FindGo("SelectedSponsorName");
+	text->SetActive(true);
+	text->text.setString(sponsor.sponsorName);
+
+	text = (TextGo*)FindGo("SponsorQuest");
+	text->SetActive(true);
+	std::stringstream ss;
+	ss << "ContractConditions" << sponsor.questCode;
+	text->text.setString(stringtable->GetW(ss.str()));
+	switch (sponsor.questCode)
+	{
+	case 0:
+		text->text.setString(text->text.getString() + " " + std::to_string(3 - sponsor.questDifficulty));
+		break;
+	case 1:
+	case 2:
+		text->text.setString(text->text.getString() + " " + std::to_string(5 + sponsor.questDifficulty * 2));
+		break;
+	case 3:
+	case 4:
+		text->text.setString(text->text.getString() + " " + std::to_string(300 + sponsor.questDifficulty * 50));
+	default:
+		break;
+	}
+
+	text = (TextGo*)FindGo("SponsorMoney");
+	text->SetActive(true);
+	text->text.setString(std::to_string(sponsor.rewardMoney));
+
+	for (int i = 0; i < 4; i++)
+	{
+		std::stringstream ss;
+		ss << "SponsorParts" << i;
+		text = (TextGo*)FindGo(ss.str());
+		text->SetActive(true);
+		text->text.setString("x" + std::to_string(sponsor.rewardParts[i]));
+	}
+
+	for (int i = 0; i < 4; i++)
+	{
+		std::stringstream ss;
+		ss << "PartBack" << i;
+		spr = (UiButton*)FindGo(ss.str());
+		spr->SetActive(true);
+	}
+
+	spr = (SpriteGo*)FindGo("SoundChip");
+	spr->SetActive(true);
+
+	spr = (SpriteGo*)FindGo("KeyboardSwitch");
+	spr->SetActive(true);
+
+	spr = (SpriteGo*)FindGo("Screw");
+	spr->SetActive(true);
+
+	spr = (SpriteGo*)FindGo("FabricPiece");
+	spr->SetActive(true);
+
+	spr = (SpriteGo*)FindGo("SponLogoBack");
+	spr->SetActive(true);
+
+	spr = (SpriteGo*)FindGo("GoldUiEx");
+	spr->SetActive(true);
+
+	text = (TextGo*)FindGo("SponsorRewardMoneyUiText");
+	text->SetActive(true);
+
+	text = (TextGo*)FindGo("SponsorQuestUiText");
+	text->SetActive(true);
+
+	text = (TextGo*)FindGo("SponsorRewardUiText");
+	text->SetActive(true);
+}
+
 void SceneHome::UpdateMoney()
 {
 	TextGo* text = (TextGo*)FindGo("MoneyInfoT");
@@ -1220,6 +2216,129 @@ void SceneHome::NewYear()
 	}
 	TEAM_MGR.SetAiTeams(newAiTeams);
 }
+
+void SceneHome::SponsorContract(int index)
+{
+	for (size_t i = 0; i < 3; i++)
+	{
+		if (TEAM_MGR.GetSponsor(i).sponsorType == newSponsor[index].sponsorType)
+		{
+			return;
+		}
+	}
+
+	auto stringtable = DATATABLE_MGR.Get<StringTable>(DataTable::Ids::String);
+	TEAM_MGR.ContractSponsor(newSponsor[index]);
+
+	if (TEAM_MGR.GetMaxSponsor() == TEAM_MGR.GetContractedSponsor())
+	{
+		TextGo* text = (TextGo*)FindGo("SponsorContractLeftWarnText");
+		text->SetActive(false);
+		text = (TextGo*)FindGo("SponsorContractAcceptText");
+		text->text.setFillColor(sf::Color(100,100,100));
+		UiButton* bt = (UiButton*)FindGo("SponsorContract");
+		bt->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/Origin/Sprite/default_button_3.png"));
+	}
+	TextGo* text = (TextGo*)FindGo("SelectedSponsorCountText");
+	text->text.setString(stringtable->GetW("SelectedSponsor"));
+	text->text.setString(text->text.getString() + " "
+		+ std::to_string(TEAM_MGR.GetContractedSponsor()) + "/"
+		+ std::to_string(TEAM_MGR.GetMaxSponsor()));
+}
+
+void SceneHome::UiSponsorSelect(int index)
+{
+	Sponsor sponsor = TEAM_MGR.GetSponsor(index);
+	if (sponsor.sponsorType == -1)
+	{
+		return;
+	}
+	selectedSponsorIndex = index;
+	auto stringtable = DATATABLE_MGR.Get<StringTable>(DataTable::Ids::String);
+	SpriteGo* spr = (SpriteGo*)FindGo("SelectedLogo");
+	spr->SetActive(true);
+	spr->sprite.setTexture(*RESOURCE_MGR.GetTexture(sponsor.sponsorTextureId));
+
+	TextGo* text = (TextGo*)FindGo("SelectedSponsorName");
+	text->SetActive(true);
+	text->text.setString(sponsor.sponsorName);
+
+	text = (TextGo*)FindGo("SponsorQuest");
+	text->SetActive(true);
+	std::stringstream ss;
+	ss << "ContractConditions" << sponsor.questCode;
+	text->text.setString(stringtable->GetW(ss.str()));
+	switch (sponsor.questCode)
+	{
+	case 0:
+		text->text.setString(text->text.getString() + " " + std::to_string(3 - sponsor.questDifficulty));
+		break;
+	case 1:
+	case 2:
+		text->text.setString(text->text.getString() + " " + std::to_string(5 + sponsor.questDifficulty * 2));
+		break;
+	case 3:
+	case 4:
+		text->text.setString(text->text.getString() + " " + std::to_string(300 + sponsor.questDifficulty * 50));
+	default:
+		break;
+	}
+
+
+	text = (TextGo*)FindGo("SponsorMoney");
+	text->SetActive(true);
+	text->text.setString(std::to_string(sponsor.rewardMoney));
+
+	for (int i = 0; i < 4; i++)
+	{
+		std::stringstream ss;
+		ss << "SponsorParts" << i;
+		text = (TextGo*)FindGo(ss.str());
+		text->SetActive(true);
+		text->text.setString("x" + std::to_string(sponsor.rewardParts[i]));
+	}
+
+	for (int i = 0; i < 4; i++)
+	{
+		std::stringstream ss;
+		ss << "PartBack" << i;
+		spr = (UiButton*)FindGo(ss.str());
+		spr->SetActive(true);
+	}
+
+	spr = (SpriteGo*)FindGo("SoundChip");
+	spr->SetActive(true);
+
+	spr = (SpriteGo*)FindGo("KeyboardSwitch");
+	spr->SetActive(true);
+
+	spr = (SpriteGo*)FindGo("Screw");
+	spr->SetActive(true);
+
+	spr = (SpriteGo*)FindGo("FabricPiece");
+	spr->SetActive(true);
+
+	spr = (SpriteGo*)FindGo("SponLogoBack");
+	spr->SetActive(true);
+
+	spr = (SpriteGo*)FindGo("GoldUiEx");
+	spr->SetActive(true);
+
+	text = (TextGo*)FindGo("SponsorRewardMoneyUiText");
+	text->SetActive(true);
+
+	text = (TextGo*)FindGo("SponsorQuestUiText");
+	text->SetActive(true);
+
+	text = (TextGo*)FindGo("SponsorRewardUiText");
+	text->SetActive(true);
+
+	text = (TextGo*)FindGo("SponsorQuestNowText");
+	text->SetActive(true);
+	text->text.setString(stringtable->GetW("Now"));
+	text->text.setString(text->text.getString() +" " + std::to_string(TEAM_MGR.GetSponsor(index).currentProcess));
+}
+
 
 void SceneHome::MakeLocalPlayer(PlayerInfo& player)
 {
@@ -1312,4 +2431,13 @@ void SceneHome::TestingCheats()
 	{
 		SCENE_MGR.ChangeScene(SceneId::Game);
 	}
+}
+
+void SceneHome::UiEquipOpen(bool on)
+{
+	SubUiBaseOpen(9,on);
+	auto stringtable = DATATABLE_MGR.Get<StringTable>(DataTable::Ids::String);
+
+	SpriteGo* spr = (SpriteGo*)FindGo("SubUiBack");
+	spr->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/UiFix/equipment_bg.png"));
 }

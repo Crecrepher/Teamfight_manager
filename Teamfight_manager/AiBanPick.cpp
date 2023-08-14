@@ -69,7 +69,7 @@ Champion AiBanPick::CompareSecondStatChampion(const Champion& a, const Champion&
             return AddStat(a) > AddStat(b);
         });
 
-    secondStatChampion = highStatChampions[1];
+    secondStatChampion = champions.front();
 
     return secondStatChampion; // 두 번째로 높은 스텟 챔피언 반환
 }

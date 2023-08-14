@@ -1,0 +1,10 @@
+ID,FPS,LOOPTYPE,,
+Skill,10,0,,
+,,,,
+TEXTUREID,LEFT,TOP,WIDTH,HEIGHT
+graphics/CustomSprite/magicknight_96pix.png,192,384,96,96
+graphics/CustomSprite/magicknight_96pix.png,288,384,96,96
+graphics/CustomSprite/magicknight_96pix.png,384,384,96,96
+graphics/CustomSprite/magicknight_96pix.png,480,384,96,96
+graphics/CustomSprite/magicknight_96pix.png,576,384,96,96
+graphics/CustomSprite/magicknight_96pix.png,0,480,96,96

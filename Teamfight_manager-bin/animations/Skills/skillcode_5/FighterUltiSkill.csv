@@ -1,0 +1,14 @@
+ID,FPS,LOOPTYPE,,
+UltiSkill,10,0,,
+,,,,
+TEXTUREID,LEFT,TOP,WIDTH,HEIGHT
+graphics/CustomSprite/fighter_64pix.png,0,320,64,64
+graphics/CustomSprite/fighter_64pix.png,64,320,64,64
+graphics/CustomSprite/fighter_64pix.png,128,320,64,64
+graphics/CustomSprite/fighter_64pix.png,192,320,64,64
+graphics/CustomSprite/fighter_128pix.png,0,0,128,128
+graphics/CustomSprite/fighter_128pix.png,128,0,128,128
+graphics/CustomSprite/fighter_128pix.png,256,0,128,128
+graphics/CustomSprite/fighter_32pix.png,0,0,32,32
+graphics/CustomSprite/fighter_32pix.png,32,0,32,32
+graphics/CustomSprite/fighter_32pix.png,64,0,32,32

@@ -1,0 +1,12 @@
+ID,FPS,LOOPTYPE,,
+Move,10,1,,
+,,,,
+TEXTUREID,LEFT,TOP,WIDTH,HEIGHT
+graphics/CustomSprite/soldier_64pix.png,320,0,64,64
+graphics/CustomSprite/soldier_64pix.png,384,0,64,64
+graphics/CustomSprite/soldier_64pix.png,448,0,64,64
+graphics/CustomSprite/soldier_64pix.png,0,64,64,64
+graphics/CustomSprite/soldier_64pix.png,64,64,64,64
+graphics/CustomSprite/soldier_64pix.png,128,64,64,64
+graphics/CustomSprite/soldier_64pix.png,192,64,64,64
+graphics/CustomSprite/soldier_64pix.png,256,64,64,64

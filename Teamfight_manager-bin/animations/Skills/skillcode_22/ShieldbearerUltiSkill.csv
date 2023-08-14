@@ -1,0 +1,10 @@
+ID,FPS,LOOPTYPE,,
+UltiSkill,10,0,,
+,,,,
+TEXTUREID,LEFT,TOP,WIDTH,HEIGHT
+graphics/CustomSprite/shieldbearer_64pix.png,320,128,64,64
+graphics/CustomSprite/shieldbearer_128pix.png,256,128,128,128
+graphics/CustomSprite/shieldbearer_128pix.png,384,128,128,128
+graphics/CustomSprite/shieldbearer_128pix.png,512,128,128,128
+graphics/CustomSprite/shieldbearer_128pix.png,640,128,128,128
+graphics/CustomSprite/shieldbearer_64pix.png,384,128,64,64

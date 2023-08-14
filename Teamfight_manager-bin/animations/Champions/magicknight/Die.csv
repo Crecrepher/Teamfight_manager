@@ -1,0 +1,15 @@
+ID,FPS,LOOPTYPE,,
+Die,10,0,,
+,,,,
+TEXTUREID,LEFT,TOP,WIDTH,HEIGHT
+graphics/CustomSprite/magicknight_96pix.png,480,192,96,96
+graphics/CustomSprite/magicknight_96pix.png,576,192,96,96
+graphics/CustomSprite/magicknight_96pix.png,0,288,96,96
+graphics/CustomSprite/magicknight_96pix.png,96,288,96,96
+graphics/CustomSprite/magicknight_96pix.png,192,288,96,96
+graphics/CustomSprite/magicknight_96pix.png,288,288,96,96
+graphics/CustomSprite/magicknight_96pix.png,384,288,96,96
+graphics/CustomSprite/magicknight_96pix.png,480,288,96,96
+graphics/CustomSprite/magicknight_96pix.png,576,288,96,96
+graphics/CustomSprite/magicknight_96pix.png,0,384,96,96
+graphics/CustomSprite/magicknight_96pix.png,96,384,96,96

@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "ChampionMgr.h"
+#include "ResourceMgr.h"
 #include "rapidcsv.h"
 
 void ChampionMgr::Init()
@@ -21,12 +22,22 @@ void ChampionMgr::LoadFromCsv(const std::string path)
 	std::vector<int> skill_1 = doc.GetColumn<int>(7);
 	std::vector<int> skill_2 = doc.GetColumn<int>(8);
 	std::vector<int> type = doc.GetColumn<int>(9);
+	std::vector<std::string> animation = doc.GetColumn<std::string>(10);
 
 
 	for (size_t i = 0; i < id.size(); ++i)
 	{
+		rapidcsv::Document ani(animation[i]);
+		
+		std::vector<std::string> aniPath = ani.GetColumn<std::string>(0);
+
+		AnimatioControler temp;
+		for (size_t j = 0; j < aniPath.size(); ++j)
+		{
+			temp.AddClip(*RESOURCE_MGR.GetAnimationClip(aniPath[j]));
+		}
 		champions.insert({ id[i], {id[i],mHp[i],atk[i],def[i],atkSp[i],atkRg[i],
-			sp[i],skill_1[i],skill_2[i],(ChampionType)type[i]} });
+			sp[i],skill_1[i],skill_2[i],(ChampionType)type[i],temp} });
 	}
 }
 
