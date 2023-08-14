@@ -25,7 +25,7 @@ protected:
 	std::vector<Champion*> blueTeam;
 	std::vector<Champion*> cemetery;
 
-	SpriteGo banSheet;
+	SpriteGo* banSheet;
 	AnimatioControler banAnimation;
 
 public:

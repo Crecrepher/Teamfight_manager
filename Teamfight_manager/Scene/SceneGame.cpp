@@ -49,10 +49,10 @@ void SceneGame::Init()
 	ButtonInit();
 
 	//애니메이션 추가 임시위치
-
-	banSheet.sortLayer = 102;
-	AddGo(&banSheet);
-	banAnimation.SetTarget(&banSheet.sprite);
+	banSheet = new SpriteGo("","BanSheet");
+	AddGo(banSheet);
+	banSheet->sortLayer = 102;
+	banAnimation.SetTarget(&banSheet->sprite);
 	banAnimation.AddClip(*RESOURCE_MGR.GetAnimationClip("animations/banSlotBlue.csv"));
 
 	championPool.OnCreate = [this](Champion* champion){
@@ -82,7 +82,7 @@ void SceneGame::Enter()
 	Scene::Enter();
 	RESOURCE_MGR.LoadFromCsv("tables/GameResourceList.csv");
 	banAnimation.Play("Idle"); // 무조건 한번만 호출되게
-	banSheet.SetOrigin(Origins::MC);
+	banSheet->SetOrigin(Origins::MC);
 	currentPhase = Phase::None;
 }
 
@@ -114,7 +114,7 @@ void SceneGame::Update(float dt)
 	banAnimation.Update(dt);
 	sf::Vector2f mousePos = INPUT_MGR.GetMousePos();
 	sf::Vector2f uiMousePos = ScreenToUiPos(mousePos);
-	banSheet.SetPosition(uiMousePos);
+	banSheet->SetPosition(uiMousePos);
 
 	switch (currentPhase)
 	{
@@ -349,7 +349,7 @@ void SceneGame::BanPhase(float dt)
 
 	banAnimation.Update(dt);
 
-	banSheet.SetPosition(mousePos);
+	banSheet->SetPosition(mousePos);
 
 	
 
