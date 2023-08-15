@@ -690,8 +690,7 @@ void SceneHome::MakeSubUi()
 	UiTrainingOpen(false);
 	MakeSubUiSponsorContract();
 	MakeSubUiEquip();
-	UiEquipOpen();
-	UiEquipMakeOpen();
+	UiEquipOpen(false);
 }
 
 void SceneHome::MakeSubUiTraining()
@@ -1652,14 +1651,6 @@ void SceneHome::MakeSubUiEquip()
 		text->sortLayer = 117;
 
 		ss.str("");
-		ss << "CraftUiUsingCount" << i;
-		AddGo(new TextGo(ss.str()));
-
-		ss.str("");
-		ss << "CraftUiUsingPartsText" << i;
-		AddGo(new TextGo(ss.str()));
-
-		ss.str("");
 		ss << "PartDecrease" << i;
 		bt = (UiButton*)FindGo(ss.str());
 		bt->SetOrigin(Origins::MC);
@@ -1907,6 +1898,7 @@ void SceneHome::SubUiBaseOpen(int index, bool on)
 		UiTrainingOpen(false);
 		UiSponsorContractOpen(true, false);
 		UiSponsorContractOpen(false, false);
+		UiEquipOpen(false);
 	};
 
 	TextGo* text = (TextGo*)FindGo("UiMenuTitleText");
@@ -3059,7 +3051,6 @@ void SceneHome::UiEquipOpen(bool on)
 	spr->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/UiFix/equipment_bg.png"));
 
 	// Base
-	
 	text = (TextGo*)FindGo("UsingEquipUiText");
 	text->SetActive(on);
 
@@ -3094,7 +3085,6 @@ void SceneHome::UiEquipOpen(bool on)
 		ss << "HavePartsText" << i;
 		text = (TextGo*)FindGo(ss.str());
 		text->SetActive(on);
-
 	}
 
 	for (int i = 0; i < 3; i++)
@@ -3193,6 +3183,122 @@ void SceneHome::UiEquipOpen(bool on)
 	text->SetActive(false);
 
 	// Craft
+
+	spr = (SpriteGo*)FindGo("EquipPopup");
+	spr->SetActive(false);
+	
+	text = (TextGo*)FindGo("PopupUiText");
+	text->SetActive(false);
+
+	spr = (SpriteGo*)FindGo("ExitEquipPopB");
+	spr->SetActive(false);
+
+	text = (TextGo*)FindGo("ExitEquipPopBText");
+	text->SetActive(false);
+
+	text = (TextGo*)FindGo("SelectPartsText");
+	text->SetActive(false);
+
+	bt = (UiButton*)FindGo("PartsResetB");
+	bt->SetActive(false);
+	text = (TextGo*)FindGo("SelectPartsResetBText");
+	text->SetActive(false);
+
+	for (int i = 0; i < 4; i++)
+	{
+		std::stringstream ss;
+		ss << "CraftSlot" << i;
+		bt = (UiButton*)FindGo(ss.str());
+		bt->SetActive(false);
+
+		ss << "Icon";
+		spr = (SpriteGo*)FindGo(ss.str());
+		spr->SetActive(false);
+
+		ss << "Bg";
+		spr = (SpriteGo*)FindGo(ss.str());
+		spr->SetActive(false);
+
+		ss.str("");
+		ss << "UsingCraftPartsText" << i;
+		text = (TextGo*)FindGo(ss.str());
+		text->SetActive(false);
+
+		ss << "Cur";
+		text = (TextGo*)FindGo(ss.str());
+		text->SetActive(false);
+
+		ss << "Text";
+		text = (TextGo*)FindGo(ss.str());
+		text->SetActive(false);
+
+		ss.str("");
+		ss << "PartDecrease" << i;
+		bt = (UiButton*)FindGo(ss.str());
+		bt->SetActive(false);
+
+		ss.str("");
+		ss << "InputPartsBt" << i << "Text1";
+		text = (TextGo*)FindGo(ss.str());
+		text->SetActive(false);
+
+		ss.str("");
+		ss << "PartDecrease" << i << "x5";
+		bt = (UiButton*)FindGo(ss.str());
+		bt->SetActive(false);
+
+		ss.str("");
+		ss << "InputPartsBt" << i << "Text0";
+		text = (TextGo*)FindGo(ss.str());
+		text->SetActive(false);
+
+		ss.str("");
+		ss << "PartIncrease" << i;
+		bt = (UiButton*)FindGo(ss.str());
+		bt->SetActive(false);
+
+		ss.str("");
+		ss << "InputPartsBt" << i << "Text2";
+		text = (TextGo*)FindGo(ss.str());
+		text->SetActive(false);
+
+		ss.str("");
+		ss << "PartIncrease" << i << "x5";
+		bt = (UiButton*)FindGo(ss.str());
+		bt->SetActive(false);
+		ss.str("");
+		ss << "InputPartsBt" << i << "Text3";
+		text = (TextGo*)FindGo(ss.str());
+		text->SetActive(false);
+
+		ss.str("");
+		ss << "CraftUiUsingCount" << i;
+		text = (TextGo*)FindGo(ss.str());
+		text->SetActive(false);
+
+		ss.str("");
+		ss << "CraftUiUsingPartsText" << i;
+		text = (TextGo*)FindGo(ss.str());
+		text->SetActive(false);
+	}
+
+	text = (TextGo*)FindGo("CraftUiCurMoneyText");
+	text->SetActive(false);
+
+	text = (TextGo*)FindGo("CraftUiPartsHeadText");
+	text->SetActive(false);
+
+	text = (TextGo*)FindGo("CraftUiUseDateText");
+	text->SetActive(false);
+
+	text = (TextGo*)FindGo("CraftUiUseCostText");
+	text->SetActive(false);
+
+	bt = (UiButton*)FindGo("OnCraftB");
+	bt->SetActive(false);
+
+	text = (TextGo*)FindGo("CraftingBText");
+	text->SetActive(false);
 }
 
 void SceneHome::UiEquipChangeOpen(bool on)
@@ -3272,5 +3378,109 @@ void SceneHome::UiEquipMakeOpen(bool on)
 	spr->SetActive(on);
 
 	text = (TextGo*)FindGo("ExitEquipPopBText");
+	text->SetActive(on);
+
+	text = (TextGo*)FindGo("SelectPartsText");
+	text->SetActive(on);
+
+	bt = (UiButton*)FindGo("PartsResetB");
+	bt->SetActive(on);
+	text = (TextGo*)FindGo("SelectPartsResetBText");
+	text->SetActive(on);
+
+	for (int i = 0; i < 4; i++)
+	{
+		std::stringstream ss;
+		ss << "CraftSlot" << i;
+		bt = (UiButton*)FindGo(ss.str());
+		bt->SetActive(on);
+
+		ss << "Icon";
+		spr = (SpriteGo*)FindGo(ss.str());
+		spr->SetActive(on);
+
+		ss << "Bg";
+		spr = (SpriteGo*)FindGo(ss.str());
+		spr->SetActive(on);
+
+		ss.str("");
+		ss << "UsingCraftPartsText" << i;
+		text = (TextGo*)FindGo(ss.str());
+		text->SetActive(on);
+
+		ss << "Cur";
+		text = (TextGo*)FindGo(ss.str());
+		text->SetActive(on);
+
+		ss << "Text";
+		text = (TextGo*)FindGo(ss.str());
+		text->SetActive(on);
+
+		ss.str("");
+		ss << "PartDecrease" << i;
+		bt = (UiButton*)FindGo(ss.str());
+		bt->SetActive(on);
+
+		ss.str("");
+		ss << "InputPartsBt" << i << "Text1";
+		text = (TextGo*)FindGo(ss.str());
+		text->SetActive(on);
+
+		ss.str("");
+		ss << "PartDecrease" << i << "x5";
+		bt = (UiButton*)FindGo(ss.str());
+		bt->SetActive(on);
+
+		ss.str("");
+		ss << "InputPartsBt" << i << "Text0";
+		text = (TextGo*)FindGo(ss.str());
+		text->SetActive(on);
+
+		ss.str("");
+		ss << "PartIncrease" << i;
+		bt = (UiButton*)FindGo(ss.str());
+		bt->SetActive(on);
+
+		ss.str("");
+		ss << "InputPartsBt" << i << "Text2";
+		text = (TextGo*)FindGo(ss.str());
+		text->SetActive(on);
+
+		ss.str("");
+		ss << "PartIncrease" << i << "x5";
+		bt = (UiButton*)FindGo(ss.str());
+		bt->SetActive(on);
+		ss.str("");
+		ss << "InputPartsBt" << i << "Text3";
+		text = (TextGo*)FindGo(ss.str());
+		text->SetActive(on);
+
+		ss.str("");
+		ss << "CraftUiUsingCount" << i;
+		text = (TextGo*)FindGo(ss.str());
+		text->SetActive(on);
+
+		ss.str("");
+		ss << "CraftUiUsingPartsText" << i;
+		text = (TextGo*)FindGo(ss.str());
+		text->SetActive(on);
+	}
+
+	text = (TextGo*)FindGo("CraftUiCurMoneyText");
+	text->SetActive(on);
+
+	text = (TextGo*)FindGo("CraftUiPartsHeadText");
+	text->SetActive(on);
+
+	text = (TextGo*)FindGo("CraftUiUseDateText");
+	text->SetActive(on);
+
+	text = (TextGo*)FindGo("CraftUiUseCostText");
+	text->SetActive(on);
+
+	bt = (UiButton*)FindGo("OnCraftB");
+	bt->SetActive(on);
+
+	text = (TextGo*)FindGo("CraftingBText");
 	text->SetActive(on);
 }
