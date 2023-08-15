@@ -10,6 +10,7 @@
 #include "SkillMgr.h"
 #include "Framework.h"
 
+#include "RectGo.h"
 #include "SpriteGo.h"
 #include "TextGo.h"
 #include "SoundGo.h"
@@ -45,6 +46,11 @@ void SceneGame::Init()
 	bg->SetPosition(centerPos);
 	bg->SetOrigin(Origins::MC);
 
+	RectGo* field = (RectGo*)AddGo(new RectGo("field"));
+	field->rectangle.setSize({ 544, 308 });
+	field->SetPosition({ 361,191 });
+	field->sortLayer = -2;
+
 	SpriteGo* header = (SpriteGo*)AddGo(new SpriteGo("graphics/Origin/Sprite/header_bg#43707.png"));
 	header->sprite.setScale(2,2);
 	header->sortLayer = 101;
@@ -52,8 +58,9 @@ void SceneGame::Init()
 	header->SetPosition(0, 0);
 	header->SetOrigin(Origins::TL);
 
-	championPool.OnCreate = [this](Champion* champion){
+	championPool.OnCreate = [this, field](Champion* champion){
 		champion->ChangeStance(ChampionStance::None);
+		champion->SetField(field);
 	};
 	championPool.Init();
 
@@ -106,6 +113,11 @@ void SceneGame::Exit()
 
 void SceneGame::Update(float dt)
 {
+	if (INPUT_MGR.GetMouseButtonDown(sf::Mouse::Left))
+	{
+		std::cout << INPUT_MGR.GetMousePos().x << "\t"
+			<< INPUT_MGR.GetMousePos().y << std::endl;
+	}
 	Scene::Update(dt);
 
 	switch (currentPhase)
@@ -153,6 +165,11 @@ void SceneGame::Update(float dt)
 	case Phase::Battle:
 	{
 		BattlePhase(dt);
+		break;
+	}
+	case Phase::Result:
+	{
+		ResultPhase(dt);
 		break;
 	}
 	}
@@ -217,9 +234,15 @@ void SceneGame::ChangePhase(Phase cPhase)
 	case Phase::Battle:
 	{
 		currentPhase = Phase::Battle;
-		battleTimer = 30.f;
+		battleTimer = 60.f;
 		break;
 	}
+	case Phase::Result:
+	{
+		currentPhase = Phase::Result;
+		break;
+	}
+
 	}
 }
 
@@ -255,6 +278,46 @@ void SceneGame::ChangeTeam()
 		break;
 	}
 	}
+}
+
+void SceneGame::ChampionPick(std::string id, Team team)
+{
+	Champion* champ = championPool.Get();
+	champ->SetState(*CHAMPION_MGR.GetChampion(id));
+	champ->UpdateState();
+	champ->SetName(std::to_string((int)team) + "팀 " + std::to_string(step) + "선수");
+	champ->SetOrder(TagetingOrder::Default);
+	champ->SetTeamScore(&redScore);
+	champ->SetDieChampion(&cemetery);
+	champ->SetSkill(*SKILL_MGR.GetSkill(champ->GetCurretState().skillCode1));
+	champ->SetSkill(*SKILL_MGR.GetSkill(champ->GetCurretState().skillCode2));
+	champ->ChangeStance(ChampionStance::None);
+	champ->SetOrigin(Origins::MC);
+	champ->SetSacleX(1);
+
+	switch (team)
+	{
+	case Team::Red:
+	{
+		champ->SetPosition((Utils::RandomRange(750, 850)), (Utils::RandomRange(300, 450)));
+		champ->SetEnemyTeam(&blueTeam);
+		champ->SetMyTeam(&redTeam);
+		champ->SetTeamColor(Team::Red);
+		redTeam.push_back(champ);
+		break;
+	}
+	case Team::Blue:
+	{
+		champ->SetPosition((Utils::RandomRange(420, 520)), (Utils::RandomRange(300, 450)));
+		champ->SetEnemyTeam(&redTeam);
+		champ->SetMyTeam(&blueTeam);
+		champ->SetTeamScore(&blueScore);
+		champ->SetTeamColor(Team::Blue);
+		blueTeam.push_back(champ);
+		break;
+	}
+	}
+	AddGo(champ);
 }
 
 void SceneGame::BanPhase(float dt)
@@ -311,55 +374,17 @@ void SceneGame::BanPhase(float dt)
 
 void SceneGame::PickPhase(float dt)
 {
-	switch (team)
+	if (team == Team::Red)
 	{
-	case Team::Red:
+		pick = "archer";
+	}
+	else if (team == Team::Blue)
 	{
-		Champion* redChamp = championPool.Get();
-		redChamp->SetState(*CHAMPION_MGR.GetChampion("soldier"));
-		redChamp->UpdateState();
-		redChamp->SetName(std::to_string((int)team) + "팀 " + std::to_string(step) + "선수");
-		redChamp->SetOrder(TagetingOrder::Default);
-		redChamp->SetPosition((Utils::RandomRange(420,520)), (Utils::RandomRange(300, 450)));
-		redChamp->SetEnemyTeam(&blueTeam);
-		redChamp->SetMyTeam(&redTeam);
-		redChamp->SetDieChampion(&cemetery);
-		redChamp->SetSkill(*SKILL_MGR.GetSkill(redChamp->GetCurretState().skillCode1));
-		redChamp->SetSkill(*SKILL_MGR.GetSkill(redChamp->GetCurretState().skillCode2));
-		redChamp->ChangeStance(ChampionStance::None);
-		redChamp->SetOrigin(Origins::MC);
-		redChamp->SetSacleX(1);
-		redChamp->SetTeamColor(Team::Red);
-		redTeam.push_back(redChamp);
-		AddGo(redChamp);
-		ChangeTeam();
-		ChangeTurn();
-		break;
+		pick = "fighter";
 	}
-	case Team::Blue:
-	{
-		Champion* blueChamp = championPool.Get();
-		blueChamp->SetState(*CHAMPION_MGR.GetChampion("swordman"));
-		blueChamp->UpdateState();
-		blueChamp->SetOrder(TagetingOrder::Default);
-		blueChamp->SetName(std::to_string((int)team) + "팀 " + std::to_string(step) + "선수");
-		blueChamp->SetPosition((Utils::RandomRange(750, 850)), (Utils::RandomRange(300, 450)));
-		blueChamp->SetEnemyTeam(&redTeam);
-		blueChamp->SetMyTeam(&blueTeam);
-		blueChamp->SetDieChampion(&cemetery);
-		blueChamp->SetSkill(*SKILL_MGR.GetSkill(blueChamp->GetCurretState().skillCode1));
-		blueChamp->SetSkill(*SKILL_MGR.GetSkill(blueChamp->GetCurretState().skillCode2));
-		blueChamp->ChangeStance(ChampionStance::None);
-		blueChamp->SetOrigin(Origins::MC);
-		blueChamp->SetSacleX(-1);
-		blueChamp->SetTeamColor(Team::Blue);
-		blueTeam.push_back(blueChamp);
-		AddGo(blueChamp);
-		ChangeTeam();
-		ChangeTurn();
-		break;
-	}
-	}
+	ChampionPick(pick, team);
+	ChangeTeam();
+	ChangeTurn();
 
 	if (step == fullStep)
 	{
@@ -406,7 +431,37 @@ void SceneGame::BattlePhase(float dt)
 	}
 
 	battleTimer -= dt;
+	if (battleTimer > 0.f)
+	{
+		for (auto champ : championPool.GetUseList())
+		{
+			champ->BattleUpdate(dt);
+		}
+	}
 	if (battleTimer <= 0)
+	{
+		std::cout << "blue Kill : " << blueScore << std::endl;
+		std::cout << "red Kill : " << redScore << std::endl;
+		if (blueScore > redScore)
+		{
+			std::cout << "blue win" << std::endl;
+		}
+		else if (blueScore < redScore)
+		{
+			std::cout << "red win" << std::endl;
+		}
+		else if (blueScore == redScore)
+		{
+			std::cout << "draw" << std::endl;
+		}
+
+		ChangePhase(Phase::Result);
+	}
+}
+
+void SceneGame::ResultPhase(float dt)
+{
+	if (INPUT_MGR.GetKeyDown(sf::Keyboard::Enter))
 	{
 		if (!redTeam.empty())
 		{
@@ -431,7 +486,7 @@ void SceneGame::BattlePhase(float dt)
 				std::cout << team->GetName() << " 킬 : " << team->GetKillScore() << std::endl;
 				std::cout << team->GetName() << " 데스 : " << team->GetDeathScore() << std::endl;
 				std::cout << team->GetName() << " 입힌 피해 : " << team->GetTotalDamage() << std::endl;
-				std::cout << team->GetName() << " 당한 피해 : " << team->GetTotalOnHit()<< std::endl;
+				std::cout << team->GetName() << " 당한 피해 : " << team->GetTotalOnHit() << std::endl;
 				team->ReleaseSkill();
 				RemoveGo(team);
 				team->SetTeamColor(Team::None);
@@ -455,6 +510,7 @@ void SceneGame::BattlePhase(float dt)
 			}
 			cemetery.clear();
 		}
-		ChangePhase(Phase::None);
+
+		SCENE_MGR.ChangeScene(SceneId::Home);
 	}
 }

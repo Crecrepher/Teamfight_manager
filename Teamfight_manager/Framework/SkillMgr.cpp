@@ -47,11 +47,22 @@ ChampionSkill* SkillMgr::GetSkill(const int code)
 
 void SkillMgr::ActiveSkill(int code, Champion* champ)
 {
+
 	switch (code)
 	{
 	case 1:
 	{
 		ArcherSkill(champ);
+		break;
+	}
+	case 2:
+	{
+		ArcherUltiSkill(champ);
+		break;
+	}
+	case 4:
+	{
+		FighterSkill(champ);
 		break;
 	}
 	}
@@ -63,6 +74,103 @@ void SkillMgr::passiveSkill(int code, Champion* champ)
 
 void SkillMgr::ArcherSkill(Champion* champ)
 {
-	//SKILL_MGR.ActiveSkill(champ->GetCurretState().skillCode1, champ);
-	return;
+	if (champ->GetCurretState().animaition.GetCurrentClipId() != "Skill")
+	{
+		champ->UseSkill();
+		champ->SetStartPos(champ->GetPosition());
+		sf::Vector2f dir = Utils::Normalize(champ->GetTarget()->GetPosition() - champ->GetPosition());
+		float magnitude = Utils::Magnitude(dir);
+		dir.x *= -1;
+		dir.y *= -1;
+		champ->SetEndPos(champ->GetPosition() + (dir * 15.f));
+		champ->SetMoveTime(0.f);
+		champ->SetAir(true);
+		return;
+	}
+
+	if (champ->GetCurretState().animaition.GetCurrFrame() > 1)
+	{
+		float t = champ->GetMoveTime() / 0.6f;
+		sf::Vector2f temp = champ->GetStartPos() + t * (champ->GetEndPos() - champ->GetStartPos());
+		champ->SetPosition(temp);
+	}
+
+	if (champ->GetCurretState().animaition.GetLastFrame())
+	{
+		std::cout << "½ºÅ³" << std::endl;
+		champ->DamageCalculate(champ->GetCurretState().attack - 10);
+		champ->GetTarget()->SetBind(0.5f);
+		champ->SkillChangeIdle();
+		champ->SetAir(false);
+		return;
+	}
+}
+
+void SkillMgr::ArcherUltiSkill(Champion* champ)
+{
+}
+
+void SkillMgr::BerserkerSkill(Champion* champ)
+{
+}
+
+void SkillMgr::FighterSkill(Champion* champ)
+{
+	champ->GetTarget()->SetBind(1.f);
+	if (champ->GetCurretState().animaition.GetCurrentClipId() != "Skill")
+	{
+		champ->UseSkill();
+		champ->SetStartPos(champ->GetPosition());
+		sf::Vector2f dir = Utils::Normalize(champ->GetTarget()->GetPosition() - champ->GetPosition());
+		champ->SetEndPos(champ->GetTarget()->GetPosition() + (dir * 30.f));
+		champ->SetMoveTime(0.f);
+		return;
+	}
+
+	if (champ->GetCurretState().animaition.GetCurrFrame() < 3)
+	{
+		float t = champ->GetMoveTime() / 0.3f;
+		sf::Vector2f temp = champ->GetStartPos() + t * (champ->GetEndPos() - champ->GetStartPos());
+		champ->SetPosition(temp);
+	}
+	else if (champ->GetCurretState().animaition.GetCurrFrame() == 3)
+	{
+		champ->SetStartPos(champ->GetPosition());
+		sf::Vector2f dir = Utils::Normalize(champ->GetTarget()->GetPosition() - champ->GetPosition());
+		if (!champ->GetTarget()->GetAir())
+		{
+			champ->GetTarget()->SetStartPos(champ->GetTarget()->GetPosition());
+			champ->GetTarget()->SetEndPos(champ->GetTarget()->GetPosition() + dir * 64.f);
+			champ->GetTarget()->SetAir(true);
+		}
+		champ->SetEndPos(champ->GetTarget()->GetPosition() + dir * 64.f);
+		champ->SetMoveTime(0.f);
+	}
+	else if (champ->GetCurretState().animaition.GetCurrFrame() > 3)
+	{
+		if (champ->GetMoveTime() >= 0.5f)
+		{
+			champ->SetMoveTime(0.5f);
+		}
+		float t = champ->GetMoveTime() / 0.5f;
+
+		sf::Vector2f temp = champ->GetStartPos() + t * (champ->GetEndPos() - champ->GetStartPos());
+		sf::Vector2f temp_enemy = champ->GetTarget()->GetStartPos() + t * (champ->GetTarget()->GetEndPos() - champ->GetTarget()->GetStartPos());
+		champ->GetTarget()->SetPosition(temp_enemy);
+		champ->SetPosition(temp);
+	}
+
+	if (champ->GetCurretState().animaition.GetLastFrame())
+	{
+		champ->DamageCalculate(champ->GetCurretState().attack +10);
+		champ->GetTarget()->SetBind(0.f);
+		champ->GetTarget()->SetAir(false);
+		champ->SkillChangeIdle();
+		return;
+	}
+	
+}
+
+void SkillMgr::FighterUltiSkill(Champion* champ)
+{
 }

@@ -8,6 +8,7 @@ enum class Phase
 	Pick,
 	Ready,
 	Battle,
+	Result,
 };
 
 enum class Team

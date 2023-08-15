@@ -22,6 +22,11 @@ public:
 	void passiveSkill(int code, Champion* champ);
 
 	void ArcherSkill(Champion* champ);
+	void ArcherUltiSkill(Champion* champ);
+	void BerserkerSkill(Champion* champ);
+	void FighterSkill(Champion* champ);
+	void FighterUltiSkill(Champion* champ);
+
 };
 
 #define SKILL_MGR (SkillMgr::Instance())
