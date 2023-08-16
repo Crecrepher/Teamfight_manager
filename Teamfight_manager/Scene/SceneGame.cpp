@@ -53,7 +53,6 @@ void SceneGame::Init()
 
 	UiInit();
 	ButtonInit();
-	BanPickFalse();
 
 	//애니메이션 추가 임시위치
 	banSheet = new SpriteGo("", "BanSheet");
@@ -159,9 +158,6 @@ void SceneGame::Update(float dt)
 	}
 	Scene::Update(dt);
 	banAnimation.Update(dt);
-	sf::Vector2f mousePos = INPUT_MGR.GetMousePos();
-	sf::Vector2f uiMousePos = ScreenToUiPos(mousePos);
-	banSheet->SetPosition(uiMousePos);
 
 	if (INPUT_MGR.GetKeyDown(sf::Keyboard::Q))
 	{
@@ -293,6 +289,7 @@ void SceneGame::ChangePhase(Phase cPhase)
 	}
 	case Phase::Battle:
 	{
+		BanPickFalse();
 		currentPhase = Phase::Battle;
 		battleTimer = 60.f;
 		break;
@@ -476,9 +473,9 @@ void SceneGame::BanPhase(float dt)
 
 			if (step == 2)
 			{
-				ButtonFalse(); // 임시 추가
 				ChangePhase(Phase::Pick);
 				step++;
+				std::cout << "페이즈 이동" << std::endl;
 				return;
 			}
 			step++;
@@ -522,9 +519,10 @@ void SceneGame::BanPhase(float dt)
 
 void SceneGame::PickPhase(float dt)
 {
+	
 	if (INPUT_MGR.GetMouseButtonDown(sf::Mouse::Right))
 	{
-		switch (team)
+		/*switch (team)
 		{
 
 		case Team::Red:
@@ -553,7 +551,7 @@ void SceneGame::PickPhase(float dt)
 		case Team::Blue:
 		{
 			Champion* blueChamp = championPool.Get();
-			blueChamp->SetState(*CHAMPION_MGR.GetChampion("archer"));
+			blueChamp->SetState(*CHAMPION_MGR.GetChampion("fighter"));
 			blueChamp->UpdateState();
 			blueChamp->SetOrder(TagetingOrder::Default);
 			blueChamp->SetName(std::to_string((int)team) + "팀 " + std::to_string(step) + "선수");
@@ -572,8 +570,9 @@ void SceneGame::PickPhase(float dt)
 			ChangeTurn();
 			break;
 		}
-		}
+		}*/
 
+		//임시코드
 		if (team == Team::Red)
 		{
 			pick = "archer";
@@ -1628,8 +1627,15 @@ void SceneGame::LineUpFalse()
 
 void SceneGame::BanPickFalse()
 {
-	FindGo("Champion Slot15")->SetActive(false);
-	FindGo("Champion Slot16")->SetActive(false);
-	FindGo("Champion Slot17")->SetActive(false);
-	FindGo("Champion Slot18")->SetActive(false);
+	SpriteGo* spr;
+	banSheet->SetActive(false);
+	banSheetBlueTeam->SetActive(false);
+	banSheetRedTeam->SetActive(false);
+	for (int i = 0; i < championSlot.size(); i++)
+	{
+		championSlot[i]->SetActive(false);
+	}
+	
+	spr = (SpriteGo*)FindGo("Ban Bg 2:2");
+	spr->SetActive(false);
 }
