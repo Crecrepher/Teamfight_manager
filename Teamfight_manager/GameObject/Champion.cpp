@@ -3,6 +3,7 @@
 #include "ResourceMgr.h"
 #include "SceneGame.h"
 #include "SceneMgr.h"
+#include "SkillMgr.h"
 #include "AnimatioControler.h"
 
 Champion::Champion(const std::string id, const std::string n)
@@ -41,6 +42,7 @@ void Champion::Reset()
 	this->kill = 0;
 	this->total_Damage = 0.f;
 	this->total_OnHit = 0.f;
+	this->currentState.animaition = this->champMgrState.animaition;
 	this->currentState.animaition.SetTarget(&sprite);
 	this->currentState.animaition.Play("Idle");
 	SetOrigin(Origins::MC);
@@ -51,12 +53,23 @@ void Champion::Release()
 	SpriteGo::Release();
 }
 
-void Champion::Update(float dt)
+void Champion::BattleUpdate(float dt)
 {
 	if (this->currentStance == ChampionStance::None)
 		return;
 
+	if (this->bind >= 0.f)
+	{
+		bind -= dt;
+	}
+
 	SpriteGo::Update(dt);
+
+	if (!field->rectangle.getGlobalBounds().contains(this->GetPosition()))
+	{
+		this->SetPosition(Utils::Clamp(this->GetPosition(), { 367,191 }, { 911,499 }));
+	}
+
 	this->SetOrigin(Origins::MC);
 
 	if (this->currentState.animaition.GetCurrentClipId() == "Die")
@@ -65,20 +78,31 @@ void Champion::Update(float dt)
 	}
 
 	UpdateState();
+	
+	this->skillTimer += dt;
+	this->attackDelay -= dt * this->currentState.attackSpeed;
 
-	skillTimer += dt;
-	attackDelay -= dt*this->currentState.attackSpeed;
-
-	if (skillTimer >= skillCoolTime)
+	if (this->skillTimer >= this->currentSkill[0].skillCoolTime)
 	{
-		skillTimer = skillCoolTime;
+		this->skillTimer = this->currentSkill[0].skillCoolTime;
 	}
 
 	if (this->hp <= 0 && this->currentStance!=ChampionStance::Dead)
 	{
 		if (this->currentState.animaition.GetCurrentClipId() != "Die")
 		{
+			if (this->currentState.animaition.GetCurrentClipId() == "Skill"&&
+				this->currentState.charId == "fighter")
+			{
+				this->target->SetAir(false);
+			}
+			this->currentState.animaition = this->champMgrState.animaition;
+			this->currentState.animaition.SetTarget(&this->sprite);
+			auto it = std::find(myTeam->begin(), myTeam->end(), this);
+			this->cemetery->push_back(*it);
+			this->myTeam->erase(it);
 			this->currentState.animaition.Play("Die");
+			this->air = false;
 			return;
 		}
 
@@ -138,6 +162,7 @@ void Champion::ChangeStance(ChampionStance stance)
 void Champion::Idle(float dt)
 {
 	this->currentState.animaition.Update(dt);
+	this->SetOrigin(Origins::MC);
 
 	if (this->currentState.animaition.GetCurrentClipId() != "Idle")
 	{
@@ -153,7 +178,7 @@ void Champion::Idle(float dt)
 		}
 		else if (this->myTeam->empty())
 		{
-			this->taget = nullptr;
+			this->target = nullptr;
 		}
 	}
 	else
@@ -164,19 +189,19 @@ void Champion::Idle(float dt)
 		}
 		else if (this->enemyTeam->empty())
 		{
-			this->taget = nullptr;
+			this->target = nullptr;
 		}
 	}
 
-	if (this->taget != nullptr)
+	if (this->target != nullptr)
 	{
-		SetSacleX(Utils::Normalize(taget->GetPosition() - this->position).x);
-		if (abs(Utils::Distance(this->GetPosition(), this->taget->GetPosition())) > this->currentState.attackRange)
+		SetSacleX(Utils::Normalize(target->GetPosition() - this->position).x);
+		if (abs(Utils::Distance(this->GetPosition(), this->target->GetPosition())) > this->currentState.attackRange && bind<0.f)
 		{
 			ChangeStance(ChampionStance::Move);
 			return;
 		}
-		else if (abs(Utils::Distance(this->GetPosition(), this->taget->GetPosition())) <= this->currentState.attackRange)
+		else if (abs(Utils::Distance(this->GetPosition(), this->target->GetPosition())) <= this->currentState.attackRange)
 		{
 			ChangeStance(ChampionStance::Action);
 			return;
@@ -187,6 +212,13 @@ void Champion::Idle(float dt)
 void Champion::Move(float dt)
 {
 	this->currentState.animaition.Update(dt);
+	this->SetOrigin(Origins::MC);
+
+	if (this->bind >= 0.f)
+	{
+		ChangeStance(ChampionStance::Idle);
+		return;
+	}
 
 	if (this->currentState.animaition.GetCurrentClipId() != "Move")
 	{
@@ -194,32 +226,30 @@ void Champion::Move(float dt)
 		return;
 	}
 
-	dt *= 5.f;
-
 	if (!this->enemyTeam->empty())
 	{
 		FindTaget();
 	}
 
-	if (this->taget != nullptr)
+	if (this->target != nullptr)
 	{
-		if (abs(Utils::Distance(this->GetPosition(), this->taget->GetPosition())) <= this->currentState.attackRange)
+		if (abs(Utils::Distance(this->GetPosition(), this->target->GetPosition())) <= this->currentState.attackRange)
 		{
 			ChangeStance(ChampionStance::Idle);
 			return;
 		}
 	}
-	SetPosition(this->position + Utils::Normalize(taget->GetPosition() - this->position) * this->currentState.speed * dt);
+	SetPosition(this->position + Utils::Normalize(target->GetPosition() - this->position) * this->currentState.speed * dt *5.f);
 }
 
 void Champion::Action(float dt)
 {
-	if (abs(Utils::Distance(this->GetPosition(), this->taget->GetPosition())) <= this->currentState.attackRange && skillTimer >= skillCoolTime)
+	if (abs(Utils::Distance(this->GetPosition(), this->target->GetPosition())) <= this->currentState.attackRange && this->skillTimer >= this->currentSkill[0].skillCoolTime && this->currentSkill[0].skillCoolTime!=0.f)
 	{
 		ChangeStance(ChampionStance::Skill);
 		return;
 	}
-	else if (abs(Utils::Distance(this->GetPosition(), this->taget->GetPosition())) <= this->currentState.attackRange&&attackDelay<=0.f)
+	else if (abs(Utils::Distance(this->GetPosition(), this->target->GetPosition())) <= this->currentState.attackRange&&this->attackDelay<=0.f)
 	{
 		ChangeStance(ChampionStance::Attack);
 		return;
@@ -234,12 +264,13 @@ void Champion::Action(float dt)
 void Champion::Attack(float dt)
 {
 	this->currentState.animaition.Update(dt*this->currentState.attackSpeed);
+	this->SetOrigin(Origins::MC);
 
-	if (this->currentState.charId == "priest" && this->taget->currentState.maxHp == this->taget->hp)
+	if (this->currentState.charId == "priest" && this->target->currentState.maxHp == this->target->hp)
 	{
 		return;
 	}
-	else if (this->currentState.charId == "priest" && this->taget->hp == 0)
+	else if (this->currentState.charId == "priest" && this->target->hp == 0)
 	{
 		return;
 	}
@@ -255,36 +286,11 @@ void Champion::Attack(float dt)
 		std::cout << "공격" << std::endl;
 		if (this->currentState.charId == "priest")
 		{
-			float heal = this->currentState.attack;
-			if (heal >= this->taget->GetHp())
-			{
-				heal = this->taget->GetHp();
-			}
-			this->total_Damage += heal;
-			std::cout << this->GetName() << " 회복량 : " << this->total_Damage << std::endl;
-			Heal(heal);
-			std::cout << this->taget->GetName() << " hp : " << this->taget->hp << std::endl;
+			HealCalculate(this->currentState.attack);
 		}
 		else if (this->currentState.charId != "priest")
 		{
-			float damage = (this->currentState.attack * 100 + 99 + 
-				this->taget->currentState.defend) / (100 + this->taget->currentState.defend);
-			if (damage <= 0.f)
-			{
-				damage = 0.f;
-			}
-			else if (damage >= this->taget->GetHp())
-			{
-				damage = this->taget->GetHp();
-			}
-			this->total_Damage += damage;
-			std::cout << this->GetName() << " 입힌 피해 : " << this->total_Damage << std::endl;
-			this->taget->Hit(damage);
-			if (this->taget->GetHp() == 0)
-			{
-				this->kill++;
-				std::cout << this->GetName() << " 킬 : " << this->kill << std::endl;
-			}
+			DamageCalculate(this->currentState.attack);
 		}
 		attackDelay = 1.f;
 		ChangeStance(ChampionStance::Idle);
@@ -294,20 +300,10 @@ void Champion::Attack(float dt)
 
 void Champion::Skill(float dt)
 {
-	this->currentState.animaition.Update(dt);
-
-	if (this->currentState.animaition.GetCurrentClipId() != "UltiSkill")
-	{
-		this->currentState.animaition.Play("UltiSkill");
-		return;
-	}
-	if (this->currentState.animaition.GetLastFrame())
-	{
-		std::cout << "스킬" << std::endl;
-		skillTimer = 0;
-		ChangeStance(ChampionStance::Idle);
-		return;
-	}
+	this->currentState.animaition.Update(dt*this->currentState.attackSpeed);
+	this->sMoveT += dt * this->currentState.attackSpeed;
+	this->SetOrigin(Origins::MC);
+	SKILL_MGR.ActiveSkill(this->currentState.skillCode1, this);
 }
 
 void Champion::SetState(State path)
@@ -328,6 +324,23 @@ void Champion::SetState(State path)
 	this->currentState.type = path.type;
 	this->champMgrState.animaition = path.animaition;
 	this->currentState.animaition = path.animaition;
+}
+
+void Champion::SetSkill(ChampionSkill code)
+{
+	this->skillMgrSkill = code;
+	this->currentSkill.push_back(this->skillMgrSkill);
+}
+
+void Champion::ReleaseSkill()
+{
+	if (this->currentSkill.empty())
+	{
+		return;
+	}
+	
+	this->currentSkill.clear();
+	return;
 }
 
 void Champion::SetSacleX(float x)
@@ -362,12 +375,12 @@ void Champion::Dead(float dt)
 		{
 		case Team::Red:
 		{
-			SetPosition((Utils::RandomRange(420, 520)), (Utils::RandomRange(300, 450)));
+			SetPosition((Utils::RandomRange(750, 850)), (Utils::RandomRange(300, 450)));
 			break;
 		}
 		case Team::Blue:
 		{
-			SetPosition((Utils::RandomRange(750, 850)), (Utils::RandomRange(300, 450)));
+			SetPosition((Utils::RandomRange(420, 520)), (Utils::RandomRange(300, 450)));
 			break;
 		}
 		}
@@ -381,9 +394,6 @@ void Champion::ChampionDie()
 {
 	this->reviveTimer = 3.f;
 	this->death++;
-	auto it = std::find(myTeam->begin(), myTeam->end(), this);
-	this->cemetery->push_back(*it);
-	this->myTeam->erase(it);
 	std::cout << this->GetName() << "챔피언 죽음" << std::endl;
 	std::cout << this->GetName() << " 데스 : " << this->death << std::endl;
 	this->sprite.setColor(sf::Color(0, 0, 0, 0));
@@ -399,6 +409,26 @@ void Champion::UpdateState()
 	this->currentState.attackSpeed = this->champMgrState.attackSpeed;
 	this->currentState.attackRange = this->champMgrState.attackRange;
 	this->currentState.speed = this->champMgrState.speed;
+}
+
+void Champion::UseSkill()
+{
+	this->currentState.animaition = this->currentSkill[0].animaition;
+	this->currentState.animaition.SetTarget(&this->sprite);
+	this->currentState.animaition.Play("Skill");
+}
+
+void Champion::SkillChangeIdle()
+{
+	this->skillTimer = 0;
+	this->currentState.animaition = this->champMgrState.animaition;
+	this->currentState.animaition.SetTarget(&this->sprite);
+	ChangeStance(ChampionStance::Idle);
+}
+
+Champion* Champion::GetTarget()
+{
+	return this->target;
 }
 
 void Champion::SetMyTeam(std::vector<Champion*>* myTeam)
@@ -426,6 +456,42 @@ void Champion::Hit(float attack)
 void Champion::Heal(float heal)
 {
 	this->hp += heal;
+}
+
+void Champion::DamageCalculate(float attack)
+{
+	float damage = (attack * 100 + 99 +
+		this->target->currentState.defend) / (100 + this->target->currentState.defend);
+	if (damage <= 0.f)
+	{
+		damage = 0.f;
+	}
+	else if (damage >= this->target->GetHp())
+	{
+		damage = this->target->GetHp();
+	}
+	this->total_Damage += damage;
+	std::cout << this->GetName() << " 입힌 피해 : " << this->total_Damage << std::endl;
+	this->target->Hit(damage);
+	if (this->target->GetHp() == 0)
+	{
+		this->kill++;
+		(*this->teamScore)++;
+		std::cout << this->GetName() << " 킬 : " << this->kill << std::endl;
+	}
+}
+
+void Champion::HealCalculate(float attack)
+{
+	float heal = attack;
+	if (heal >= this->target->GetHp())
+	{
+		heal = this->target->GetHp();
+	}
+	this->total_Damage += heal;
+	std::cout << this->GetName() << " 회복량 : " << this->total_Damage << std::endl;
+	Heal(heal);
+	std::cout << this->target->GetName() << " hp : " << this->target->hp << std::endl;
 }
 
 void Champion::FindTaget()
@@ -491,7 +557,7 @@ void Champion::TagetOrderCP()
 			if (kda > tagetRange)
 			{
 				tagetRange = kda;
-				this->taget = enemy;
+				this->target = enemy;
 			}
 		}
 	}
@@ -507,7 +573,7 @@ void Champion::TagetOrderSR()
 			if (abs(Utils::Distance(this->GetPosition(), enemy->GetPosition())) <= tagetRange)
 			{
 				tagetRange = abs(Utils::Distance(this->GetPosition(), enemy->GetPosition()));
-				this->taget = enemy;
+				this->target = enemy;
 			}
 		}
 	}
@@ -524,7 +590,7 @@ void Champion::TagetOrderRH()
 			if (enemy->GetRowHealth() <= tagetRange)
 			{
 				tagetRange = enemy->GetRowHealth();
-				this->taget = enemy;
+				this->target = enemy;
 			}
 		}
 	}
@@ -546,10 +612,10 @@ void Champion::TagetOrderH()
 			{
 				if (team->GetRowHealth() == 0)
 				{
-					this->taget = nullptr;
+					this->target = nullptr;
 				}
 				tagetRange = team->GetRowHealth();
-				this->taget = team;
+				this->target = team;
 			}
 		}
 	}
@@ -565,7 +631,7 @@ void Champion::TagetOrderLR()
 			if (abs(Utils::Distance(this->GetPosition(), enemy->GetPosition())) >= tagetRange)
 			{
 				tagetRange = abs(Utils::Distance(this->GetPosition(), enemy->GetPosition()));
-				this->taget = enemy;
+				this->target = enemy;
 			}
 		}
 	}

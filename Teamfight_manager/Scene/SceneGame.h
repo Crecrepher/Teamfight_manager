@@ -12,9 +12,13 @@ protected:
 	Mode mode=Mode::Duo;
 	Team team;
 	Turn currentTurn;
+	std::string pick = "";
 
 	float battleTimer;
 	float readyTimer;
+
+	int redScore;
+	int blueScore;
 
 	int fullStep; // ¹ê, ÇÈ ÃÑÈ½¼ö
 	int step; // ÁøÇàÁßÀÎ ¹ê, ÇÈ
@@ -45,12 +49,14 @@ public:
 	Phase GetPhase() { return currentPhase; }
 	void ChangeTurn();
 	void ChangeTeam();
+	void ChampionPick(std::string id, Team team);
 
 	void LeaguePhase(float dt);
 	void BanPhase(float dt);
 	void PickPhase(float dt);
 	void ReadyPhase(float dt);
 	void BattlePhase(float dt);
+	void ResultPhase(float dt);
 
 	template <typename T>
 	void ClearObjectPool(ObjectPool<T>& pool);

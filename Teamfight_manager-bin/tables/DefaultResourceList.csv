@@ -119,3 +119,9 @@ RESOURCE_TYPES 0.TEX 1.FONT 2.SOUND 3.ANI,RESOURCE_PATH
 3,animations/Skills/skillcode_25/SwordmanSkill.csv
 3,animations/Skills/skillcode_26/SwordmanUltiSkill.csv
 3,animations/banSlotBlue.csv
+3,animations/Skills/skillcode_27/BerserkerUltimateAttack.csv
+3,animations/Skills/skillcode_27/BerserkerUltimateMove.csv
+3,animations/Skills/skillcode_27/BerserkerUltimateIdle.csv
+3,animations/Skills/skillcode_27/BerserkerUltimateDie.csv
+3,animations/Skills/skillcode_27/BerserkerUltimateSkill.csv
+3,animations/Skills/skillcode_28/ShieldbearerSkill.csv

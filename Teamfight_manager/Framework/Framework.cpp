@@ -7,6 +7,7 @@
 #include "DataTableMgr.h"
 #include "ChampionMgr.h"
 #include "TeamMgr.h"
+#include "SkillMgr.h"
 
 
 Framework::Framework(int w, int h, const std::string& t)
@@ -22,6 +23,7 @@ void Framework::Init(int width, int height, const std::string& title)
     SCENE_MGR.Init();
     CHAMPION_MGR.Init();
     TEAM_MGR.Init();
+    SKILL_MGR.Init();
 }
 
 void Framework::Release()
