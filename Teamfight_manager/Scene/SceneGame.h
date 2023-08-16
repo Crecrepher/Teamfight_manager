@@ -13,7 +13,7 @@ protected:
 	Phase currentPhase=Phase::None;
 	Mode mode=Mode::Duo;
 	Team team;
-	Turn currentTurn;
+	Turn currentTurn = Turn::Player;
 	std::string pick = "";
 
 	float battleTimer;
@@ -31,6 +31,7 @@ protected:
 	std::vector<Champion*> blueTeam;
 	std::vector<Champion*> cemetery;
 
+	std::vector<int> banChamps;
 	SpriteGo* banSheet;
 
 	SpriteGo* banSheetBlueTeam; // ºí·ç
@@ -41,7 +42,7 @@ protected:
 	AnimatioControler banAnimation3;
 
 	std::vector<UiButton*> championSlot;
-	int champCount = 18;
+	int champCount = 14;
 	bool selectCheck = true;
 
 
@@ -65,7 +66,7 @@ public:
 	Phase GetPhase() { return currentPhase; }
 	void ChangeTurn();
 	void ChangeTeam();
-	void ChampionPick(std::string id, Team team);
+	void ChampionPick(int id, Team team);
 
 	void LeaguePhase(float dt);
 	void BanPhase(float dt);
@@ -80,14 +81,14 @@ public:
 	void UiInit();
 
 	void ButtonInit();
-	void ButtonTrue();
-	void ButtonFalse();
+	void ButtonTrue(bool on = true);
 
 	void LineUpTrue();
 	void LineUpFalse();
 	
 	void BanPickFalse();
 	
+	void AiSelect();
 
 };
 

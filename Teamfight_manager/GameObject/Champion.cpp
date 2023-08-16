@@ -82,6 +82,16 @@ void Champion::BattleUpdate(float dt)
 	this->skillTimer += dt;
 	this->attackDelay -= dt * this->currentState.attackSpeed;
 
+	//일시적 평타버그해결용 *******나중에지워야함*******
+	////////////////////////////////////////////////////////
+	///////////////////////지워주세요///////////////////////
+	if (currentState.skillCode1 != 1 &&
+		currentState.skillCode1 != 4)
+	{
+		skillTimer = 0;
+	}
+	////////////////////////////////////////////////////////
+
 	if (this->skillTimer >= this->currentSkill[0].skillCoolTime)
 	{
 		this->skillTimer = this->currentSkill[0].skillCoolTime;

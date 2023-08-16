@@ -232,3 +232,26 @@ Uniform28,레이싱 슈트
 Uniform29,비키니
 Uniform30,미이라
 Uniform31,거북이 등껍질
+AgeCount,세
+Name,이름
+UnusedPoint,미사용 포인트
+UsePointTo,희망하는 능력치에 훈련 포인트를 투자하세요.
+LeftTrainPoint,남은 훈련포인트
+ChampName0,궁수
+ChampName1,격투가
+ChampName2,기사
+ChampName3,몽크
+ChampName4,닌자
+ChampName5,성직자
+ChampName6,화염술사
+ChampName7,검사
+ChampName8,무녀복
+ChampName9,광전사
+ChampName10,소총수
+ChampName11,얼음술사
+ChampName12,마검사
+ChampName13,방패병
+Attack,공격력
+Defence,방어력
+Progress,진행
+DoNextProgress,다음 일정을 진행합니다

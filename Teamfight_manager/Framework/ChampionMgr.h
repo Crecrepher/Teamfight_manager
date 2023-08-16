@@ -8,12 +8,13 @@ private:
 	ChampionMgr() = default;
 	virtual ~ChampionMgr() =default;
 
-	std::unordered_map<std::string, State> champions;
+	std::unordered_map<int, State> champions;
 
 public:	
 	void Init();
 	void LoadFromCsv(const std::string path);
 
+	State* GetChampion(int id);
 	State* GetChampion(const std::string& id);
 };
 

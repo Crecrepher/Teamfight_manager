@@ -73,7 +73,8 @@ public:
 	void UpdateMoney();
 	void Recruit(int grade,int slotNum);
 	void NewYear();
-	void MakeLocalPlayer(PlayerInfo& player);
+	PlayerInfo MakeDefaultPlayer();
+	PlayerInfo MakeLocalPlayer();
 	
 	void TestingCheats();
 };

@@ -196,6 +196,8 @@ public:
 	Sponsor GetSponsor(int index) { return sponsors[index]; }
 	void DeleteContractedSponsor();
 	void ContractSponsor(Sponsor sponsor);
+
+	void SaveLoad();
 };
 
 #define TEAM_MGR (TeamMgr::Instance())

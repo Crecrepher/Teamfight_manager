@@ -36,12 +36,12 @@ void ChampionMgr::LoadFromCsv(const std::string path)
 		{
 			temp.AddClip(*RESOURCE_MGR.GetAnimationClip(aniPath[j]));
 		}
-		champions.insert({ id[i], {id[i],mHp[i],atk[i],def[i],atkSp[i],atkRg[i],
+		champions.insert({ i, {id[i],mHp[i],atk[i],def[i],atkSp[i],atkRg[i],
 			sp[i],skill_1[i],skill_2[i],(ChampionType)type[i],temp} });
 	}
 }
 
-State* ChampionMgr::GetChampion(const std::string& id)
+State* ChampionMgr::GetChampion(int id)
 {
 	auto findChamp = champions.find(id);
 
@@ -52,4 +52,17 @@ State* ChampionMgr::GetChampion(const std::string& id)
 	}
 
 	return &findChamp->second;
+}
+
+State* ChampionMgr::GetChampion(const std::string& id)
+{
+	for (auto it : champions)
+	{
+		if (it.second.charId == id)
+		{
+			return &it.second;
+		}
+	}
+	std::cout << "ERR : NOT EXIST CHAMPION" << std::endl;
+	return nullptr;
 }

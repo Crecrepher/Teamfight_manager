@@ -231,7 +231,6 @@ std::vector<PlayerInfo> TeamMgr::GetRoster()
 
 std::vector<AiTeam> TeamMgr::GetAiTeamInfo()
 { 
-	aiTeams;
 	return aiTeams; 
 }
 
@@ -297,4 +296,29 @@ void TeamMgr::ContractSponsor(Sponsor sponsor)
 		sponsors[contractedSponsor].currentProcess = 8;
 	}
 	contractedSponsor++;
+}
+
+void TeamMgr::SaveLoad()
+{
+	std::ifstream is{ "OWSave.dat", std::ofstream::binary };
+	if (is.fail()) {
+		std::cout << "세이브 파일이 없습니다" << std::endl;
+		return;
+	}
+
+	is.read((char*)&ableChamp, sizeof(int));
+	is.read((char*)&ableCharacteristic, sizeof(int));
+	is.read((char*)&maxTrainingPoint, sizeof(int));
+	is.read((char*)&money, sizeof(int));
+	is.read((char*)&playerNum, sizeof(int));
+	is.read((char*)&MaxPlayer, sizeof(int));
+	for (int i = 0; i < playerNum; i++)
+	{
+		is.read((char*)&player[i].name, sizeof(std::wstring));
+		is.read((char*)&player[i].age, sizeof(int));
+		is.read((char*)&player[i].condition, sizeof(int));
+		is.read((char*)&player[i].attack, sizeof(int));
+		is.read((char*)&player[i].defence, sizeof(int));
+	}
+	return;
 }
