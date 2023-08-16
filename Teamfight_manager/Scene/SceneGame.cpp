@@ -45,17 +45,58 @@ void SceneGame::Init()
 	bg->SetOrigin(Origins::MC);
 	bg->SetActive(false);
 
+	//벡터 임시위치
+	championSlot = std::vector<UiButton*>(18);
 	UiInit();
 	ButtonInit();
+	BanPickFalse();
 
 	//애니메이션 추가 임시위치
 
-	banSheet.sortLayer = 102;
-	AddGo(&banSheet);
-	banAnimation.SetTarget(&banSheet.sprite);
+	banSheet = new SpriteGo("", "BanSheet");
+	AddGo(banSheet);
+	banSheet->sortLayer = 102;
+	banAnimation.SetTarget(&banSheet->sprite);
 	banAnimation.AddClip(*RESOURCE_MGR.GetAnimationClip("animations/banSlotBlue.csv"));
 
-	championPool.OnCreate = [this](Champion* champion){
+	banSheetBlueTeam = new SpriteGo("", "BanSheet_BlueTeam");
+	AddGo(banSheetBlueTeam);
+	banSheetBlueTeam->sortLayer = 102;
+	banAnimation2.SetTarget(&banSheetBlueTeam->sprite);
+	banAnimation2.AddClip(*RESOURCE_MGR.GetAnimationClip("animations/banSlotBlueTeam.csv"));
+
+	banSheetRedTeam = new SpriteGo("", "BanSheet_RedTeam");
+	AddGo(banSheetRedTeam);
+	banSheetRedTeam->sortLayer = 102;
+	banAnimation3.SetTarget(&banSheetRedTeam->sprite);
+	banAnimation3.AddClip(*RESOURCE_MGR.GetAnimationClip("animations/banSlotRedTeam.csv"));
+
+	banSheet->SetActive(false);
+	banSheetBlueTeam->SetActive(false);
+	banSheetRedTeam->SetActive(false);
+	
+
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	//FindGo("BanSheet")->SetActive(false);
+	//FindGo("BanSheet_BlueTeam")->SetActive(false);
+	//FindGo("BanSheet_RedTeam")->SetActive(false);
+
+	championPool.OnCreate = [this](Champion* champion) {
 		champion->ChangeStance(ChampionStance::None);
 	};
 	championPool.Init();
@@ -68,7 +109,7 @@ void SceneGame::Init()
 		go->Init();
 	}
 }
-	
+
 void SceneGame::Release()
 {
 	for (auto go : gameObjects)
@@ -82,7 +123,7 @@ void SceneGame::Enter()
 	Scene::Enter();
 	RESOURCE_MGR.LoadFromCsv("tables/GameResourceList.csv");
 	banAnimation.Play("Idle"); // 무조건 한번만 호출되게
-	banSheet.SetOrigin(Origins::MC);
+	banSheet->SetOrigin(Origins::MC);
 	currentPhase = Phase::None;
 }
 
@@ -110,12 +151,9 @@ void SceneGame::Exit()
 
 void SceneGame::Update(float dt)
 {
+	selectCheck = true;
 	Scene::Update(dt);
-	banAnimation.Update(dt);
-	sf::Vector2f mousePos = INPUT_MGR.GetMousePos();
-	sf::Vector2f uiMousePos = ScreenToUiPos(mousePos);
-	banSheet.SetPosition(uiMousePos);
-
+	
 	switch (currentPhase)
 	{
 	case Phase::None:
@@ -169,10 +207,6 @@ void SceneGame::Update(float dt)
 		break;
 	}
 	}
-	//sf::Vector2f mousePos = SCENE_MGR.GetCurrScene()->ScreenToWorldPos(INPUT_MGR.GetMousePos());
-	//std::cout << "x : " << mousePos.x << std::endl;
-	//std::cout << "y : " << mousePos.y << std::endl << std::endl;
-	//스테이지로 돌아가기
 	if (INPUT_MGR.GetKeyDown(sf::Keyboard::Escape))
 	{
 		SCENE_MGR.ChangeScene(SceneId::Home);
@@ -282,196 +316,171 @@ void SceneGame::LeaguePhase(float dt)
 	// 스왑페이즈를 만들어라 스왑페이즈에 전술까지 넣어야 하기 때문에
 	// 
 	// 마우스 좌표 테스트
-	sf::Vector2f mousePos = INPUT_MGR.GetMousePos();
+	/*sf::Vector2f mousePos = INPUT_MGR.GetMousePos();
 	sf::Vector2f uiMousePos = ScreenToUiPos(mousePos);
-	std::cout << "마우스x: " << uiMousePos.x << "마우스y: "<< uiMousePos.y << std::endl;
+	std::cout << "마우스x: " << uiMousePos.x << "마우스y: " << uiMousePos.y << std::endl;*/
 
+    LineUpTrue();
 
-	FindGo("Line Up")->SetActive(true);
-	FindGo("Next Button")->SetActive(true);
-	FindGo("keyboard Buttons_D")->SetActive(true);
-	FindGo("keyboard Buttons_F")->SetActive(true);
+	UiButton* ui = (UiButton*)FindGo("Next Button");
 
-	FindGo("Line Up Text1")->SetActive(true);
-	FindGo("Line Up Text2")->SetActive(true);
-	FindGo("Line Up Text3")->SetActive(true);
-	FindGo("Line Up Text4")->SetActive(true);
-	FindGo("Line Up Text5")->SetActive(true);
-	FindGo("Enemy Team Name Text")->SetActive(true);
-
-	FindGo("Player Member Text1")->SetActive(true);
-	FindGo("Player Member Text2")->SetActive(true);
-	FindGo("Player Member Text3")->SetActive(true);
-	FindGo("Player Member Text4")->SetActive(true);
-	FindGo("Player Member Text5")->SetActive(true);
-	FindGo("Player Member Text6")->SetActive(true);
-
-	FindGo("Enemy Member Text1")->SetActive(true);
-	FindGo("Enemy Member Text2")->SetActive(true);
-	FindGo("Enemy Member Text3")->SetActive(true);
-	FindGo("Enemy Member Text4")->SetActive(true);
-
-	FindGo("Pleyer Team Title1")->SetActive(true);
-	FindGo("Enemy Team Title1")->SetActive(true);
-	
-	FindGo("Player Draft Slot1")->SetActive(true);
-	FindGo("Player Draft Slot2")->SetActive(true);
-	FindGo("Player Draft Slot3")->SetActive(true);
-	FindGo("Player Draft Slot4")->SetActive(true);
-	FindGo("Player Draft Slot5")->SetActive(true);
-	FindGo("Player Draft Slot6")->SetActive(true);
-
-	FindGo("Enemy Draft Slot1")->SetActive(true);
-	FindGo("Enemy Draft Slot2")->SetActive(true);
-	FindGo("Enemy Draft Slot3")->SetActive(true);
-	FindGo("Enemy Draft Slot4")->SetActive(true);
-	FindGo("Draft Arrow1")->SetActive(true);
-	
+	ui->OnClick = [this, ui]()
 	{
-		UiButton* ui = (UiButton*)FindGo("Next Button");
+		std::cout << "벤 페이즈!" << std::endl;
+		LineUpFalse();
+		ChangePhase(Phase::Ban);
+	};
 
-		ui->OnClick = [this, ui]()
-		{
-			std::cout << "밴 페이즈!" << std::endl;
-			lineUpFalse();
-			ChangePhase(Phase::Ban);
-		};
-	}
 }
 
 void SceneGame::BanPhase(float dt)
 {
 	FindGo("Ban Bg 2:2")->SetActive(true);
-	// 마우스 좌표 테스트
-	sf::Vector2f mousePos = INPUT_MGR.GetMousePos();
-	sf::Vector2f uiMousePos = ScreenToUiPos(mousePos);
-	std::cout << "마우스x: " << uiMousePos.x << "마우스y: " << uiMousePos.y << std::endl;
-
 	banAnimation.Update(dt);
 
-	banSheet.SetPosition(mousePos);
+	ButtonTrue();
 
-	
+	sf::Vector2f mousePos = INPUT_MGR.GetMousePos();
+	sf::Vector2f uiMousePos = ScreenToUiPos(mousePos);
+
+	if (INPUT_MGR.GetMouseButtonDown(sf::Mouse::Left))
+	{
+		std::cout << "마우스x: " << uiMousePos.x << "마우스y: " << uiMousePos.y << std::endl;
+	}
+
+	// 마우스 좌표 테스트
+	//sf::Vector2f mousePos = INPUT_MGR.GetMousePos();
+	//sf::Vector2f uiMousePos = ScreenToUiPos(mousePos);
+	//std::cout << "마우스x: " << uiMousePos.x << "마우스y: " << uiMousePos.y << std::endl;
+
+	//banSheet->SetPosition(mousePos);
+
+
 
 
 	//animation.
+	if(INPUT_MGR.GetMouseButtonDown(sf::Mouse::Right))
+	{
+		switch (mode)
+		{
+		case Mode::Duo:
+		{
+			std::cout << "벤 했음" << std::endl;
+			ChangeTurn();
+			ChangeTeam();
 
-	switch (mode)
-	{
-	case Mode::Duo:
-	{
-
-		ChangeTurn();
-		ChangeTeam();
-
-		if (step == 2)
-		{
-			ChangePhase(Phase::Pick);
+			if (step == 2)
+			{
+				ButtonFalse(); // 임시 추가
+				ChangePhase(Phase::Pick);
+				step++;
+				return;
+			}
 			step++;
-			return;
+			break;
 		}
-		step++;
-		break;
-	}
-	case Mode::Trio:
-	{
-		ChangeTurn();
-		ChangeTeam();
-		if (step == 2)
+		case Mode::Trio:
 		{
-			ChangePhase(Phase::Pick);
+			ChangeTurn();
+			ChangeTeam();
+			if (step == 2)
+			{
+				ChangePhase(Phase::Pick);
+				step++;
+				return;
+			}
 			step++;
-			return;
+			break;
 		}
-		step++;
-		break;
-	}
-	case Mode::Sqaud:
-	{
-		ChangeTurn();
-		ChangeTeam();
-		if (step == 4)
+		case Mode::Sqaud:
 		{
-			ChangePhase(Phase::Pick);
+			ChangeTurn();
+			ChangeTeam();
+			if (step == 4)
+			{
+				ChangePhase(Phase::Pick);
+				step++;
+				return;
+			}
+			else if (step == 10)
+			{
+				ChangePhase(Phase::Pick);
+				step++;
+				return;
+			}
 			step++;
-			return;
+			break;
 		}
-		else if (step == 10)
-		{
-			ChangePhase(Phase::Pick);
-			step++;
-			return;
 		}
-		step++;
-		break;
-	}
 	}
 }
 
 void SceneGame::PickPhase(float dt)
 {
 
-
-	switch (team)
+	if (INPUT_MGR.GetMouseButtonDown(sf::Mouse::Right))
 	{
+		switch (team)
+		{
+		case Team::Red:
+		{
+			
+			std::cout << "레드 픽했음" << std::endl;
+			Champion* redChamp = championPool.Get();
+			redChamp->SetState(*CHAMPION_MGR.GetChampion("archer"));
+			redChamp->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/Origin/Sprite/archer_0.png"));
+			redChamp->SetPosition((Utils::RandomRange(420, 520)), (Utils::RandomRange(300, 450)));
+			redChamp->SetEnemyTeam(&blueTeam);
+			redChamp->SetMyTeam(&redTeam);
+			redChamp->SetDieChampion(&cemetery);
+			redChamp->ChangeStance(ChampionStance::None);
+			redChamp->Reset();
+			redChamp->SetSacleX(1);
+			redChamp->SetTeamColor(Team::Red);
+			redTeam.push_back(redChamp);
+			AddGo(redChamp);
+			ChangeTeam();
+			ChangeTurn();
+			break;
+		}
+		case Team::Blue:
+		{
 
+			std::cout << "블루 픽했음" << std::endl;
+			Champion* blueChamp = championPool.Get();
+			blueChamp->SetState(*CHAMPION_MGR.GetChampion("archer"));
+			blueChamp->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/Origin/Sprite/archer_0.png"));
+			blueChamp->SetPosition((Utils::RandomRange(750, 850)), (Utils::RandomRange(300, 450)));
+			blueChamp->SetEnemyTeam(&redTeam);
+			blueChamp->SetMyTeam(&blueTeam);
+			blueChamp->SetDieChampion(&cemetery);
+			blueChamp->ChangeStance(ChampionStance::None);
+			blueChamp->Reset();
+			blueChamp->SetSacleX(-1);
+			blueChamp->SetTeamColor(Team::Blue);
+			blueTeam.push_back(blueChamp);
+			AddGo(blueChamp);
+			ChangeTeam();
+			ChangeTurn();
 
+			break;
+		}
+		}
+		if (step == fullStep)
+		{
+			readyTimer = 1.f;
 
-	case Team::Red:
-	{
-
-		Champion* redChamp = championPool.Get();
-		redChamp->SetState(*CHAMPION_MGR.GetChampion("archer"));
-		redChamp->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/Origin/Sprite/archer_0.png"));
-		redChamp->SetPosition((Utils::RandomRange(420,520)), (Utils::RandomRange(300, 450)));
-		redChamp->SetEnemyTeam(&blueTeam);
-		redChamp->SetMyTeam(&redTeam);
-		redChamp->SetDieChampion(&cemetery);
-		redChamp->ChangeStance(ChampionStance::None);
-		redChamp->Reset();
-		redChamp->SetSacleX(1);
-		redChamp->SetTeamColor(Team::Red);
-		redTeam.push_back(redChamp);
-		AddGo(redChamp);
-		ChangeTeam();
-		ChangeTurn();
-		break;
-	}
-	case Team::Blue:
-	{
-		Champion* blueChamp = championPool.Get();
-		blueChamp->SetState(*CHAMPION_MGR.GetChampion("archer"));
-		blueChamp->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/Origin/Sprite/archer_0.png"));
-		blueChamp->SetPosition((Utils::RandomRange(750, 850)), (Utils::RandomRange(300, 450)));
-		blueChamp->SetEnemyTeam(&redTeam);
-		blueChamp->SetMyTeam(&blueTeam);
-		blueChamp->SetDieChampion(&cemetery);
-		blueChamp->ChangeStance(ChampionStance::None);
-		blueChamp->Reset();
-		blueChamp->SetSacleX(-1);
-		blueChamp->SetTeamColor(Team::Blue);
-		blueTeam.push_back(blueChamp);
-		AddGo(blueChamp);
-		ChangeTeam();
-		ChangeTurn();
-		break;
-	}
-	}
-
-	if (step == fullStep)
-	{
-		readyTimer = 1.f;
-
-		ChangePhase(Phase::Ready);
-	}
-	else if (mode == Mode::Sqaud&&step==8)
-	{
-		step++;
-		ChangePhase(Phase::Ban);
-	}
-	else
-	{
-		step++;
+			ChangePhase(Phase::Ready);
+		}
+		else if (mode == Mode::Sqaud && step == 8)
+		{
+			step++;
+			ChangePhase(Phase::Ban);
+		}
+		else
+		{
+			step++;
+		}
 	}
 }
 
@@ -490,8 +499,6 @@ void SceneGame::ReadyPhase(float dt)
 
 void SceneGame::BattlePhase(float dt)
 {
-
-
 	battleTimer -= dt;
 	if (battleTimer <= 0)
 	{
@@ -540,7 +547,7 @@ void SceneGame::BattlePhase(float dt)
 void SceneGame::UiInit()
 {
 	// 익주꺼 가져옴
-	SpriteGo* header = (SpriteGo*)AddGo(new SpriteGo("graphics/Origin/Sprite/header_bg#43707.png","Header"));
+	SpriteGo* header = (SpriteGo*)AddGo(new SpriteGo("graphics/Origin/Sprite/header_bg#43707.png", "Header"));
 	header->sprite.setScale(2, 2);
 	header->sortLayer = 101;
 	header->sortOrder = 1;
@@ -1309,28 +1316,115 @@ void SceneGame::UiInit()
 
 void SceneGame::ButtonInit()
 {
-	// On Enter
+	//// 밴픽단계 챔피언 슬롯 18개
+	for (int i = 0; i < champCount; i++)
 	{
+		std::stringstream ss;
+		ss << "Champion Slot" << i + 1;
+		championSlot[i] = (UiButton*)AddGo(new UiButton("graphics/LeagueSystem/Banpick/championSlot1.png", ss.str()));
+		championSlot[i]->sprite.setScale(0.98f, 0.93f);
+		championSlot[i]->SetOrigin(Origins::MC);
+		championSlot[i]->sortLayer = 103;
+		championSlot[i]->sortOrder = 1;
+		championSlot[i]->SetPosition(278+((i%10)*78), 233+((i/10)*113));
+		championSlot[i]->SetActive(false);
 
-
-
-
+		championSlot[i]->OnEnter = [this,i]() {
+			FindGo("BanSheet")->SetActive(true);
+			banSheet->SetPosition(championSlot[i]->GetPosition());
+			selectCheck = true;
+		};
+		championSlot[i]->OnExit = [this]() {
+			if (selectCheck)
+			{
+				return;
+			}
+			FindGo("BanSheet")->SetActive(false);
+			selectCheck = false;
+		};
 	}
 
-	// On Exit
-	{
-
-
-
-
-	}
-
-	// On Click
 	
+	/*UiButton*championBanSlot1 = (UiButton*)AddGo(new UiButton("graphics/LeagueSystem/Banpick/champion_Ban_Slot1.png", "Champion_Ban_Slot1"));
+	championBanSlot1->SetOrigin(Origins::MC);
+	championBanSlot1->sortLayer = 102;
+	championBanSlot1->sortOrder = 1;
+	championBanSlot1->SetPosition(BanSlotPosition1);
+	championBanSlot1->SetActive(false);
+
+	championBanSlot2 = (UiButton*)AddGo(new UiButton("graphics/LeagueSystem/Banpick/champion_Ban_Slot2.png", "Champion_Ban_Slot2"));
+	championBanSlot2->SetOrigin(Origins::MC);
+	championBanSlot2->sortLayer = 102;
+	championBanSlot2->sortOrder = 1;
+	championBanSlot2->SetPosition(BanSlotPosition2);
+	championBanSlot2->SetActive(false);*/
+
+
+
 
 }
 
-void SceneGame::lineUpFalse()
+void SceneGame::ButtonTrue()
+{
+	for (int i = 0; i < champCount; i++)
+	{
+		championSlot[i]->SetActive(true);
+	}
+}
+
+void SceneGame::ButtonFalse()
+{
+	for (int i = 0; i < champCount; i++)
+	{
+		championSlot[i]->SetActive(false);
+		FindGo("BanSheet")->SetActive(false);
+	}
+}
+
+void SceneGame::LineUpTrue()
+{
+	FindGo("Line Up")->SetActive(true);
+	FindGo("Next Button")->SetActive(true);
+	FindGo("keyboard Buttons_D")->SetActive(true);
+	FindGo("keyboard Buttons_F")->SetActive(true);
+
+	FindGo("Line Up Text1")->SetActive(true);
+	FindGo("Line Up Text2")->SetActive(true);
+	FindGo("Line Up Text3")->SetActive(true);
+	FindGo("Line Up Text4")->SetActive(true);
+	FindGo("Line Up Text5")->SetActive(true);
+	FindGo("Enemy Team Name Text")->SetActive(true);
+
+	FindGo("Player Member Text1")->SetActive(true);
+	FindGo("Player Member Text2")->SetActive(true);
+	FindGo("Player Member Text3")->SetActive(true);
+	FindGo("Player Member Text4")->SetActive(true);
+	FindGo("Player Member Text5")->SetActive(true);
+	FindGo("Player Member Text6")->SetActive(true);
+
+	FindGo("Enemy Member Text1")->SetActive(true);
+	FindGo("Enemy Member Text2")->SetActive(true);
+	FindGo("Enemy Member Text3")->SetActive(true);
+	FindGo("Enemy Member Text4")->SetActive(true);
+
+	FindGo("Pleyer Team Title1")->SetActive(true);
+	FindGo("Enemy Team Title1")->SetActive(true);
+
+	FindGo("Player Draft Slot1")->SetActive(true);
+	FindGo("Player Draft Slot2")->SetActive(true);
+	FindGo("Player Draft Slot3")->SetActive(true);
+	FindGo("Player Draft Slot4")->SetActive(true);
+	FindGo("Player Draft Slot5")->SetActive(true);
+	FindGo("Player Draft Slot6")->SetActive(true);
+
+	FindGo("Enemy Draft Slot1")->SetActive(true);
+	FindGo("Enemy Draft Slot2")->SetActive(true);
+	FindGo("Enemy Draft Slot3")->SetActive(true);
+	FindGo("Enemy Draft Slot4")->SetActive(true);
+	FindGo("Draft Arrow1")->SetActive(true);
+}
+
+void SceneGame::LineUpFalse()
 {
 	FindGo("Line Up")->SetActive(false);
 	FindGo("Next Button")->SetActive(false);
@@ -1371,4 +1465,12 @@ void SceneGame::lineUpFalse()
 	FindGo("Enemy Draft Slot3")->SetActive(false);
 	FindGo("Enemy Draft Slot4")->SetActive(false);
 	FindGo("Draft Arrow1")->SetActive(false);
+}
+
+void SceneGame::BanPickFalse()
+{
+	FindGo("Champion Slot15")->SetActive(false);
+	FindGo("Champion Slot16")->SetActive(false);
+	FindGo("Champion Slot17")->SetActive(false);
+	FindGo("Champion Slot18")->SetActive(false);
 }
