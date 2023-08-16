@@ -5,6 +5,8 @@
 #include "GameState.h"
 #include "AnimatioControler.h"
 
+class UiButton;
+
 class SceneGame : public Scene
 {
 protected:
@@ -30,7 +32,21 @@ protected:
 	std::vector<Champion*> cemetery;
 
 	SpriteGo* banSheet;
+
+	SpriteGo* banSheetBlueTeam; // 블루
+	SpriteGo* banSheetRedTeam; // 레드
+
 	AnimatioControler banAnimation;
+	AnimatioControler banAnimation2;
+	AnimatioControler banAnimation3;
+
+	std::vector<UiButton*> championSlot;
+	int champCount = 18;
+	bool selectCheck = true;
+
+
+	sf::Vector2f BanSlotPosition1 = { 363, 661 };
+	sf::Vector2f BanSlotPosition2 = { 919, 661 };
 
 public:
 	SceneGame();
@@ -62,8 +78,17 @@ public:
 	void ClearObjectPool(ObjectPool<T>& pool);
 
 	void UiInit();
+
 	void ButtonInit();
-	void lineUpFalse();
+	void ButtonTrue();
+	void ButtonFalse();
+
+	void LineUpTrue();
+	void LineUpFalse();
+	
+	void BanPickFalse();
+	
+
 };
 
 template<typename T>
