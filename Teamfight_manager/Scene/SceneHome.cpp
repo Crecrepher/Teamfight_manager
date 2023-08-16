@@ -1900,6 +1900,7 @@ void SceneHome::SubUiBaseOpen(int index, bool on)
 		UiSponsorContractOpen(false, false);
 		UiEquipOpen(false);
 	};
+	bt->SetActive(on);
 
 	TextGo* text = (TextGo*)FindGo("UiMenuTitleText");
 	text->SetActive(on);
