@@ -126,6 +126,9 @@ void SceneGame::Enter()
 	currentPhase = Phase::None;
 	banChamps = std::vector<int>(6,-1);
 
+	redScore = 0;
+	blueScore = 0;
+
 	SpriteGo* spr = (SpriteGo*)FindGo("1");
 	spr->SetActive(false);
 
@@ -507,6 +510,7 @@ void SceneGame::PickPhase(float dt)
 	{
 		AiSelect();
 	}
+
 	if (step == fullStep)
 	{
 		readyTimer = 1.f;
@@ -550,12 +554,13 @@ void SceneGame::BattlePhase(float dt)
 	text->text.setString(std::to_string(blueScore));
 
 
-
-	for (auto unit : championPool.GetUseList())
+	if (!championPool.GetUseList().empty())
 	{
-		unit->sortOrder = unit->GetPosition().y;
+		for (auto unit : championPool.GetUseList())
+		{
+			unit->sortOrder = unit->GetPosition().y;
+		}
 	}
-
 	battleTimer -= dt;
 	if (battleTimer > 0.f)
 	{

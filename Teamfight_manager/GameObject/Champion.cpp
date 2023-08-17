@@ -86,7 +86,9 @@ void Champion::BattleUpdate(float dt)
 	////////////////////////////////////////////////////////
 	///////////////////////지워주세요///////////////////////
 	if (currentState.skillCode1 != 1 &&
-		currentState.skillCode1 != 4)
+		currentState.skillCode1 != 4 &&
+		currentState.skillCode1 !=12&&
+		currentState.skillCode1 !=14)
 	{
 		skillTimer = 0;
 	}
@@ -95,6 +97,37 @@ void Champion::BattleUpdate(float dt)
 	if (this->skillTimer >= this->currentSkill[0].skillCoolTime)
 	{
 		this->skillTimer = this->currentSkill[0].skillCoolTime;
+	}
+
+	if (this->bloodingStack > 0 && this->dotDamage != nullptr)
+	{
+		this->bloodingTimer -= dt;
+		if (this->bloodingTimer <= 0.f)
+		{
+			this->bloodingTimer = 0.5f;
+			this->bloodingStack--;
+
+			float damage = 3.f;
+			if (damage >= this->GetHp())
+			{
+				damage = this->GetHp();
+			}
+			this->dotDamage->total_Damage += damage;
+			std::cout << this->dotDamage->GetName() << " 입힌 피해 : " << this->dotDamage->total_Damage << std::endl;
+			this->Hit(damage);
+			if (this->GetHp() == 0)
+			{
+				this->dotDamage->kill++;
+				(this->dotDamage->teamScore)++;
+				std::cout << this->dotDamage->GetName() << " 킬 : " << this->dotDamage->kill << std::endl;
+			}
+			std::cout << "dot deal" << damage << std::endl;
+		}
+		if (this->bloodingStack == 0)
+		{
+			std::cout << "dot 끝" << std::endl;
+			this->dotDamage == nullptr;
+		}
 	}
 
 	if (this->hp <= 0 && this->currentStance!=ChampionStance::Dead)
@@ -106,12 +139,16 @@ void Champion::BattleUpdate(float dt)
 			{
 				this->target->SetAir(false);
 			}
+			this->currentState.animaition.Stop();
 			this->currentState.animaition = this->champMgrState.animaition;
 			this->currentState.animaition.SetTarget(&this->sprite);
 			auto it = std::find(myTeam->begin(), myTeam->end(), this);
 			this->cemetery->push_back(*it);
 			this->myTeam->erase(it);
 			this->currentState.animaition.Play("Die");
+			this->dotDamage == nullptr;
+			this->bloodingStack = 0;
+			this->limit = false;
 			this->air = false;
 			return;
 		}
@@ -206,6 +243,16 @@ void Champion::Idle(float dt)
 	if (this->target != nullptr)
 	{
 		SetSacleX(Utils::Normalize(target->GetPosition() - this->position).x);
+
+		if (this->currentState.charId == "ninja");
+		{
+			if (this->skillTimer >= this->currentSkill[0].skillCoolTime && this->currentSkill[0].skillCoolTime != 0.f)
+			{
+				ChangeStance(ChampionStance::Skill);
+				return;
+			}
+		}
+
 		if (abs(Utils::Distance(this->GetPosition(), this->target->GetPosition())) > this->currentState.attackRange && bind<0.f)
 		{
 			ChangeStance(ChampionStance::Move);
@@ -377,6 +424,9 @@ void Champion::Dead(float dt)
 	if (this->reviveTimer <= 0)
 	{
 		this->hp = this->currentState.maxHp;
+
+		this->target = nullptr;
+
 		auto it = std::find(cemetery->begin(), cemetery->end(), this);
 		this->myTeam->push_back(*it);
 		this->cemetery->erase(it);
@@ -430,7 +480,7 @@ void Champion::UseSkill()
 
 void Champion::SkillChangeIdle()
 {
-	this->skillTimer = 0;
+	this->skillTimer = 0.f;
 	this->currentState.animaition = this->champMgrState.animaition;
 	this->currentState.animaition.SetTarget(&this->sprite);
 	ChangeStance(ChampionStance::Idle);
@@ -458,7 +508,7 @@ void Champion::SetDieChampion(std::vector<Champion*>* cemetery)
 
 void Champion::Hit(float attack)
 {
-	total_OnHit += attack;
+	this->total_OnHit += attack;
 	std::cout << this->GetName() << " 당한 피해 : " << this->total_OnHit << std::endl;
 	this->hp -= attack;
 }
@@ -545,6 +595,16 @@ void Champion::FindTaget()
 		TagetOrderRH();
 		break;
 	}
+	case TagetingOrder::CircleInRangeEnemy:
+	{
+		TagetOrderCIE(0, 0.f,0.f);
+		break;
+	}
+	case TagetingOrder::CircleInRangeTeam:
+	{
+		TagetOrderCIT(0, 0.f,0.f);
+		break;
+	}
 	}
 }
 
@@ -553,6 +613,7 @@ void Champion::TagetOrderCP()
 	if (!enemyTeam->empty())
 	{
 		float tagetRange = -1.f;
+
 		for (auto enemy : *enemyTeam)
 		{
 			float kda;
@@ -577,7 +638,7 @@ void Champion::TagetOrderSR()
 {
 	if (!enemyTeam->empty())
 	{
-		float tagetRange=9999.f;
+		float tagetRange = 9999.f;
 		for (auto enemy : *enemyTeam)
 		{
 			if (abs(Utils::Distance(this->GetPosition(), enemy->GetPosition())) <= tagetRange)
@@ -587,9 +648,8 @@ void Champion::TagetOrderSR()
 			}
 		}
 	}
-	
 }
-
+	
 void Champion::TagetOrderRH()
 {
 	if (!enemyTeam->empty())
@@ -611,37 +671,107 @@ void Champion::TagetOrderH()
 	if (!myTeam->empty())
 	{
 		float tagetRange = 9999.f;
-		for (auto team : *myTeam)
-		{
-			if (team == this)
+			for (auto team : *myTeam)
 			{
-				continue;
-			}
-
-			if (team->GetRowHealth() <= tagetRange)
-			{
-				if (team->GetRowHealth() == 0)
+				if (team == this)
 				{
-					this->target = nullptr;
+					continue;
 				}
-				tagetRange = team->GetRowHealth();
-				this->target = team;
+
+				if (team->GetRowHealth() <= tagetRange)
+				{
+					if (team->GetRowHealth() == 0)
+					{
+						this->target = nullptr;
+					}
+					tagetRange = team->GetRowHealth();
+					this->target = team;
+				}
 			}
 		}
 	}
-}
 
 void Champion::TagetOrderLR()
 {
 	if (!enemyTeam->empty())
 	{
 		float tagetRange = 0.f;
-		for (auto enemy : *enemyTeam)
-		{
-			if (abs(Utils::Distance(this->GetPosition(), enemy->GetPosition())) >= tagetRange)
+			for (auto enemy : *enemyTeam)
 			{
-				tagetRange = abs(Utils::Distance(this->GetPosition(), enemy->GetPosition()));
-				this->target = enemy;
+				if (abs(Utils::Distance(this->GetPosition(), enemy->GetPosition())) >= tagetRange)
+				{
+					tagetRange = abs(Utils::Distance(this->GetPosition(), enemy->GetPosition()));
+					this->target = enemy;
+				}
+			}
+		}
+	}
+
+void Champion::TagetOrderCIE(int code, float range, float value)
+{
+	if (this->enemyTeam->empty())
+	{
+		return;
+	}
+		for (auto enemy : *this->enemyTeam)
+		{
+			if (abs(Utils::Distance(this->GetPosition(), enemy->GetPosition())) <= range)
+			{
+				switch (code)
+				{
+				case 0:
+				{
+					std::cout << "아무 일도 없었다." << std::endl;
+					break;
+				}
+				case 1:
+				{
+					DamageCalculate(value);
+					break;
+				}
+
+				}
+			}
+		}
+	}
+
+void Champion::TagetOrderCIT(int code, float range, float value)
+{
+	if (this->myTeam->empty())
+	{
+		return;
+	}
+
+	for (auto team : *this->myTeam)
+	{
+		if (abs(Utils::Distance(this->GetPosition(), team->GetPosition())) <= range)
+		{
+			this->target = team;
+			switch (code)
+			{
+			case 0:
+			{
+				std::cout << "아무 일도 없었다." << std::endl;
+				break;;
+			}
+			case 1:
+			{
+				if (this->target->GetHp() < this->target->currentState.maxHp)
+				{
+					std::cout << "monkHeal" << std::endl;
+					HealCalculate(value);
+				}
+				break;
+			}
+			case 2:
+			{
+				if (team == this)
+				{
+					break;
+				}
+				HealCalculate(value);
+				break;
+			}
 			}
 		}
 	}

@@ -26,6 +26,8 @@ public:
 	void BerserkerSkill(Champion* champ);
 	void FighterSkill(Champion* champ);
 	void FighterUltiSkill(Champion* champ);
+	void MonkSkill(Champion* champ);
+	void NinjaSkill(Champion* champ);
 
 };
 

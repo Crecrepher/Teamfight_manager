@@ -64,6 +64,8 @@ enum class TagetingOrder
 	CarryPlayer,
 	Heal,
 	RowHealth,
+	CircleInRangeEnemy,
+	CircleInRangeTeam,
 };
 
 struct State

@@ -65,6 +65,16 @@ void SkillMgr::ActiveSkill(int code, Champion* champ)
 		FighterSkill(champ);
 		break;
 	}
+	case 12:
+	{
+		MonkSkill(champ);
+		break;
+	}
+	case 14:
+	{
+		NinjaSkill(champ);
+		break;
+	}
 	}
 }
 
@@ -117,6 +127,7 @@ void SkillMgr::BerserkerSkill(Champion* champ)
 void SkillMgr::FighterSkill(Champion* champ)
 {
 	champ->GetTarget()->SetBind(1.f);
+
 	if (champ->GetCurretState().animaition.GetCurrentClipId() != "Skill")
 	{
 		champ->UseSkill();
@@ -127,7 +138,7 @@ void SkillMgr::FighterSkill(Champion* champ)
 		return;
 	}
 
-	if (champ->GetCurretState().animaition.GetCurrFrame() < 3)
+	 if (champ->GetCurretState().animaition.GetCurrFrame() < 3)
 	{
 		float t = champ->GetMoveTime() / 0.3f;
 		sf::Vector2f temp = champ->GetStartPos() + t * (champ->GetEndPos() - champ->GetStartPos());
@@ -168,9 +179,74 @@ void SkillMgr::FighterSkill(Champion* champ)
 		champ->SkillChangeIdle();
 		return;
 	}
-	
 }
 
 void SkillMgr::FighterUltiSkill(Champion* champ)
 {
+}
+
+void SkillMgr::MonkSkill(Champion* champ)
+{
+	if (champ->GetCurretState().animaition.GetCurrentClipId() != "Skill")
+	{
+		champ->UseSkill();
+		return;
+	}
+
+	if (champ->GetCurretState().animaition.GetCurrFrame() == 3)
+	{
+		if (!champ->GetFrameLimit())
+		{
+			champ->TagetOrderCIT(1, 250.f, 30.f);
+			champ->SetFrameLimit(true);
+		}
+		return;
+	}
+
+	if (champ->GetCurretState().animaition.GetLastFrame())
+	{
+		std::cout << "½ºÅ³" << std::endl;
+		champ->SetFrameLimit(false);
+		champ->SkillChangeIdle();
+		return;
+	}
+}
+
+void SkillMgr::NinjaSkill(Champion* champ)
+{
+	if (champ->GetCurretState().animaition.GetCurrentClipId() != "Skill")
+	{
+		champ->UseSkill();
+		return;
+	}
+
+	if (champ->GetCurretState().animaition.GetCurrFrame() == 7)
+	{
+		champ->TagetOrderLR();
+
+		sf::Vector2f dir = Utils::Normalize(champ->GetTarget()->GetPosition() - champ->GetPosition());
+
+		if (dir.x >= 0)
+		{
+			champ->SetEndPos({ champ->GetTarget()->GetPosition().x + 30.f, champ->GetTarget()->GetPosition().y });
+			champ->SetSacleX(-1);
+		}
+		else if (dir.x <0)
+		{
+			champ->SetEndPos({ champ->GetTarget()->GetPosition().x - 30.f, champ->GetTarget()->GetPosition().y });
+			champ->SetSacleX(1);
+		}
+
+		champ->SetPosition(champ->GetEndPos());
+		return;
+	}
+
+	if (champ->GetCurretState().animaition.GetLastFrame())
+	{
+		champ->DamageCalculate(champ->GetCurretState().attack);
+		champ->GetTarget()->SetBloodingStack(5);
+		champ->GetTarget()->UseBloodingPlayer(champ);
+		champ->SkillChangeIdle();
+		return;
+	}
 }

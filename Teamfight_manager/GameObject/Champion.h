@@ -53,8 +53,12 @@ protected:
 	float total_Damage = 0.f;
 	float total_OnHit = 0.f;
 
+	int bloodingStack = 0;
+	float bloodingTimer = 0.5f;
+
 	float bind = 0.f;
 	bool air = false;
+	bool limit = false;
 
 //	bool ActiveUltiSkill = true;
 	//skill용 위치 지정 변수 ( SkillMgr 이 싱글톤 이기 때문에 위치 변수 따로 필요 )
@@ -70,6 +74,7 @@ protected:
 	RectGo* field;
 
 	Champion* target=nullptr;
+	Champion* dotDamage = nullptr;
 
 public:
 	Champion(const std::string id = "", const std::string n = "");
@@ -106,6 +111,8 @@ public:
 	void TagetOrderH();
 	void TagetOrderRH();
 	void TagetOrderLR();
+	void TagetOrderCIE(int code, float range, float value);
+	void TagetOrderCIT(int code, float range, float value);
 
 	float GetRowHealth();
 
@@ -131,6 +138,10 @@ public:
 	void SetMoveTime(float t) { this->sMoveT = t; }
 	bool GetAir() { return this->air; }
 	void SetAir(bool change) { this->air = change; }
+	void SetBloodingStack(int stack) { this->bloodingStack = stack; }
+	void UseBloodingPlayer(Champion* champ) { this->dotDamage = champ; }
+	void SetFrameLimit(bool limit) { this->limit = limit; }
+	bool GetFrameLimit() { return limit; }
 	
 
 	void SetStartPos(sf::Vector2f pos) { this->startPos = pos; }
