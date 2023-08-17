@@ -63,7 +63,12 @@ void SceneHome::Enter()
 {
 	Scene::Enter();
 	RESOURCE_MGR.LoadFromCsv("tables/HomeResourceList.csv");
-	
+	equipCraftParts = std::vector<int>(4);
+	selectedSponsorIndex = -1;
+	backClick = true;
+	isMenuOn = false;
+	isPopupOn = false;
+
 	if (TEAM_MGR.GetTodayDate() == 0)
 	{
 		NewYear();
@@ -347,7 +352,7 @@ void SceneHome::AddGoUiButton()
 			break;
 		}
 		ss << "Bg";
-		AddGo(new SpriteGo("graphics/Origin/Sprite/upgrade_icon_bg.png", ss.str()));
+		AddGo(new SpriteGo("graphics/Origin/Sprite/material_item_bg_0.png", ss.str()));
 		ss.str("");
 		ss << "PartDecrease" << i;
 		AddGo(new UiButton("graphics/Origin/Sprite/default_button_0.png", ss.str()));
@@ -1788,6 +1793,10 @@ void SceneHome::MakeSubUiEquip()
 	bt->SetPosition(700, 185);
 	bt->SetSize(1.3, 1);
 	bt->sortLayer = 116;
+	bt->OnClick = [this]() {
+		equipCraftParts = std::vector<int>(4);
+		UpdateCraftVal();
+	};
 
 	text = (TextGo*)FindGo("SelectPartsResetBText");
 	text->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
@@ -1806,6 +1815,7 @@ void SceneHome::MakeSubUiEquip()
 		bt->SetPosition(356,225+(65*i));
 		bt->SetSize(1.8, 1.4);
 		bt->sortLayer = 116;
+		
 
 		ss << "Icon";
 		spr = (SpriteGo*)FindGo(ss.str());
@@ -1818,8 +1828,17 @@ void SceneHome::MakeSubUiEquip()
 		spr = (SpriteGo*)FindGo(ss.str());
 		spr->SetOrigin(Origins::MC);
 		spr->SetPosition(320, 255 + (65 * i));
-		spr->SetSize(3, 3);
+		spr->SetSize(2, 2);
 		spr->sortLayer = 116;
+
+		bt->OnEnter = [bt, spr]() {
+			bt->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/Origin/Sprite/equipment_making_slot_bg_1.png"));
+			spr->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/Origin/Sprite/material_item_bg_2.png"));
+		};
+		bt->OnExit = [bt, spr]() {
+			bt->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/Origin/Sprite/equipment_making_slot_bg_0.png"));
+			spr->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/Origin/Sprite/material_item_bg_0.png"));
+		};
 
 		ss.str("");
 		ss << "UsingCraftPartsText" << i;
@@ -1872,6 +1891,10 @@ void SceneHome::MakeSubUiEquip()
 		bt->SetPosition(600, 255 + (65 * i));
 		bt->SetSize(0.45, 1);
 		bt->sortLayer = 116;
+		bt->OnClick = [this,i]() {
+			equipCraftParts[i] = std::max(equipCraftParts[i]-1, 0);
+			UpdateCraftVal();
+		};
 
 		ss.str("");
 		ss << "InputPartsBt" << i << "Text1";
@@ -1890,6 +1913,10 @@ void SceneHome::MakeSubUiEquip()
 		bt->SetPosition(567, 255 + (65 * i));
 		bt->SetSize(0.45, 1);
 		bt->sortLayer = 116;
+		bt->OnClick = [this,i]() {
+			equipCraftParts[i] = std::max(equipCraftParts[i]-5,0);
+			UpdateCraftVal();
+		};
 
 		ss.str("");
 		ss << "InputPartsBt" << i << "Text0";
@@ -1908,6 +1935,10 @@ void SceneHome::MakeSubUiEquip()
 		bt->SetPosition(680, 255 + (65 * i));
 		bt->SetSize(0.45, 1);
 		bt->sortLayer = 116;
+		bt->OnClick = [this, i]() {
+			equipCraftParts[i] = std::min(equipCraftParts[i]+1, 20);
+			UpdateCraftVal();
+		};
 
 		ss.str("");
 		ss << "InputPartsBt" << i << "Text2";
@@ -1926,6 +1957,10 @@ void SceneHome::MakeSubUiEquip()
 		bt->SetPosition(713, 255 + (65 * i));
 		bt->SetSize(0.45, 1);
 		bt->sortLayer = 116;
+		bt->OnClick = [this, i]() {
+			equipCraftParts[i] = std::min(equipCraftParts[i]+5, 20);
+			UpdateCraftVal();
+		};
 
 		ss.str("");
 		ss << "InputPartsBt" << i << "Text3";
@@ -2009,7 +2044,6 @@ void SceneHome::MakeSubUiEquip()
 	bt->SetPosition(FRAMEWORK.GetWindowSize().x*0.5, 540);
 	bt->SetSize(2, 2);
 	bt->sortLayer = 116;
-
 
 	text = (TextGo*)FindGo("CraftingBText");
 	text->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
@@ -3453,6 +3487,18 @@ void SceneHome::TestingCheats()
 	}
 }
 
+bool SceneHome::isPartsEmpty()
+{
+	for (int i = 0; i < 4; i++)
+	{
+		if (equipCraftParts[i] != 0)
+		{
+			return false;
+		}
+	}
+	return true;
+}
+
 void SceneHome::UiEquipOpen(bool on)
 {
 	SubUiBaseOpen(9,on);
@@ -4106,6 +4152,8 @@ void SceneHome::UiEquipMakeOpen(int index, bool on)
 
 	text = (TextGo*)FindGo("CraftUiCurMoneyText");
 	text->SetActive(on);
+	text->text.setString(std::to_string(TEAM_MGR.GetMoney()));
+	text->SetOrigin(Origins::MR);
 
 	text = (TextGo*)FindGo("CraftUiPartsHeadText");
 	text->SetActive(on);
@@ -4118,13 +4166,137 @@ void SceneHome::UiEquipMakeOpen(int index, bool on)
 
 	bt = (UiButton*)FindGo("OnCraftB");
 	bt->SetActive(on);
+	bt->OnClick = [this,index]() {
+		if (craftCost > TEAM_MGR.GetMoney() || isPartsEmpty())
+		{
+			return;
+		}
+		ItemMakeSlot craftSlot;
+		craftSlot.inCrafting = true;
+		craftSlot.itemType = Utils::RandomRange(0, 3);
+		//이부분 함수화
+		switch (craftSlot.itemType)
+		{
+		case 0:
+			craftSlot.itemCode = Utils::RandomRange(0, 31);
+			break;
+		case 1:
+			craftSlot.itemCode = Utils::RandomRange(0, 37);
+			break;
+		case 2:
+			craftSlot.itemCode = Utils::RandomRange(0, 29);
+			break;
+		case 3:
+			craftSlot.itemCode = Utils::RandomRange(0, 32);
+			break;
+		}
+		craftSlot.leftDate = craftTime;
+		craftSlot.usedParts = equipCraftParts;
+		TEAM_MGR.SetCraftSlot(index, craftSlot);
+		UiEquipMakeOpen(index, false);
+		UiEquipOpen();
+	};
 
 	text = (TextGo*)FindGo("CraftingBText");
 	text->SetActive(on);
+
+	UpdateCraftVal();
 }
 
 void SceneHome::UiCraftFinish(bool on)
 {
+}
+
+void SceneHome::UpdateCraftVal()
+{
+	auto stringtable = DATATABLE_MGR.Get<StringTable>(DataTable::Ids::String);
+	SpriteGo* spr;
+	UiButton* bt;
+	TextGo* text;
+
+	for (int i = 0; i < 4; i++)
+	{
+		std::stringstream ss;
+		ss << "UsingCraftPartsText" << i<< "Cur";
+		text = (TextGo*)FindGo(ss.str());
+		text->text.setString(std::to_string(TEAM_MGR.GetParts(i)));
+
+		ss << "Text";
+		text = (TextGo*)FindGo(ss.str());
+		text->text.setString(std::to_wstring(TEAM_MGR.GetParts(i)) + stringtable->GetW("HavePartsNGold"));
+
+		ss.str("");
+		ss << "CraftUiUsingCount" << i;
+		text = (TextGo*)FindGo(ss.str());
+		text->text.setString(std::to_string(equipCraftParts[i]));
+
+		ss.str("");
+		ss << "CraftUiUsingPartsText" << i;
+		text = (TextGo*)FindGo(ss.str());
+		std::wstringstream wss;
+		switch (i)
+		{
+		case 0:
+			wss<< stringtable->GetW("SoundChip");
+			break;
+		case 1:
+			wss << stringtable->GetW("Switch");
+			break;
+		case 2:
+			wss << stringtable->GetW("Screw");
+			break;
+		case 3:
+			wss << stringtable->GetW("Fabric");
+			break;
+		}
+		wss << " " << equipCraftParts[i] << stringtable->GetW("Count");
+		if (equipCraftParts[i] > TEAM_MGR.GetParts(i))
+		{
+			wss << "(" << equipCraftParts[i] - TEAM_MGR.GetParts(i) <<
+				stringtable->GetW("BuyCount") << ")";
+		}
+		text->text.setString(wss.str());
+	}
+
+	text = (TextGo*)FindGo("CraftUiUseDateText");
+	{
+		int partsSum = 0;
+		for (int i = 0; i < 4; i++)
+		{
+			partsSum += equipCraftParts[i];
+		}
+		std::wstringstream wss;
+		wss << stringtable->GetW("RemainingTime") << "\t" <<
+			partsSum / 10 + 1<< stringtable->GetW("Week");
+		text->text.setString(wss.str());
+		craftTime = partsSum / 10 + 1;
+	}
+	text = (TextGo*)FindGo("CraftUiUseCostText");
+	{
+		int partsCost = 0;
+		for (int i = 0; i < 4; i++)
+		{
+			if (equipCraftParts[i] > TEAM_MGR.GetParts(i))
+			{
+				partsCost += 10 * (equipCraftParts[i] - TEAM_MGR.GetParts(i));
+			}
+		}
+		std::wstringstream wss;
+		wss << stringtable->GetW("PartsCost") << "\t" <<
+			partsCost;
+		text->text.setString(wss.str());
+		craftCost = partsCost;
+	}
+
+	bt = (UiButton*)FindGo("OnCraftB");
+	if (craftCost > TEAM_MGR.GetMoney() || isPartsEmpty())
+	{
+		bt->sprite.setColor(sf::Color(100, 100, 100));
+	}
+	else
+	{
+		bt->sprite.setColor(sf::Color::White);
+	}
 }
 
 std::wstring SceneHome::ReturnEquipStats(int itemType, int itemNum)

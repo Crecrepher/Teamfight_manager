@@ -28,7 +28,9 @@ protected:
 	std::vector<TrainingInfo> gainTrainingInfo;
 	int maxTrainingPoint = 3;
 
-
+	std::vector<int> equipCraftParts;
+	int craftCost = 0;
+	int craftTime = 0;
 public:
 	SceneHome();
 	virtual ~SceneHome() override;
@@ -72,6 +74,7 @@ public:
 	void UiEquipChangeOpen(int type,bool on = true);
 	void UiEquipMakeOpen(int index, bool on = true);
 	void UiCraftFinish(bool on = true);
+	void UpdateCraftVal();
 	std::wstring ReturnEquipStats(int itemType, int itemNum);
 	void ReturnItemName(TextGo& text,int type, int num);
 
@@ -80,6 +83,8 @@ public:
 	void NewYear();
 	PlayerInfo MakeDefaultPlayer();
 	PlayerInfo MakeLocalPlayer();
+	
+	bool isPartsEmpty();
 	
 	void TestingCheats();
 };
