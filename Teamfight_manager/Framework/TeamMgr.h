@@ -66,6 +66,15 @@ struct Sponsor
 	int currentProcess = 0;
 };
 
+struct ItemMakeSlot
+{
+	bool inCrafting = false;
+	int itemType = -1;
+	int itemCode = -1;
+	int leftDate = -1;
+	std::vector<int> usedParts = std::vector<int>(4);
+};
+
 class TeamMgr : public Singleton<TeamMgr>
 {
 	friend Singleton<TeamMgr>;
@@ -130,11 +139,15 @@ protected:
 
 	std::vector<AiTeam> aiTeams;
 
-	std::vector<bool> gear;
-	//장비 [인덱스 = 장비코드] <보유여부>
-	int gearNum = 4;
+	std::vector<std::vector<bool>> gear;
+	//장비 [장비유형][장비코드] <보유여부>
+	std::vector<int> equipedGear;
+	int gearNum = 37;
+	int gearMakeSlotCount = 1;
+	std::vector<ItemMakeSlot> craftSlot;
 	std::vector<int> gearParts; //4
 	//장비부품 [인덱스 = 부품코드(사운드칩,스위치,나사,천 조각)] <갯수>
+
 	std::vector<bool> facility; //40
 	//시설 [인덱스 = 시설코드] <보유여부>
 
@@ -168,8 +181,6 @@ public:
 
 	bool CheckRecruitSlot(int index) { return recruiting_players[index].first; }
 
-	
-
 	int GetMoney() { return money; }
 	void EarnMoney(int money) { this->money += money; }
 	void UseMoney(int money) { this->money -= money; }
@@ -196,6 +207,14 @@ public:
 	Sponsor GetSponsor(int index) { return sponsors[index]; }
 	void DeleteContractedSponsor();
 	void ContractSponsor(Sponsor sponsor);
+
+	std::vector<int>GetEquipedGear() { return equipedGear; }
+	void SetEquipedGear(int type, int code) { equipedGear[type] = code; }
+	bool GetGearOpen(int type, int code) { return gear[type][code]; }
+	int GetCraftSlotCount() { return gearMakeSlotCount; }
+	std::vector<ItemMakeSlot>GetCraftSlot() { return craftSlot; }
+	void SetCraftSlot(int index, ItemMakeSlot craftInfo) { craftSlot[index] = craftInfo; }
+	int GetParts(int type) { return gearParts[type]; }
 
 	void SaveLoad();
 };

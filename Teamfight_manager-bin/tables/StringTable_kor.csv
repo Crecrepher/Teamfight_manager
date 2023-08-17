@@ -245,7 +245,7 @@ ChampName4,닌자
 ChampName5,성직자
 ChampName6,화염술사
 ChampName7,검사
-ChampName8,무녀복
+ChampName8,무녀
 ChampName9,광전사
 ChampName10,소총수
 ChampName11,얼음술사
@@ -255,3 +255,14 @@ Attack,공격력
 Defence,방어력
 Progress,진행
 DoNextProgress,다음 일정을 진행합니다
+AtkSpeed,공격 속도
+SkillCooldown,기술 쿨타임 감소
+HpDrain,흡혈
+ChampType0,전사
+ChampType1,원거리
+ChampType2,암살자
+ChampType3,마법사
+ChampType4,전투 보조
+ChampTypePro,계열 챔피언 숙련도
+ChampPro,챔피언 숙련도
+Count,개

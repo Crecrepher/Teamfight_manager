@@ -3,6 +3,7 @@
 
 #include "DataTableMgr.h"
 #include "StringTable.h"
+#include "ItemTable.h"
 #include "SceneMgr.h"
 #include "InputMgr.h"
 #include "ResourceMgr.h"
@@ -215,6 +216,12 @@ void SceneHome::AddGoSprites()
 	AddGo(new SpriteGo("graphics/Origin/Sprite/lock_icon.png", "LockIcon1"));
 
 	//Item
+
+	AddGo(new SpriteGo("graphics/Origin/Sprite/items_headset_28.png", "ItemEquipedIcon0"));
+	AddGo(new SpriteGo("graphics/Origin/Sprite/items_controller_36.png", "ItemEquipedIcon1"));
+	AddGo(new SpriteGo("graphics/Origin/Sprite/items_chair_1.png", "ItemEquipedIcon2"));
+	AddGo(new SpriteGo("graphics/Origin/Sprite/items_uniform_31.png", "ItemEquipedIcon3"));
+
 	for (int i = 0; i < 3; i++)
 	{
 		std::stringstream ss;
@@ -755,8 +762,8 @@ void SceneHome::MakeSubUi()
 	MakeSubUiTraining();
 	MakeSubUiSponsorContract();
 	MakeSubUiEquip();
-	UiEquipOpen(false);
 	UiTrainingOpen(false);
+	UiEquipOpen();
 }
 
 void SceneHome::MakeSubUiTraining()
@@ -1495,6 +1502,13 @@ void SceneHome::MakeSubUiEquip()
 		bt->SetPosition(42, 210 + (i * 75));
 		bt->SetSize(2, 2);
 		bt->sortLayer = 111;
+		bt->OnClick = [this,i]() {
+			if (isPopupOn)
+			{
+				return;
+			}
+			UiEquipChangeOpen(i);
+		};
 
 		ss.str("");
 		ss << "EquipItemNameSlot" << i;
@@ -1510,10 +1524,18 @@ void SceneHome::MakeSubUiEquip()
 		text = (TextGo*)FindGo(ss.str());
 		text->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
 		text->text.setString(L"Àåºñ ½ºÅÝ");
-		text->text.setCharacterSize(14);
+		text->text.setCharacterSize(11);
 		text->SetOrigin(Origins::TL);
-		text->SetPosition(bt->GetPosition().x + 75, bt->GetPosition().y + 30);
+		text->SetPosition(bt->GetPosition().x + 75, bt->GetPosition().y + 35);
 		text->sortLayer = 112;
+
+		ss.str("");
+		ss << "ItemEquipedIcon" << i;
+		spr = (SpriteGo*)FindGo(ss.str());
+		spr->SetOrigin(Origins::MC);
+		spr->SetPosition(bt->GetPosition().x+36 , bt->GetPosition().y + 36);
+		spr->SetSize(2, 2);
+		spr->sortLayer = 112;
 
 		ss.str("");
 		ss << "EquipItemType" << i;
@@ -3435,6 +3457,8 @@ void SceneHome::UiEquipOpen(bool on)
 {
 	SubUiBaseOpen(9,on);
 	auto stringtable = DATATABLE_MGR.Get<StringTable>(DataTable::Ids::String);
+	auto itemTable = DATATABLE_MGR.Get<ItemTable>(DataTable::Ids::Item);
+	std::vector<int> equipedGear = TEAM_MGR.GetEquipedGear();
 	SpriteGo* spr;
 	UiButton* bt;
 	TextGo* text;
@@ -3458,15 +3482,40 @@ void SceneHome::UiEquipOpen(bool on)
 		ss << "EquipSlotB" << i;
 		bt = (UiButton*)FindGo(ss.str());
 		bt->SetActive(on);
+		bt->OnEnter = [bt,this]() {
+			if (isPopupOn)
+			{
+				return;
+			}
+			bt->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/UiFix/equipment_slot_bg_1.png"));
+		};
+		bt->OnExit = [bt,this]() {
+			if (isPopupOn)
+			{
+				return;
+			}
+			bt->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/UiFix/equipment_slot_bg_0.png"));
+		};
 
 		ss.str("");
 		ss << "EquipItemNameSlot" << i;
 		text = (TextGo*)FindGo(ss.str());
 		text->SetActive(on);
+		ReturnItemName(*text, i, equipedGear[i]);
 
 		ss << "Stat";
 		text = (TextGo*)FindGo(ss.str());
+		text->text.setString(ReturnEquipStats(i, equipedGear[i]));
 		text->SetActive(on);
+
+		ss.str("");
+		ss << "ItemEquipedIcon" << i;
+		spr = (SpriteGo*)FindGo(ss.str());
+		spr->SetActive(on);
+		sf::Texture* tex = RESOURCE_MGR.GetTexture(itemTable->Get(i, equipedGear[i]).textureId);
+		spr->sprite.setTexture(*tex);
+		spr->sprite.setTextureRect({ 0,0,(int)tex->getSize().x,(int)tex->getSize().y });
+		spr->SetOrigin(Origins::MC);
 
 		ss.str("");
 		ss << "EquipItemType" << i;
@@ -3476,52 +3525,135 @@ void SceneHome::UiEquipOpen(bool on)
 		ss.str("");
 		ss << "HavePartsText" << i;
 		text = (TextGo*)FindGo(ss.str());
+		switch (i)
+		{
+		case 0:
+		{
+			std::wstringstream wss;
+			wss << stringtable->GetW("SoundChip") << std::endl
+				<< TEAM_MGR.GetParts(i) << stringtable->GetW("Count");
+			text->text.setString(wss.str());
+		}
+			break;
+		case 1:
+		{
+			std::wstringstream wss;
+			wss << stringtable->GetW("Switch") << std::endl
+				<< TEAM_MGR.GetParts(i) << stringtable->GetW("Count");
+			text->text.setString(wss.str());
+		}
+			break;
+		case 2:
+		{
+			std::wstringstream wss;
+			wss << stringtable->GetW("Screw") << std::endl
+				<< TEAM_MGR.GetParts(i) << stringtable->GetW("Count");
+			text->text.setString(wss.str());
+		}
+			break;
+		case 3:
+		{
+			std::wstringstream wss;
+			wss << stringtable->GetW("Fabric") << std::endl
+				<< TEAM_MGR.GetParts(i) << stringtable->GetW("Count");
+			text->text.setString(wss.str());
+		}
+			break;
+		}
 		text->SetActive(on);
 	}
 
+	std::vector<ItemMakeSlot> craftSlot = TEAM_MGR.GetCraftSlot();
+
 	for (int i = 0; i < 3; i++)
 	{
+		bool slotOpen = on && i < TEAM_MGR.GetCraftSlotCount();
+		bool slotClose = on && i >= TEAM_MGR.GetCraftSlotCount();
+
 		std::stringstream ss;
 		ss << "Equipmake" << i;
 		spr = (SpriteGo*)FindGo(ss.str());
 		spr->SetActive(on);
+		if (slotOpen)
+		{
+			if (craftSlot[i].inCrafting)
+			{
+				spr->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/UiFix/equipment_making_slot_bg_2.png"));
+			}
+			else
+			{
+				spr->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/UiFix/equipment_making_slot_bg_0.png"));
+			}
+		}
+		
 
 		ss.str("");
 		ss << "EquipMakeB" << i;
 		bt = (UiButton*)FindGo(ss.str());
-		bt->SetActive(on);
+		bt->SetActive(slotOpen);
+		if (craftSlot[i].inCrafting)
+		{
+			bt->SetActive(false);
+		}
+		bt->OnClick = [i,this]() {
+			if (!TEAM_MGR.GetCraftSlot()[i].inCrafting)
+			{
+				UiEquipMakeOpen(i);
+			}
+			else if (TEAM_MGR.GetCraftSlot()[i].leftDate == 0)
+			{
+				UiCraftFinish();
+			}
+		};
 
 		ss.str("");
 		ss << "MakeItemPartsText" << i;
 		text = (TextGo*)FindGo(ss.str());
-		text->SetActive(on);
+		text->SetActive(slotOpen);
+		if (!craftSlot[i].inCrafting)
+		{
+			text->SetActive(false);
+		}
 
 		ss.str("");
 		ss << "MakeItemBText" << i;
 		text = (TextGo*)FindGo(ss.str());
-		text->SetActive(on);
+		text->SetActive(slotOpen);
+		if (craftSlot[i].inCrafting)
+		{
+			text->SetActive(false);
+		}
 
 		ss.str("");
 		ss << "MakingItemText" << i;
 		text = (TextGo*)FindGo(ss.str());
-		text->SetActive(on);
+		text->SetActive(slotOpen);
+		if (!craftSlot[i].inCrafting)
+		{
+			text->SetActive(false);
+		}
 
 		ss << "Time";
 		AddGo(new TextGo(ss.str()));
 		text = (TextGo*)FindGo(ss.str());
-		text->SetActive(on);
+		text->SetActive(slotOpen);
+		if (!craftSlot[i].inCrafting)
+		{
+			text->SetActive(false);
+		}
+
 
 		if (i > 0)
 		{
 			ss.str("");
 			ss << "ItemMakeLock" << i - 1;
 			SpriteGo* lockIco = (SpriteGo*)FindGo(ss.str());
-			lockIco->SetActive(on);
+			lockIco->SetActive(slotClose);
 
 			ss.str("");
 			ss << "CanCraftExText" << i - 1;
 			text = (TextGo*)FindGo(ss.str());
-			text->SetActive(on);
+			text->SetActive(slotClose);
 		}
 
 	}
@@ -3693,34 +3825,137 @@ void SceneHome::UiEquipOpen(bool on)
 	text->SetActive(false);
 }
 
-void SceneHome::UiEquipChangeOpen(bool on)
+void SceneHome::UiEquipChangeOpen(int type, bool on)
 {
+	isPopupOn = true;
 	auto stringtable = DATATABLE_MGR.Get<StringTable>(DataTable::Ids::String);
+	auto itemTable = DATATABLE_MGR.Get<ItemTable>(DataTable::Ids::Item);
+	std::vector<int> equipedGear = TEAM_MGR.GetEquipedGear();
+
 	SpriteGo* spr;
 	UiButton* bt;
 	TextGo* text;
 	RectGo* rect = (RectGo*)FindGo("PopupUiShade");
 	rect->SetActive(on);
+	int itemCount = 0;
 
-	for (int i = 0; i < 38; i++)
+
+	switch (type)
+	{
+	case 0:
+		itemCount = 31;
+		break;
+	case 1:
+		itemCount = 37;
+		break;
+	case 2:
+		itemCount = 29;
+		break;
+	case 3:
+		itemCount = 32;
+		break;
+	}
+
+	for (int i = 0; i < itemCount; i++)
 	{
 		std::stringstream ss;
 		ss.str("");
 		ss << "EquipItemB" << i;
 		bt = (UiButton*)FindGo(ss.str());
 		bt->SetActive(on);
+		if (equipedGear[type] == i)
+		{
+			bt->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/Origin/Sprite/equipment_icon_bg_2.png"));
+		}
+		else
+		{
+			bt->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/Origin/Sprite/equipment_icon_bg_0.png"));
+		}
+		if (!TEAM_MGR.GetGearOpen(type, i))
+		{
+			std::stringstream ss2;
+			ss2 << "EquipItemB" << i << "Sprite";
+			SpriteGo* spr = (SpriteGo*)FindGo(ss2.str());
+			spr->sprite.setColor(sf::Color(50, 50, 50));
+			ss2 << "Lock";
+			spr = (SpriteGo*)FindGo(ss2.str());
+			spr->SetActive(on);
+		}
+		bt->OnClick = [this,type,i, itemCount]() {
+			if (TEAM_MGR.GetGearOpen(type,i))
+			{
+				TEAM_MGR.SetEquipedGear(type, i);
+
+				TextGo* text = (TextGo*)FindGo("EquipItemText");
+				ReturnItemName(*text, type, i);
+
+				text = (TextGo*)FindGo("EquipItemValText");
+				text->text.setString(ReturnEquipStats(type,i));		
+				for (int j = 0; j < itemCount; j++)
+				{
+					std::stringstream ss;
+					ss.str("");
+					ss << "EquipItemB" << j;
+					UiButton* bt = (UiButton*)FindGo(ss.str());
+					if (j == i)
+					{
+						bt->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/Origin/Sprite/equipment_icon_bg_2.png"));
+					}
+					else
+					{
+						bt->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/Origin/Sprite/equipment_icon_bg_0.png"));
+					}
+				}
+			}
+		};
+
+		bt->OnEnter = [bt,this, type, i]() {
+			TextGo* text = (TextGo*)FindGo("LookItemText");
+			ReturnItemName(*text, type, i);
+
+			text = (TextGo*)FindGo("LookItemValText");
+			text->text.setString(ReturnEquipStats(type, i));
+
+			if (TEAM_MGR.GetEquipedGear()[type] != i)
+			{
+				bt->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/Origin/Sprite/equipment_icon_bg_1.png"));
+			}
+		};
+		bt->OnExit = [bt, type, i]() {
+			if (TEAM_MGR.GetEquipedGear()[type] != i)
+			{
+				bt->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/Origin/Sprite/equipment_icon_bg_0.png"));
+			}
+		};
+
 		ss << "Sprite";
 		spr = (SpriteGo*)FindGo(ss.str());
 		spr->SetActive(on);
+		sf::Texture* tex = RESOURCE_MGR.GetTexture(itemTable->Get(type, i).textureId);
+		spr->sprite.setTexture(*tex);
+		spr->sprite.setTextureRect({ 0,0,(int)tex->getSize().x,(int)tex->getSize().y });
+		spr->SetOrigin(Origins::MC);
+	}
+	for (int i = itemCount; i < 37; i++)
+	{
+		std::stringstream ss;
+		ss.str("");
+		ss << "EquipItemB" << i;
+		bt = (UiButton*)FindGo(ss.str());
+		bt->SetActive(false);
+
+		ss << "Sprite";
+		spr = (SpriteGo*)FindGo(ss.str());
+		spr->SetActive(false);
 
 		ss << "Lock";
 		spr = (SpriteGo*)FindGo(ss.str());
-		spr->SetActive(on);
+		spr->SetActive(false);
 	}
 
 	spr = (SpriteGo*)FindGo("EquipPopup");
 	spr->SetActive(on);
-	spr->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/UiFix/equipment_making_slot_bg_0.png"));
+	spr->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/UiFix/equipment_change_popup_bg.png"));
 
 	text = (TextGo*)FindGo("PopupUiText");
 	text->SetActive(on);
@@ -3741,16 +3976,22 @@ void SceneHome::UiEquipChangeOpen(bool on)
 	text = (TextGo*)FindGo("LookItemValText");
 	text->SetActive(on);
 
-	spr = (SpriteGo*)FindGo("ExitEquipPopB");
-	spr->SetActive(on);
+	bt = (UiButton*)FindGo("ExitEquipPopB");
+	bt->SetActive(on);
+	bt->OnClick = [this, type]() {
+		UiEquipChangeOpen(type, false);
+		UiEquipOpen();
+		isPopupOn = false;
+	};
 
 	text = (TextGo*)FindGo("ExitEquipPopBText");
 	text->SetActive(on);
 }
 
 
-void SceneHome::UiEquipMakeOpen(bool on)
+void SceneHome::UiEquipMakeOpen(int index, bool on)
 {
+	isPopupOn = true;
 	auto stringtable = DATATABLE_MGR.Get<StringTable>(DataTable::Ids::String);
 	SpriteGo* spr;
 	UiButton* bt;
@@ -3766,8 +4007,13 @@ void SceneHome::UiEquipMakeOpen(bool on)
 	text->SetActive(on);
 	text->text.setString(stringtable->GetW("CraftEquip"));
 
-	spr = (SpriteGo*)FindGo("ExitEquipPopB");
-	spr->SetActive(on);
+	bt = (UiButton*)FindGo("ExitEquipPopB");
+	bt->SetActive(on);
+	bt->OnClick = [this, index]() {
+		UiEquipMakeOpen(index, false);
+		UiEquipOpen();
+		isPopupOn = false;
+	};
 
 	text = (TextGo*)FindGo("ExitEquipPopBText");
 	text->SetActive(on);
@@ -3875,4 +4121,95 @@ void SceneHome::UiEquipMakeOpen(bool on)
 
 	text = (TextGo*)FindGo("CraftingBText");
 	text->SetActive(on);
+}
+
+void SceneHome::UiCraftFinish(bool on)
+{
+}
+
+std::wstring SceneHome::ReturnEquipStats(int itemType, int itemNum)
+{
+	auto stringtable = DATATABLE_MGR.Get<StringTable>(DataTable::Ids::String);
+	auto itemTable = DATATABLE_MGR.Get<ItemTable>(DataTable::Ids::Item);
+	ItemInfo item = itemTable->Get(itemType, itemNum);
+
+	std::wstringstream wss;
+
+	if (item.atk !=0)
+	{
+		wss << stringtable->GetW("Attack") << " +" << item.atk << std::endl;
+	}
+	if (item.def != 0)
+	{
+		wss << stringtable->GetW("Defence") << " +" << item.def << std::endl;
+	}
+	if (item.atkSpeed != 0)
+	{
+		wss << stringtable->GetW("AtkSpeed") << " +" << item.atkSpeed << std::endl;
+	}
+	if (item.coolDown != 0)
+	{
+		wss << stringtable->GetW("SkillCooldown") << " +" << item.coolDown << std::endl;
+	}
+	if (item.hpDrain != 0)
+	{
+		wss << stringtable->GetW("HpDrain") << " +" << item.hpDrain << std::endl;
+	}
+	if (item.proficiencyType != 0)
+	{
+		std::stringstream ss;
+		ss << "ChampType" << (item.proficiencyType - 1);
+		wss << stringtable->GetW(ss.str()) << stringtable->GetW("ChampTypePro") << " +" << item.proficiencyValue << std::endl;
+	}
+	if (item.champProficiency != 0)
+	{
+		std::stringstream ss;
+		ss << "ChampName" << (item.champProficiency - 1);
+		wss << stringtable->GetW(ss.str()) << stringtable->GetW("ChampPro") << " +" << item.champProficiencyValue << std::endl;
+	}
+	
+	
+	return wss.str();
+}
+
+void SceneHome::ReturnItemName(TextGo& text, int type, int num)
+{
+	auto stringtable = DATATABLE_MGR.Get<StringTable>(DataTable::Ids::String);
+	auto itemTable = DATATABLE_MGR.Get<ItemTable>(DataTable::Ids::Item);
+	std::stringstream ss;
+	switch (type)
+	{
+	case 0:
+		ss << "Headset";
+		break;
+	case 1:
+		ss << "Controller";
+		break;
+	case 2:
+		ss << "Chair";
+		break;
+	case 3:
+		ss << "Uniform";
+		break;
+	}
+	ss << num;
+	text.text.setString(stringtable->GetW(ss.str()));
+	switch (itemTable->Get(type, num).grade)
+	{
+	case 0:
+		text.text.setFillColor(sf::Color::White);
+		break;
+	case 1:
+		text.text.setFillColor(sf::Color(0, 128, 64));
+		break;
+	case 2:
+		text.text.setFillColor(sf::Color(0, 128, 255));
+		break;
+	case 3:
+		text.text.setFillColor(sf::Color(163, 73, 164));
+		break;
+	case 4:
+		text.text.setFillColor(sf::Color(255, 128, 0));
+		break;
+	}
 }
