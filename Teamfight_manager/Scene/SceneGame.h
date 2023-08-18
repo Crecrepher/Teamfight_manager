@@ -2,6 +2,7 @@
 #include "Scene.h"
 #include "ObjectPool.h"
 #include "Champion.h"
+#include "ChampionEffect.h"
 #include "GameState.h"
 #include "AnimatioControler.h"
 
@@ -11,7 +12,7 @@ class SceneGame : public Scene
 {
 protected:
 	Phase currentPhase=Phase::None;
-	Mode mode=Mode::Duo;
+	Mode mode=Mode::Trio;
 	Team team;
 	Turn currentTurn = Turn::Player;
 	std::string pick = "";
@@ -24,8 +25,10 @@ protected:
 
 	int fullStep; // ¹ê, ÇÈ ÃÑÈ½¼ö
 	int step; // ÁøÇàÁßÀÎ ¹ê, ÇÈ
+	float speedUp = 1.f;
 
 	ObjectPool<Champion> championPool;
+	ObjectPool<ChampionEffect> effectPool;
 	
 	std::vector<Champion*> redTeam;
 	std::vector<Champion*> blueTeam;

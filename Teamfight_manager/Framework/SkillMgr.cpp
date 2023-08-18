@@ -222,27 +222,31 @@ void SkillMgr::NinjaSkill(Champion* champ)
 
 	if (champ->GetCurretState().animaition.GetCurrFrame() == 7)
 	{
-		champ->TagetOrderLR();
-
-		sf::Vector2f dir = Utils::Normalize(champ->GetTarget()->GetPosition() - champ->GetPosition());
-
-		if (dir.x >= 0)
+		if (!champ->GetFrameLimit())
 		{
-			champ->SetEndPos({ champ->GetTarget()->GetPosition().x + 30.f, champ->GetTarget()->GetPosition().y });
-			champ->SetSacleX(-1);
-		}
-		else if (dir.x <0)
-		{
-			champ->SetEndPos({ champ->GetTarget()->GetPosition().x - 30.f, champ->GetTarget()->GetPosition().y });
-			champ->SetSacleX(1);
-		}
+			champ->TagetOrderLR();
 
-		champ->SetPosition(champ->GetEndPos());
+			sf::Vector2f dir = Utils::Normalize(champ->GetTarget()->GetPosition() - champ->GetPosition());
+
+			if (dir.x >= 0)
+			{
+				champ->SetEndPos({ champ->GetTarget()->GetPosition().x + 30.f, champ->GetTarget()->GetPosition().y });
+				champ->SetSacleX(-1);
+			}
+			else if (dir.x < 0)
+			{
+				champ->SetEndPos({ champ->GetTarget()->GetPosition().x - 30.f, champ->GetTarget()->GetPosition().y });
+				champ->SetSacleX(1);
+			}
+			champ->SetPosition(champ->GetEndPos());
+			champ->SetFrameLimit(true);
+		}
 		return;
 	}
 
 	if (champ->GetCurretState().animaition.GetLastFrame())
 	{
+		champ->SetFrameLimit(false);
 		champ->DamageCalculate(champ->GetCurretState().attack);
 		champ->GetTarget()->SetBloodingStack(5);
 		champ->GetTarget()->UseBloodingPlayer(champ);

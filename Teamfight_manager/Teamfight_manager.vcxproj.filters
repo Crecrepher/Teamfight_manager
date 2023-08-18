@@ -33,6 +33,7 @@
     <ClCompile Include="AiBanPick.cpp" />
     <ClCompile Include="Framework\SkillMgr.cpp" />
     <ClCompile Include="DataTable\ItemTable.cpp" />
+    <ClCompile Include="GameObject\ChampionEffect.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="3rd\rapidcsv.h" />
@@ -72,5 +73,6 @@
     <ClInclude Include="AiBanPick.h" />
     <ClInclude Include="Framework\SkillMgr.h" />
     <ClInclude Include="DataTable\ItemTable.h" />
+    <ClInclude Include="GameObject\ChampionEffect.h" />
   </ItemGroup>
 </Project>
