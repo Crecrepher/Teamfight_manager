@@ -652,9 +652,7 @@ void SceneHome::MakeMainUi()
 			return;
 		}
 		TEAM_MGR.DayPass();
-<<<<<<< HEAD
-		SCENE_MGR.ChangeScene(SceneId::Game);
-=======
+
 		UpdateMoney();
 		if (TEAM_MGR.GetTodayDate() == 0)
 		{
@@ -674,7 +672,6 @@ void SceneHome::MakeMainUi()
 		text->text.setString(std::to_string(TEAM_MGR.GetTodayYear()) + " / "
 			+ std::to_string(TEAM_MGR.GetTodayDate() / 4 + 1) + " Week "
 			+ std::to_string(TEAM_MGR.GetTodayDate() % 4 + 1));
->>>>>>> e1234829c394dfccf82db0e06054abd0a04faeed
 	};
 
 	TextGo* text = (TextGo*)FindGo("ProgressPlayText");
