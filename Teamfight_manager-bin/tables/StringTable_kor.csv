@@ -266,3 +266,9 @@ ChampType4,전투 보조
 ChampTypePro,계열 챔피언 숙련도
 ChampPro,챔피언 숙련도
 Count,개
+Year,년
+Month,월
+Weekday,주차
+RecruitDay,선수 영입일
+LeagueDay,경기일
+VacationDay,선수단 전체 휴가

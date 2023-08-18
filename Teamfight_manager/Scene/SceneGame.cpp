@@ -124,7 +124,7 @@ void SceneGame::Enter()
 	banAnimation.Play("Idle"); // 무조건 한번만 호출되게
 	banSheet->SetOrigin(Origins::MC);
 	currentPhase = Phase::None;
-	banChamps = std::vector<int>(6,-1);
+	banChamps = std::vector<int>(14,-1);
 
 	redScore = 0;
 	blueScore = 0;

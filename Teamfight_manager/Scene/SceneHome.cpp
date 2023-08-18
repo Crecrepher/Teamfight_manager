@@ -44,6 +44,7 @@ void SceneHome::Init()
 
 	AddGo(new RectGo("UiShade"));
 	AddGo(new RectGo("PopupUiShade"));
+	AddGo(new RectGo("PopupTextShade"));
 
 	for (auto go : gameObjects)
 	{
@@ -68,6 +69,8 @@ void SceneHome::Enter()
 	backClick = true;
 	isMenuOn = false;
 	isPopupOn = false;
+	popTextFade = maxPopTextFade;
+
 
 	if (TEAM_MGR.GetTodayDate() == 0)
 	{
@@ -109,6 +112,11 @@ void SceneHome::Update(float dt)
 		&& !isMenuOn)
 	{
 		MainUiClose();
+	}
+
+	if (!isPopupOn && popTextFade >= 0.f)
+	{
+		PopTextUpdate(dt);
 	}
 
 	TestingCheats();
@@ -246,7 +254,9 @@ void SceneHome::AddGoSprites()
 	// Change Equip
 	AddGo(new SpriteGo("graphics/UiFix/equipment_change_popup_bg.png", "EquipPopup"));
 
-	// Craft
+	// CraftResult
+	AddGo(new SpriteGo("graphics/UiFix/equipment_result_bg.png", "CraftResultBack"));
+	AddGo(new SpriteGo("graphics/Origin/Sprite/items_uniform_0.png", "CraftResultIcon"));
 }
 
 void SceneHome::AddGoUiButton()
@@ -365,6 +375,9 @@ void SceneHome::AddGoUiButton()
 		AddGo(new UiButton("graphics/Origin/Sprite/default_button_0.png", ss.str()));
 	}
 	AddGo(new UiButton("graphics/Origin/Sprite/important_button_0.png", "OnCraftB"));
+
+	// CraftResult
+	AddGo(new UiButton("graphics/Origin/Sprite/default_button_0.png", "CraftResultB"));
 }
 
 void SceneHome::AddGoText()
@@ -377,6 +390,8 @@ void SceneHome::AddGoText()
 
 	AddGo(new TextGo("ProgressPlayText"));
 	AddGo(new TextGo("DoProgressPlayText"));
+
+	AddGo(new TextGo("PopupText"));
 
 	//Training
 	AddGo(new TextGo("TrainPlayerName"));
@@ -507,12 +522,26 @@ void SceneHome::AddGoText()
 	AddGo(new TextGo("CraftUiUseDateText"));
 	AddGo(new TextGo("CraftUiUseCostText"));
 	AddGo(new TextGo("CraftingBText"));
+
+	//CraftResult
+	AddGo(new TextGo("CraftResultTitle"));
+	AddGo(new TextGo("CraftResultName"));
+	AddGo(new TextGo("CraftResultVal"));
+	AddGo(new TextGo("CraftResultOkBText"));
 }
 
 
 void SceneHome::MakeMainUi()
 {
 	auto stringtable = DATATABLE_MGR.Get<StringTable>(DataTable::Ids::String);
+
+	RectGo* popTextShade = (RectGo*)FindGo("PopupTextShade");
+	popTextShade->SetOrigin(Origins::MC);
+	popTextShade->SetSize(FRAMEWORK.GetWindowSize());
+	popTextShade->rectangle.setFillColor(sf::Color(56, 58, 64, 200));
+	popTextShade->sortLayer = 100;
+
+
 	SpriteGo* ground = (SpriteGo*)FindGo("Ground");
 	ground->SetOrigin(Origins::TC);
 	ground->SetSize(FRAMEWORK.GetWindowSize().x / ground->GetSize().x,
@@ -651,7 +680,7 @@ void SceneHome::MakeMainUi()
 	bt->SetPosition(FRAMEWORK.GetWindowSize().x - 30.f,
 		FRAMEWORK.GetWindowSize().y - 30.f);
 	bt->sortLayer = 101;
-	bt->OnClick = [this]() {
+	bt->OnClick = [this,stringtable]() {
 		if (isMenuOn)
 		{
 			return;
@@ -673,9 +702,12 @@ void SceneHome::MakeMainUi()
 			SCENE_MGR.ChangeScene(SceneId::Game);
 		}
 		TextGo* text = (TextGo*)FindGo("Calinder");
-		text->text.setString(std::to_string(TEAM_MGR.GetTodayYear()) + " / "
-			+ std::to_string(TEAM_MGR.GetTodayDate() / 4 + 1) + " Week "
-			+ std::to_string(TEAM_MGR.GetTodayDate() % 4 + 1));
+		text->text.setString(std::to_wstring(TEAM_MGR.GetTodayYear()) + L" / "
+			+ std::to_wstring(TEAM_MGR.GetTodayDate() / 4 + 1) + stringtable->GetW("Month") + L" "
+			+ std::to_wstring(TEAM_MGR.GetTodayDate() % 4 + 1) + stringtable->GetW("Weekday"));
+		UpdatePopDate();
+		popTextFade = maxPopTextFade;
+		ResetSky();
 	};
 
 	TextGo* text = (TextGo*)FindGo("ProgressPlayText");
@@ -713,14 +745,25 @@ void SceneHome::MakeMainUi()
 
 	text = (TextGo*)FindGo("Calinder");
 	text->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
-	text->text.setString(std::to_string(TEAM_MGR.GetTodayYear()) + " / "
-		+ std::to_string(TEAM_MGR.GetTodayDate() / 4 + 1) + " Week "
-		+ std::to_string(TEAM_MGR.GetTodayDate() % 4 + 1));
+	text->text.setString(std::to_wstring(TEAM_MGR.GetTodayYear()) + L" / "
+		+ std::to_wstring(TEAM_MGR.GetTodayDate() / 4 + 1) + stringtable->GetW("Month") + L" "
+		+ std::to_wstring(TEAM_MGR.GetTodayDate() % 4 + 1) + stringtable->GetW("Weekday"));
 	text->text.setFillColor(sf::Color::White);
 	text->text.setCharacterSize(18);
 	text->SetOrigin(Origins::TL);
 	text->SetPosition(845, 22);
 	text->sortLayer = 107;
+
+	text = (TextGo*)FindGo("PopupText");
+	text->text.setFont(*RESOURCE_MGR.GetFont("fonts/Silver.ttf"));
+	UpdatePopDate();
+	text->text.setFillColor(sf::Color::White);
+	text->text.setOutlineColor(sf::Color::Black);
+	text->text.setOutlineThickness(5);
+	text->text.setCharacterSize(120);
+	text->SetPosition(FRAMEWORK.GetWindowSize().x * 0.5f, 100.f);
+	text->SetOrigin(Origins::TC);
+	text->sortLayer = 101;
 }
 
 
@@ -768,7 +811,8 @@ void SceneHome::MakeSubUi()
 	MakeSubUiSponsorContract();
 	MakeSubUiEquip();
 	UiTrainingOpen(false);
-	UiEquipOpen();
+	UiEquipOpen(false);
+	UiCraftFinish(0,false);
 }
 
 void SceneHome::MakeSubUiTraining()
@@ -1642,11 +1686,10 @@ void SceneHome::MakeSubUiEquip()
 		text->sortLayer = 113;
 
 		ss << "Time";
-		AddGo(new TextGo(ss.str()));
 		text = (TextGo*)FindGo(ss.str());
 		text->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
 		text->text.setString(stringtable->GetW("TimeRemaining"));
-		text->text.setCharacterSize(14);
+		text->text.setCharacterSize(17);
 		text->SetOrigin(Origins::MC);
 		text->SetPosition(spr->GetPosition().x + 140, spr->GetPosition().y);
 		text->sortLayer = 113;
@@ -2052,6 +2095,57 @@ void SceneHome::MakeSubUiEquip()
 	text->SetOrigin(Origins::MC);
 	text->SetPosition(bt->GetPosition());
 	text->sortLayer = 117;
+
+	//Craft Result
+	spr = (SpriteGo*)FindGo("CraftResultBack");
+	spr->SetOrigin(Origins::MC);
+	spr->SetPosition(FRAMEWORK.GetWindowSize() * 0.5f);
+	spr->SetSize(2, 2);
+	spr->sortLayer = 116;
+
+	spr = (SpriteGo*)FindGo("CraftResultIcon");
+	spr->SetOrigin(Origins::MC);
+	spr->SetPosition(515,337);
+	spr->SetSize(2, 2);
+	spr->sortLayer = 116;
+
+	bt = (UiButton*)FindGo("CraftResultB");
+	bt->SetOrigin(Origins::MC);
+	bt->SetPosition(FRAMEWORK.GetWindowSize().x * 0.5, 460);
+	bt->SetSize(2, 2);
+	bt->sortLayer = 116;
+
+	text = (TextGo*)FindGo("CraftResultTitle");
+	text->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
+	text->text.setString(stringtable->GetW("CheckResult"));
+	text->text.setCharacterSize(30);
+	text->SetOrigin(Origins::MC);
+	text->SetPosition(FRAMEWORK.GetWindowSize().x * 0.5, 250);
+	text->sortLayer = 117;
+
+	text = (TextGo*)FindGo("CraftResultName");
+	text->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
+	text->text.setString(stringtable->GetW("Headset0"));
+	text->text.setCharacterSize(18);
+	text->SetOrigin(Origins::ML);
+	text->SetPosition(550,315);
+	text->sortLayer = 117;
+
+	text = (TextGo*)FindGo("CraftResultVal");
+	text->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
+	text->text.setString(stringtable->GetW("Headset0"));
+	text->text.setCharacterSize(16);
+	text->SetOrigin(Origins::ML);
+	text->SetPosition(550, 335);
+	text->sortLayer = 117;
+
+	text = (TextGo*)FindGo("CraftResultOkBText");
+	text->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
+	text->text.setString(stringtable->GetW("OK"));
+	text->text.setCharacterSize(20);
+	text->SetOrigin(Origins::MC);
+	text->SetPosition(bt->GetPosition());
+	text->sortLayer = 117;
 }
 
 void SceneHome::MainUiFunc(int index)
@@ -2080,30 +2174,8 @@ void SceneHome::MainUiFunc(int index)
 	case 9:
 		UiEquipOpen();
 	case 13:
-		std::cout << "오늘의 일정은 " ;
-		{
-			switch (TEAM_MGR.GetSchedule(TEAM_MGR.GetTodayDate()))
-			{
-			case TeamMgr::Schedule::Recruit:
-				std::cout << "선수모집일";
-				break;
-			case TeamMgr::Schedule::PracticeLeague:
-				std::cout << "연습경기일";
-				break;
-			case TeamMgr::Schedule::League:
-				std::cout << "경기일";
-				break;
-			case TeamMgr::Schedule::Vacation:
-				std::cout << "선수단 전체 휴가";
-				break;
-			case TeamMgr::Schedule::EventLeague:
-				std::cout << "이벤트 경기";
-				break;
-			default:
-				break;
-			}
-		}
-		std::cout << " 입니다." << std::endl;
+		UpdatePopDate();
+		popTextFade = maxPopTextFade;
 		break;
 	case 15:
 	{
@@ -2178,6 +2250,11 @@ void SceneHome::SubUiBaseOpen(int index, bool on)
 
 	RectGo* rect = (RectGo*)FindGo("UiShade");
 	rect->SetActive(on);
+}
+
+void SceneHome::UiRecruitOpen(bool on)
+{
+
 }
 
 void SceneHome::UiTrainingOpen(bool on)
@@ -2815,6 +2892,7 @@ void SceneHome::UiTrainingGaugeUpdate(int index)
 void SceneHome::UiSponsorContractOpen(bool contract, bool on)
 {
 	isMenuOn = on;
+	isPopupOn = on;
 	selectedSponsorIndex = -1;
 	auto stringtable = DATATABLE_MGR.Get<StringTable>(DataTable::Ids::String);
 	SubUiBaseOpen(8, on);
@@ -3436,6 +3514,51 @@ PlayerInfo SceneHome::MakeLocalPlayer()
 	return player;
 }
 
+void SceneHome::UpdatePopDate()
+{
+	auto stringtable = DATATABLE_MGR.Get<StringTable>(DataTable::Ids::String);
+	TextGo* text = (TextGo*)FindGo("PopupText");
+	std::wstringstream wss;
+	wss << TEAM_MGR.GetTodayYear() << stringtable->GetW("Year") << " " <<
+		TEAM_MGR.GetTodayDate() / 4 + 1 << stringtable->GetW("Month") << " " <<
+		TEAM_MGR.GetTodayDate() % 4 + 1 << stringtable->GetW("Weekday") << std::endl;
+	switch (TEAM_MGR.GetSchedule(TEAM_MGR.GetTodayDate()))
+	{
+	case TeamMgr::Schedule::Recruit:
+		wss << stringtable->GetW("RecruitDay");
+		break;
+	case TeamMgr::Schedule::League:
+		wss << stringtable->GetW("LeagueDay");
+		break;
+	case TeamMgr::Schedule::Vacation:
+		wss << stringtable->GetW("VacationDay");
+		break;
+	}
+	text->text.setString(wss.str());
+	text->SetOrigin(Origins::TC);
+}
+
+void SceneHome::PopTextUpdate(float dt)
+{
+	popTextFade = std::max(popTextFade - dt,0.f);
+	float popColor = 255 * (popTextFade*2 / maxPopTextFade);
+	TextGo* text = (TextGo*)FindGo("PopupText");
+	RectGo* rect = (RectGo*)FindGo("PopupTextShade");
+	if (popTextFade > maxPopTextFade/2.f)
+	{
+		text->text.setFillColor(sf::Color::White);
+		text->text.setOutlineColor(sf::Color::Black);
+		rect->rectangle.setFillColor(sf::Color(56, 58, 64, 200));
+	}
+	else
+	{
+		text->text.setFillColor(sf::Color(popColor, popColor, popColor, popColor));
+		text->text.setOutlineColor((sf::Color(0, 0, 0, popColor)));
+		rect->rectangle.setFillColor(sf::Color(56, 58, 64, std::max(popColor-55.f,0.f)));
+	}
+	
+}
+
 void SceneHome::TestingCheats()
 {
 	//***********************************************
@@ -3487,6 +3610,29 @@ void SceneHome::TestingCheats()
 	}
 }
 
+void SceneHome::PopText()
+{
+	
+}
+
+void SceneHome::ResetSky()
+{
+	sky = (sky + 1) % 3;
+	SpriteGo* spr = (SpriteGo*)FindGo("Sky");
+	switch (sky)
+	{
+	case 0:
+		spr->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/Origin/Sprite/sky_day.png"));
+		break;
+	case 1:
+		spr->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/Origin/Sprite/sky_sunset.png"));
+		break;
+	case 2:
+		spr->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/Origin/Sprite/sky_night.png"));
+		break;
+	}
+}
+
 bool SceneHome::isPartsEmpty()
 {
 	for (int i = 0; i < 4; i++)
@@ -3528,6 +3674,7 @@ void SceneHome::UiEquipOpen(bool on)
 		ss << "EquipSlotB" << i;
 		bt = (UiButton*)FindGo(ss.str());
 		bt->SetActive(on);
+		bt->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/UiFix/equipment_slot_bg_0.png"));
 		bt->OnEnter = [bt,this]() {
 			if (isPopupOn)
 			{
@@ -3637,7 +3784,7 @@ void SceneHome::UiEquipOpen(bool on)
 		ss << "EquipMakeB" << i;
 		bt = (UiButton*)FindGo(ss.str());
 		bt->SetActive(slotOpen);
-		if (craftSlot[i].inCrafting)
+		if (craftSlot[i].inCrafting && craftSlot[i].leftDate > 0)
 		{
 			bt->SetActive(false);
 		}
@@ -3648,7 +3795,7 @@ void SceneHome::UiEquipOpen(bool on)
 			}
 			else if (TEAM_MGR.GetCraftSlot()[i].leftDate == 0)
 			{
-				UiCraftFinish();
+				UiCraftFinish(i);
 			}
 		};
 
@@ -3656,6 +3803,12 @@ void SceneHome::UiEquipOpen(bool on)
 		ss << "MakeItemPartsText" << i;
 		text = (TextGo*)FindGo(ss.str());
 		text->SetActive(slotOpen);
+		ss.str("");
+		ss << craftSlot[i].usedParts[0] << " \t\t"
+			<< craftSlot[i].usedParts[1] << "\t\t"
+			<< craftSlot[i].usedParts[2] << "\t\t"
+			<< craftSlot[i].usedParts[3];
+		text->text.setString(ss.str());
 		if (!craftSlot[i].inCrafting)
 		{
 			text->SetActive(false);
@@ -3665,7 +3818,17 @@ void SceneHome::UiEquipOpen(bool on)
 		ss << "MakeItemBText" << i;
 		text = (TextGo*)FindGo(ss.str());
 		text->SetActive(slotOpen);
-		if (craftSlot[i].inCrafting)
+		if (!craftSlot[i].inCrafting)
+		{
+			text->text.setString(stringtable->GetW("Craft"));
+			text->SetOrigin(Origins::MC);
+		}
+		else if (craftSlot[i].leftDate == 0)
+		{
+			text->text.setString(stringtable->GetW("CheckResult"));
+			text->SetOrigin(Origins::MC);
+		}
+		if (craftSlot[i].inCrafting && craftSlot[i].leftDate > 0)
 		{
 			text->SetActive(false);
 		}
@@ -3674,16 +3837,19 @@ void SceneHome::UiEquipOpen(bool on)
 		ss << "MakingItemText" << i;
 		text = (TextGo*)FindGo(ss.str());
 		text->SetActive(slotOpen);
-		if (!craftSlot[i].inCrafting)
+		if (!craftSlot[i].inCrafting || craftSlot[i].leftDate < 1 )
 		{
 			text->SetActive(false);
 		}
 
 		ss << "Time";
-		AddGo(new TextGo(ss.str()));
 		text = (TextGo*)FindGo(ss.str());
 		text->SetActive(slotOpen);
-		if (!craftSlot[i].inCrafting)
+		std::wstringstream wss;
+		wss << stringtable->GetW("TimeRemaining") << " " << craftSlot[i].leftDate << stringtable->GetW("Week");
+		text->text.setString(wss.str());
+		text->SetOrigin(Origins::MC);
+		if (!craftSlot[i].inCrafting || craftSlot[i].leftDate < 1)
 		{
 			text->SetActive(false);
 		}
@@ -3926,6 +4092,13 @@ void SceneHome::UiEquipChangeOpen(int type, bool on)
 			ss2 << "Lock";
 			spr = (SpriteGo*)FindGo(ss2.str());
 			spr->SetActive(on);
+		}
+		else
+		{
+			std::stringstream ss2;
+			ss2 << "EquipItemB" << i << "Sprite";
+			SpriteGo* spr = (SpriteGo*)FindGo(ss2.str());
+			spr->sprite.setColor(sf::Color::White);
 		}
 		bt->OnClick = [this,type,i, itemCount]() {
 			if (TEAM_MGR.GetGearOpen(type,i))
@@ -4174,27 +4347,18 @@ void SceneHome::UiEquipMakeOpen(int index, bool on)
 		ItemMakeSlot craftSlot;
 		craftSlot.inCrafting = true;
 		craftSlot.itemType = Utils::RandomRange(0, 3);
-		//이부분 함수화
-		switch (craftSlot.itemType)
-		{
-		case 0:
-			craftSlot.itemCode = Utils::RandomRange(0, 31);
-			break;
-		case 1:
-			craftSlot.itemCode = Utils::RandomRange(0, 37);
-			break;
-		case 2:
-			craftSlot.itemCode = Utils::RandomRange(0, 29);
-			break;
-		case 3:
-			craftSlot.itemCode = Utils::RandomRange(0, 32);
-			break;
-		}
+		craftSlot.itemCode = CraftRoll(craftSlot.itemType);
 		craftSlot.leftDate = craftTime;
 		craftSlot.usedParts = equipCraftParts;
 		TEAM_MGR.SetCraftSlot(index, craftSlot);
+		for (int j = 0; j < 4; j++)
+		{
+			TEAM_MGR.UseParts(j, equipCraftParts[j]);
+		}
+		TEAM_MGR.UseMoney(craftCost);
 		UiEquipMakeOpen(index, false);
 		UiEquipOpen();
+		UpdateMoney();
 	};
 
 	text = (TextGo*)FindGo("CraftingBText");
@@ -4203,8 +4367,180 @@ void SceneHome::UiEquipMakeOpen(int index, bool on)
 	UpdateCraftVal();
 }
 
-void SceneHome::UiCraftFinish(bool on)
+int SceneHome::CraftRoll(int type)
 {
+	int result = 0;
+	int grade = Utils::RandomRange(0,100);
+	if (grade >= 100 - (equipCraftParts[type] / 5))
+	{
+		grade = 4;
+	}
+	else if (grade >= 90 - (equipCraftParts[type] / 2))
+	{
+		grade = 3;
+	}
+	else if (grade >= 70 - (equipCraftParts[type]))
+	{
+		grade = 2;
+	}
+	else if (grade >= 40 - (equipCraftParts[type]))
+	{
+		grade = 1;
+	}
+	else
+	{
+		grade = 0;
+	}
+
+	switch (type)
+	{
+	case 0:
+		if (grade == 0)
+		{
+			result = Utils::RandomRange(0, 3);
+		}
+		else if (grade == 1)
+		{
+			result = Utils::RandomRange(4, 10);
+		}
+		else if (grade == 2)
+		{
+			result = Utils::RandomRange(11, 20);
+		}
+		else if (grade == 3)
+		{
+			result = Utils::RandomRange(21, 27);
+		}
+		else
+		{
+			result = Utils::RandomRange(28, 30);
+		}
+		break;
+	case 1:
+		if (grade == 0)
+		{
+			result = Utils::RandomRange(0, 5);
+		}
+		else if (grade == 1)
+		{
+			result = Utils::RandomRange(6, 13);
+		}
+		else if (grade == 2)
+		{
+			result = Utils::RandomRange(14, 25);
+		}
+		else if (grade == 3)
+		{
+			result = Utils::RandomRange(26, 32);
+		}
+		else
+		{
+			result = Utils::RandomRange(33, 36);
+		}
+		break;
+	case 2:
+		if (grade == 0)
+		{
+			result = Utils::RandomRange(0, 3);
+		}
+		else if (grade == 1)
+		{
+			result = Utils::RandomRange(4, 11);
+		}
+		else if (grade == 2)
+		{
+			result = Utils::RandomRange(12, 19);
+		}
+		else if (grade == 3)
+		{
+			result = Utils::RandomRange(20, 25);
+		}
+		else
+		{
+			result = Utils::RandomRange(26, 28);
+		}
+		break;
+	case 3:
+		if (grade == 0)
+		{
+			result = Utils::RandomRange(0, 3);
+		}
+		else if (grade == 1)
+		{
+			result = Utils::RandomRange(4, 12);
+		}
+		else if (grade == 2)
+		{
+			result = Utils::RandomRange(13, 21);
+		}
+		else if (grade == 3)
+		{
+			result = Utils::RandomRange(22, 28);
+		}
+		else
+		{
+			result = Utils::RandomRange(29, 31);
+		}
+		break;
+	}
+	return result;
+}
+
+void SceneHome::UiCraftFinish(int index, bool on)
+{
+	isPopupOn = on;
+	auto stringtable = DATATABLE_MGR.Get<StringTable>(DataTable::Ids::String);
+	auto itemTable = DATATABLE_MGR.Get<ItemTable>(DataTable::Ids::Item);
+	ItemMakeSlot slotInfo;
+	if (on)
+	{
+		slotInfo = TEAM_MGR.GetCraftSlot()[index];
+	}
+	SpriteGo* spr;
+	UiButton* bt;
+	TextGo* text;
+	RectGo* rect = (RectGo*)FindGo("PopupUiShade");
+	rect->SetActive(on);
+
+	spr = (SpriteGo*)FindGo("CraftResultBack");
+	spr->SetActive(on);
+
+	spr = (SpriteGo*)FindGo("CraftResultIcon");
+	sf::Texture* tex = RESOURCE_MGR.GetTexture(itemTable->Get(slotInfo.itemType, slotInfo.itemCode).textureId);
+	spr->sprite.setTexture(*tex);
+	spr->sprite.setTextureRect({ 0,0,(int)tex->getSize().x,(int)tex->getSize().y });
+	spr->SetOrigin(Origins::MC);
+	spr->SetActive(on);
+
+	bt = (UiButton*)FindGo("CraftResultB");
+	bt->OnClick = [this,index]() {
+		UiCraftFinish(index,false);
+		UiEquipOpen();
+	};
+	bt->SetActive(on);
+
+	text = (TextGo*)FindGo("CraftResultTitle");
+	text->SetActive(on);
+
+	text = (TextGo*)FindGo("CraftResultName");
+	ReturnItemName(*text, slotInfo.itemType, slotInfo.itemCode);
+	text->SetOrigin(Origins::TL);
+	text->SetActive(on);
+
+	text = (TextGo*)FindGo("CraftResultVal");
+	text->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
+	text->text.setString(ReturnEquipStats(slotInfo.itemType, slotInfo.itemCode));
+	text->SetOrigin(Origins::TL);
+	text->SetActive(on);
+
+	text = (TextGo*)FindGo("CraftResultOkBText");
+	text->SetActive(on);
+
+	if (on)
+	{
+		TEAM_MGR.OpenItem(slotInfo.itemType, slotInfo.itemCode);
+		TEAM_MGR.SetCraftSlot(index, ItemMakeSlot());
+	}
 }
 
 void SceneHome::UpdateCraftVal()

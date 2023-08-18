@@ -121,7 +121,14 @@ void TeamMgr::DayPass()
 {
 	date++;
 	CheckQuest();
-
+	for (int i = 0; i < craftSlot.size(); i++)
+	{
+		if (craftSlot[i].leftDate > 0)
+		{
+			craftSlot[i].leftDate--;
+		}
+	}
+	
 	if (date >= 48)
 	{
 		date = 0;
