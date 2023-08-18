@@ -81,6 +81,8 @@ void SceneHome::Enter()
 			TEAM_MGR.Employ(0);
 			Recruit(-1, 0);
 			TEAM_MGR.Employ(0);
+			Recruit(-1, 0);
+			TEAM_MGR.Employ(0);
 			gainTrainingInfo = TEAM_MGR.GetTrainingInfo();
 		}
 	}
@@ -141,6 +143,15 @@ void SceneHome::AddGoSprites()
 	AddGo(new SpriteGo("graphics/Origin/Sprite/header_league_bg.png", "LeagueUi"));
 	AddGo(new SpriteGo("graphics/Origin/Sprite/training_ui_bg.png", "SubUiBack"));
 	AddGo(new SpriteGo("graphics/Origin/Sprite/proceed_button_2.png", "PlayBArrow"));
+
+	//Recruit
+	AddGo(new SpriteGo("graphics/UiFix/player_recruit_card.png", "RecruitBg"));
+	for (int i = 0; i < 4; i++)
+	{
+		std::stringstream ss;
+		ss << "RecruitChamp" << i;
+		AddGo(new SpriteGo("graphics/UiFix/character_icons_0.png", ss.str()));
+	}
 
 	//Training
 	AddGo(new SpriteGo("graphics/Origin/Sprite/scroll_bar.png", "ScrollBar"));
@@ -274,6 +285,11 @@ void SceneHome::AddGoUiButton()
 	AddGo(new UiButton("graphics/Origin/Sprite/default_button_0.png", "TrainPointReturnB"));
 	AddGo(new UiButton("graphics/Origin/Sprite/default_button_0.png", "TrainCloseB"));
 	
+	//Recruit
+	AddGo(new UiButton("graphics/Origin/Sprite/important_button_0.png", "RecruitB"));
+	AddGo(new UiButton("graphics/Origin/Sprite/default_button_0.png", "RecruitCloseB"));
+	AddGo(new UiButton("graphics/Origin/Sprite/default_button_0.png", "RecruitCanceleB"));
+
 	// Training
 	for (int i = 0; i < 12; i++)
 	{
@@ -392,6 +408,23 @@ void SceneHome::AddGoText()
 	AddGo(new TextGo("DoProgressPlayText"));
 
 	AddGo(new TextGo("PopupText"));
+
+	//Recruit
+	AddGo(new TextGo("RecruitName"));
+	AddGo(new TextGo("RecruitAge"));
+	AddGo(new TextGo("RecruitCost"));
+	AddGo(new TextGo("RecruitAtk"));
+	AddGo(new TextGo("RecruitDef"));
+	for (int i = 0; i < 4; i++)
+	{
+		std::stringstream ss;
+		ss << "RecruitChampText" << i;
+		AddGo(new TextGo(ss.str()));
+	}
+	AddGo(new TextGo("RecruitBText"));
+	AddGo(new TextGo("RecruitCancelBText"));
+	AddGo(new TextGo("RecruitExitBText"));
+	
 
 	//Training
 	AddGo(new TextGo("TrainPlayerName"));
@@ -810,9 +843,153 @@ void SceneHome::MakeSubUi()
 	MakeSubUiTraining();
 	MakeSubUiSponsorContract();
 	MakeSubUiEquip();
+	MakeSubUiRecruit();
 	UiTrainingOpen(false);
 	UiEquipOpen(false);
 	UiCraftFinish(0,false);
+	UiRecruitOpen(true);
+}
+
+void SceneHome::MakeSubUiRecruit()
+{
+	auto stringtable = DATATABLE_MGR.Get<StringTable>(DataTable::Ids::String);
+	SpriteGo* spr;
+	UiButton* bt;
+	TextGo* text;
+	spr = (SpriteGo*)FindGo("RecruitBg");
+	spr->SetOrigin(Origins::MC);
+	spr->SetPosition(FRAMEWORK.GetWindowSize().x * 0.5f,
+		FRAMEWORK.GetWindowSize().y * 0.44f);
+	spr->SetSize(2,2);
+	spr->sortLayer = 110;
+
+	spr = (SpriteGo*)FindGo("RecruitChamp0");
+	spr->sprite.setTextureRect({ 0,0,25,25 });
+	spr->SetOrigin(Origins::MC);
+	spr->SetPosition(590,300);
+	spr->SetSize(2, 2);
+	spr->sortLayer = 111;
+
+	text = (TextGo*)FindGo("RecruitChampText0");
+	text->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
+	text->text.setString(L"23");
+	text->text.setCharacterSize(16);
+	text->text.setOutlineColor(sf::Color::Black);
+	text->text.setOutlineThickness(2);
+	text->SetOrigin(Origins::MC);
+	text->SetPosition(spr->GetPosition().x + 12,
+		spr->GetPosition().y - 16);
+	text->sortLayer = 112;
+
+	for (int i = 1; i < 4; i++)
+	{
+		std::stringstream ss;
+		ss << "RecruitChamp" << i;
+		spr = (SpriteGo*)FindGo(ss.str());
+		spr->sprite.setTextureRect({ 0,0,25,25 });
+		spr->SetPosition(580+(43*(i-1)), 370);
+		spr->SetOrigin(Origins::MC);
+		spr->SetSize(1.7, 1.7);
+		spr->sortLayer = 111;
+
+		ss.str("");
+		ss << "RecruitChampText" << i;
+		text = (TextGo*)FindGo(ss.str());
+		text->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
+		text->text.setString(L"23");
+		text->text.setCharacterSize(12);
+		text->text.setOutlineColor(sf::Color::Black);
+		text->text.setOutlineThickness(2);
+		text->SetOrigin(Origins::MC);
+		text->SetPosition(spr->GetPosition().x + 12,
+			spr->GetPosition().y - 10);
+		text->sortLayer = 112;
+	}
+
+	bt = (UiButton*)FindGo("RecruitB");
+	bt->SetOrigin(Origins::MC);
+	bt->SetPosition(FRAMEWORK.GetWindowSize().x * 0.5f,
+		FRAMEWORK.GetWindowSize().y * 0.59f);
+	bt->SetSize(2, 1.5);
+	bt->sortLayer = 111;
+
+	text = (TextGo*)FindGo("RecruitBText");
+	text->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
+	text->text.setString(stringtable->GetW("PlayerSearch"));
+	text->text.setCharacterSize(16);
+	text->SetOrigin(Origins::MC);
+	text->SetPosition(bt->GetPosition());
+	text->sortLayer = 112;
+
+	bt = (UiButton*)FindGo("RecruitCanceleB");
+	bt->SetOrigin(Origins::MC);
+	bt->SetPosition(FRAMEWORK.GetWindowSize().x * 0.5f,
+		FRAMEWORK.GetWindowSize().y * 0.65f);
+	bt->SetSize(2, 1.5);
+	bt->sortLayer = 111;
+
+	text = (TextGo*)FindGo("RecruitCancelBText");
+	text->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
+	text->text.setString(stringtable->GetW("Cancel"));
+	text->text.setCharacterSize(16);
+	text->SetOrigin(Origins::MC);
+	text->SetPosition(bt->GetPosition());
+	text->sortLayer = 112;
+
+	bt = (UiButton*)FindGo("RecruitCloseB");
+	bt->SetOrigin(Origins::MC);
+	bt->SetPosition(FRAMEWORK.GetWindowSize().x * 0.62f,
+		FRAMEWORK.GetWindowSize().y * 0.53f);
+	bt->SetSize(1.5, 1.5);
+	bt->sortLayer = 111;
+
+	text = (TextGo*)FindGo("RecruitExitBText");
+	text->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
+	text->text.setString(stringtable->GetW("Close"));
+	text->text.setCharacterSize(16);
+	text->SetOrigin(Origins::MC);
+	text->SetPosition(bt->GetPosition());
+	text->sortLayer = 112;
+
+	text = (TextGo*)FindGo("RecruitName");
+	text->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
+	text->text.setString(L"Name");
+	text->text.setCharacterSize(16);
+	text->SetOrigin(Origins::ML);
+	text->SetPosition(565,253);
+	text->sortLayer = 112;
+
+	text = (TextGo*)FindGo("RecruitAge");
+	text->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
+	text->text.setString(L"20 Age");
+	text->text.setCharacterSize(16);
+	text->SetOrigin(Origins::MC);
+	text->SetPosition(665, 285);
+	text->sortLayer = 112;
+
+	text = (TextGo*)FindGo("RecruitCost");
+	text->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
+	text->text.setString(L"123");
+	text->text.setCharacterSize(16);
+	text->SetOrigin(Origins::ML);
+	text->SetPosition(660, 311);
+	text->sortLayer = 112;
+
+	text = (TextGo*)FindGo("RecruitAtk");
+	text->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
+	text->text.setString(L"12");
+	text->text.setCharacterSize(16);
+	text->SetOrigin(Origins::ML);
+	text->SetPosition(590, 338);
+	text->sortLayer = 112;
+
+	text = (TextGo*)FindGo("RecruitDef");
+	text->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
+	text->text.setString(L"23");
+	text->text.setCharacterSize(16);
+	text->SetOrigin(Origins::ML);
+	text->SetPosition(661, 338);
+	text->sortLayer = 112;
 }
 
 void SceneHome::MakeSubUiTraining()
@@ -2157,9 +2334,7 @@ void SceneHome::MainUiFunc(int index)
 	switch (index)
 	{
 	case 5:
-		Recruit(0, 0);
-		TEAM_MGR.Employ(0);
-		UpdateMoney();
+		UiRecruitOpen();
 		break;
 	case 6:
 		UiTrainingOpen();
@@ -2254,7 +2429,153 @@ void SceneHome::SubUiBaseOpen(int index, bool on)
 
 void SceneHome::UiRecruitOpen(bool on)
 {
+	isMenuOn = on;
+	auto stringtable = DATATABLE_MGR.Get<StringTable>(DataTable::Ids::String);
+	SpriteGo* spr;
+	UiButton* bt;
+	TextGo* text;
+	bool recruitAble = on && TEAM_MGR.CheckRecruitSlot(0);
+	PlayerInfo player = TEAM_MGR.GetRecruitSlotInfo(0);
 
+	spr = (SpriteGo*)FindGo("RecruitBg");
+	spr->SetActive(on);
+
+	RectGo* rect = (RectGo*)FindGo("UiShade");
+	rect->SetActive(on);
+
+	spr = (SpriteGo*)FindGo("RecruitChamp0");
+	spr->SetActive(recruitAble);
+	if (recruitAble)
+	{
+		std::stringstream ss;
+		ss << "graphics/UiFix/character_icons_" << player.proficiency[0].first << ".png";
+		spr->sprite.setTexture(*RESOURCE_MGR.GetTexture(ss.str()));
+	}
+	
+	text = (TextGo*)FindGo("RecruitChampText0");
+	text->SetActive(recruitAble);
+	if (recruitAble)
+	{
+		text->text.setString(std::to_string(player.proficiency[0].second));
+		text->SetOrigin(Origins::MC);
+	}
+
+	for (int i = 1; i < 4; i++)
+	{
+		std::stringstream ss;
+		ss << "RecruitChamp" << i;
+		spr = (SpriteGo*)FindGo(ss.str());
+		spr->SetActive(recruitAble);
+		if (recruitAble && i < player.knownChamp)
+		{
+			std::stringstream ss;
+			ss << "graphics/UiFix/character_icons_" << player.proficiency[i].first << ".png";
+			spr->sprite.setTexture(*RESOURCE_MGR.GetTexture(ss.str()));
+		}
+		else
+		{
+			spr->SetActive(false);
+		}
+
+		ss.str("");
+		ss << "RecruitChampText" << i;
+		text = (TextGo*)FindGo(ss.str());
+		text->SetActive(recruitAble);
+		if (recruitAble && i < player.knownChamp)
+		{
+			text->text.setString(std::to_string(player.proficiency[i].second));
+			text->SetOrigin(Origins::MC);
+		}
+		else
+		{
+			text->SetActive(false);
+		}
+	}
+
+	bt = (UiButton*)FindGo("RecruitB");
+	bt->SetActive(on);
+	bt->OnClick = [this]() {
+		if (!TEAM_MGR.CheckRecruitSlot(0))
+		{
+			if (TEAM_MGR.GetMoney() < 10)
+			{
+				return;
+			}
+			else
+			{
+				Recruit(0, 0);
+				UpdateMoney();
+				UiRecruitOpen();
+			}
+		}
+		else
+		{
+			if (TEAM_MGR.GetRecruitSlotInfo(0).contract_cost > TEAM_MGR.GetMoney())
+			{
+				return;
+			}
+			else if (true)
+			{
+
+			}
+			else
+			{
+				TEAM_MGR.Employ(0);
+				UpdateMoney();
+				UiRecruitOpen();
+			}
+		}
+	};
+	if (TEAM_MGR.GetMoney() < 10)
+	{
+		bt->sprite.setColor(sf::Color(100, 100, 100));
+	}
+	else if (recruitAble)
+	{
+		if (TEAM_MGR.GetRecruitSlotInfo(0).contract_cost > TEAM_MGR.GetMoney())
+		{
+			bt->sprite.setColor(sf::Color(100, 100, 100));
+		}
+		else
+		{
+			bt->sprite.setColor(sf::Color::White);
+		}
+	}
+	else
+	{
+		bt->sprite.setColor(sf::Color::White);
+	}
+
+
+	text = (TextGo*)FindGo("RecruitBText");
+	text->SetActive(on);
+
+	bt = (UiButton*)FindGo("RecruitCanceleB");
+	bt->SetActive(recruitAble);
+
+	text = (TextGo*)FindGo("RecruitCancelBText");
+	text->SetActive(recruitAble);
+
+	bt = (UiButton*)FindGo("RecruitCloseB");
+	bt->SetActive(on);
+
+	text = (TextGo*)FindGo("RecruitExitBText");
+	text->SetActive(on);
+
+	text = (TextGo*)FindGo("RecruitName");
+	text->SetActive(recruitAble);
+
+	text = (TextGo*)FindGo("RecruitAge");
+	text->SetActive(recruitAble);
+
+	text = (TextGo*)FindGo("RecruitCost");
+	text->SetActive(recruitAble);
+
+	text = (TextGo*)FindGo("RecruitAtk");
+	text->SetActive(recruitAble);
+
+	text = (TextGo*)FindGo("RecruitDef");
+	text->SetActive(recruitAble);
 }
 
 void SceneHome::UiTrainingOpen(bool on)

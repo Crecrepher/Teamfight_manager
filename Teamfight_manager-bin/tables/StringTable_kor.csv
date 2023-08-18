@@ -272,3 +272,6 @@ Weekday,주차
 RecruitDay,선수 영입일
 LeagueDay,경기일
 VacationDay,선수단 전체 휴가
+Recruit,영입
+PlayerSearch,탐색 (10g)
+Cancel,취소

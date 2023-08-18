@@ -180,6 +180,7 @@ public:
 	int GetMaxTrainingPoint() { return maxTrainingPoint; }
 
 	bool CheckRecruitSlot(int index) { return recruiting_players[index].first; }
+	PlayerInfo GetRecruitSlotInfo(int index) { return recruiting_players[index].second; }
 
 	int GetMoney() { return money; }
 	void EarnMoney(int money) { this->money += money; }
