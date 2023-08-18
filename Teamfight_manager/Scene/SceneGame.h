@@ -5,16 +5,22 @@
 #include "GameState.h"
 #include "AnimatioControler.h"
 
+class UiButton;
+
 class SceneGame : public Scene
 {
 protected:
 	Phase currentPhase=Phase::None;
 	Mode mode=Mode::Duo;
 	Team team;
-	Turn currentTurn;
+	Turn currentTurn = Turn::Player;
+	std::string pick = "";
 
 	float battleTimer;
 	float readyTimer;
+
+	int redScore;
+	int blueScore;
 
 	int fullStep; // ¹ê, ÇÈ ÃÑÈ½¼ö
 	int step; // ÁøÇàÁßÀÎ ¹ê, ÇÈ
@@ -25,8 +31,23 @@ protected:
 	std::vector<Champion*> blueTeam;
 	std::vector<Champion*> cemetery;
 
-	SpriteGo banSheet;
+	std::vector<int> banChamps;
+	SpriteGo* banSheet;
+
+	SpriteGo* banSheetBlueTeam; // ºí·ç
+	SpriteGo* banSheetRedTeam; // ·¹µå
+
 	AnimatioControler banAnimation;
+	AnimatioControler banAnimation2;
+	AnimatioControler banAnimation3;
+
+	std::vector<UiButton*> championSlot;
+	int champCount = 14;
+	bool selectCheck = true;
+
+
+	sf::Vector2f BanSlotPosition1 = { 363, 661 };
+	sf::Vector2f BanSlotPosition2 = { 919, 661 };
 
 public:
 	SceneGame();
@@ -45,22 +66,30 @@ public:
 	Phase GetPhase() { return currentPhase; }
 	void ChangeTurn();
 	void ChangeTeam();
+	void ChampionPick(int id, Team team);
 
 	void LeaguePhase(float dt);
 	void BanPhase(float dt);
 	void PickPhase(float dt);
 	void ReadyPhase(float dt);
 	void BattlePhase(float dt);
+	void ResultPhase(float dt);
 
 	template <typename T>
 	void ClearObjectPool(ObjectPool<T>& pool);
 
 	void UiInit();
-<<<<<<< HEAD
-=======
+
 	void ButtonInit();
-	void lineUpFalse();
->>>>>>> e1234829c394dfccf82db0e06054abd0a04faeed
+	void ButtonTrue(bool on = true);
+
+	void LineUpTrue();
+	void LineUpFalse();
+	
+	void BanPickFalse();
+	
+	void AiSelect();
+
 };
 
 template<typename T>

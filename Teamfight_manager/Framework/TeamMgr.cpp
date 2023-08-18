@@ -3,14 +3,21 @@
 
 void TeamMgr::Init()
 {
-	gear = std::vector<bool>(gearNum, false);
-	gearParts = std::vector<int>(4, 0);
+	gear = std::vector<std::vector<bool>>(4, { std::vector<bool>(gearNum,false)});
+	for (int i = 0; i < 4; i++)
+	{
+		gear[i][0] = true;
+		gear[i][1] = true;
+	}
+	equipedGear = std::vector<int>(4,0);
+	gearParts = std::vector<int>(4, 1);
 	facility = std::vector<bool>(40, false);
 	recruiting_players = std::vector<std::pair<bool, PlayerInfo>>(4,{false,PlayerInfo()});
 	dayGrowTable = std::vector<std::vector<int>>(10);
 	trainingGrowTable = std::vector<std::vector<int>>(10);
 	sponsors = std::vector<Sponsor>(3);
 	roster = std::vector<PlayerInfo>(6);
+	craftSlot = std::vector<ItemMakeSlot>(3);
 	InitGrowTable();
 	
 	return;
@@ -231,7 +238,6 @@ std::vector<PlayerInfo> TeamMgr::GetRoster()
 
 std::vector<AiTeam> TeamMgr::GetAiTeamInfo()
 { 
-	aiTeams;
 	return aiTeams; 
 }
 
@@ -297,4 +303,29 @@ void TeamMgr::ContractSponsor(Sponsor sponsor)
 		sponsors[contractedSponsor].currentProcess = 8;
 	}
 	contractedSponsor++;
+}
+
+void TeamMgr::SaveLoad()
+{
+	std::ifstream is{ "OWSave.dat", std::ofstream::binary };
+	if (is.fail()) {
+		std::cout << "세이브 파일이 없습니다" << std::endl;
+		return;
+	}
+
+	is.read((char*)&ableChamp, sizeof(int));
+	is.read((char*)&ableCharacteristic, sizeof(int));
+	is.read((char*)&maxTrainingPoint, sizeof(int));
+	is.read((char*)&money, sizeof(int));
+	is.read((char*)&playerNum, sizeof(int));
+	is.read((char*)&MaxPlayer, sizeof(int));
+	for (int i = 0; i < playerNum; i++)
+	{
+		is.read((char*)&player[i].name, sizeof(std::wstring));
+		is.read((char*)&player[i].age, sizeof(int));
+		is.read((char*)&player[i].condition, sizeof(int));
+		is.read((char*)&player[i].attack, sizeof(int));
+		is.read((char*)&player[i].defence, sizeof(int));
+	}
+	return;
 }

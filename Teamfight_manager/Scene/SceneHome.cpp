@@ -3,6 +3,7 @@
 
 #include "DataTableMgr.h"
 #include "StringTable.h"
+#include "ItemTable.h"
 #include "SceneMgr.h"
 #include "InputMgr.h"
 #include "ResourceMgr.h"
@@ -42,6 +43,7 @@ void SceneHome::Init()
 	AddGoText();
 
 	AddGo(new RectGo("UiShade"));
+	AddGo(new RectGo("PopupUiShade"));
 
 	for (auto go : gameObjects)
 	{
@@ -61,10 +63,18 @@ void SceneHome::Enter()
 {
 	Scene::Enter();
 	RESOURCE_MGR.LoadFromCsv("tables/HomeResourceList.csv");
-
+	
 	if (TEAM_MGR.GetTodayDate() == 0)
 	{
 		NewYear();
+		if (TEAM_MGR.GetTodayYear() == 2021)
+		{
+			Recruit(-1, 0);
+			TEAM_MGR.Employ(0);
+			Recruit(-1, 0);
+			TEAM_MGR.Employ(0);
+			gainTrainingInfo = TEAM_MGR.GetTrainingInfo();
+		}
 	}
 	else if (TEAM_MGR.GetTodayDate() == 4)
 	{
@@ -117,14 +127,19 @@ void SceneHome::AddGoSprites()
 	AddGo(new SpriteGo("graphics/Origin/Sprite/header_calendar_icon.png", "CalendarUi"));
 	AddGo(new SpriteGo("graphics/Origin/Sprite/header_league_bg.png", "LeagueUi"));
 	AddGo(new SpriteGo("graphics/Origin/Sprite/training_ui_bg.png", "SubUiBack"));
+	AddGo(new SpriteGo("graphics/Origin/Sprite/proceed_button_2.png", "PlayBArrow"));
 
-	//player
+	//Training
 	AddGo(new SpriteGo("graphics/Origin/Sprite/scroll_bar.png", "ScrollBar"));
 	for (int i = 0; i < 6; i++)
 	{
 		std::stringstream ss;
 		ss << "TrainingSlotUi" << i;
 		AddGo(new SpriteGo("graphics/Origin/Sprite/training_slot_bg.png", ss.str()));
+		ss << "Name";
+		AddGo(new TextGo(ss.str()));
+		ss << "Point";
+		AddGo(new TextGo(ss.str()));
 		ss.str("");
 		ss << "XpBack" << i;
 		AddGo(new SpriteGo("graphics/Origin/Sprite/exp_guage_0.png", ss.str()));
@@ -159,6 +174,9 @@ void SceneHome::AddGoSprites()
 		ss.str("");
 		ss << "CharacterStatIcons" << i;
 		AddGo(new SpriteGo("graphics/Origin/Sprite/character_icons_0.png", ss.str()));
+		ss.str("");
+		ss << "CharacterStatLevel" << i;
+		AddGo(new TextGo(ss.str()));
 	}
 	AddGo(new SpriteGo("graphics/Origin/Sprite/attack_icon.png", "IconAtk0"));
 	AddGo(new SpriteGo("graphics/Origin/Sprite/attack_icon.png", "IconAtk1"));
@@ -198,6 +216,12 @@ void SceneHome::AddGoSprites()
 	AddGo(new SpriteGo("graphics/Origin/Sprite/lock_icon.png", "LockIcon1"));
 
 	//Item
+
+	AddGo(new SpriteGo("graphics/Origin/Sprite/items_headset_28.png", "ItemEquipedIcon0"));
+	AddGo(new SpriteGo("graphics/Origin/Sprite/items_controller_36.png", "ItemEquipedIcon1"));
+	AddGo(new SpriteGo("graphics/Origin/Sprite/items_chair_1.png", "ItemEquipedIcon2"));
+	AddGo(new SpriteGo("graphics/Origin/Sprite/items_uniform_31.png", "ItemEquipedIcon3"));
+
 	for (int i = 0; i < 3; i++)
 	{
 		std::stringstream ss;
@@ -213,6 +237,11 @@ void SceneHome::AddGoSprites()
 	}
 	AddGo(new SpriteGo("graphics/Origin/Sprite/lock_icon.png", "ItemMakeLock0"));
 	AddGo(new SpriteGo("graphics/Origin/Sprite/lock_icon.png", "ItemMakeLock1"));
+
+	// Change Equip
+	AddGo(new SpriteGo("graphics/UiFix/equipment_change_popup_bg.png", "EquipPopup"));
+
+	// Craft
 }
 
 void SceneHome::AddGoUiButton()
@@ -229,11 +258,17 @@ void SceneHome::AddGoUiButton()
 
 	AddGo(new UiButton("graphics/Origin/Sprite/default_button_0.png", "TrainPointReturnB"));
 	AddGo(new UiButton("graphics/Origin/Sprite/default_button_0.png", "TrainCloseB"));
+	
+	// Training
 	for (int i = 0; i < 12; i++)
 	{
 		std::stringstream ss;
 		ss << "PlayerList" << i;
 		AddGo(new UiButton("graphics/Origin/Sprite/player_list_bg_0.png", ss.str()));
+		ss << "Name";
+		AddGo(new TextGo(ss.str()));
+		ss << "Point";
+		AddGo(new TextGo(ss.str()));
 	}
 	for (int i = 0; i < 6; i++)
 	{
@@ -273,6 +308,58 @@ void SceneHome::AddGoUiButton()
 		ss << "EquipMakeB" << i;
 		AddGo(new UiButton("graphics/Origin/Sprite/important_button_0.png", ss.str()));
 	}
+
+	//ChangeEquip
+
+	for (int i = 0; i < 38; i++)
+	{
+		std::stringstream ss;
+		ss << "EquipItemB" << i;
+		AddGo(new UiButton("graphics/Origin/Sprite/equipment_icon_bg_0.png", ss.str()));
+		ss << "Sprite";
+		AddGo(new SpriteGo("graphics/Origin/Sprite/items_controller_0.png", ss.str()));
+		ss << "Lock";
+		AddGo(new SpriteGo("graphics/Origin/Sprite/lock_icon.png", ss.str()));
+	}
+	AddGo(new UiButton("graphics/Origin/Sprite/default_button_0.png", "ExitEquipPopB"));
+
+	//Craft
+	AddGo(new UiButton("graphics/Origin/Sprite/default_button_0.png", "PartsResetB"));
+	for (int i = 0; i < 4; i++)
+	{
+		std::stringstream ss;
+		ss << "CraftSlot" << i;
+		AddGo(new UiButton("graphics/Origin/Sprite/equipment_making_slot_bg_0.png", ss.str()));
+		ss << "Icon";
+		switch (i)
+		{
+		case 0:
+			AddGo(new SpriteGo("graphics/Origin/Sprite/sound_chip.png", ss.str()));
+			break;
+		case 1:
+			AddGo(new SpriteGo("graphics/Origin/Sprite/keyboard_switch.png", ss.str()));
+			break;
+		case 2:
+			AddGo(new SpriteGo("graphics/Origin/Sprite/screw.png", ss.str()));
+			break;
+		case 3:
+			AddGo(new SpriteGo("graphics/Origin/Sprite/fabric_piece.png", ss.str()));
+			break;
+		}
+		ss << "Bg";
+		AddGo(new SpriteGo("graphics/Origin/Sprite/upgrade_icon_bg.png", ss.str()));
+		ss.str("");
+		ss << "PartDecrease" << i;
+		AddGo(new UiButton("graphics/Origin/Sprite/default_button_0.png", ss.str()));
+		ss << "x5";
+		AddGo(new UiButton("graphics/Origin/Sprite/default_button_0.png", ss.str()));
+		ss.str("");
+		ss << "PartIncrease" << i;
+		AddGo(new UiButton("graphics/Origin/Sprite/default_button_0.png", ss.str()));
+		ss << "x5";
+		AddGo(new UiButton("graphics/Origin/Sprite/default_button_0.png", ss.str()));
+	}
+	AddGo(new UiButton("graphics/Origin/Sprite/important_button_0.png", "OnCraftB"));
 }
 
 void SceneHome::AddGoText()
@@ -283,6 +370,21 @@ void SceneHome::AddGoText()
 	AddGo(new TextGo("UiMenuTitleText"));
 	AddGo(new TextGo("UiMenuCloseText"));
 
+	AddGo(new TextGo("ProgressPlayText"));
+	AddGo(new TextGo("DoProgressPlayText"));
+
+	//Training
+	AddGo(new TextGo("TrainPlayerName"));
+	AddGo(new TextGo("TrainPlayerAge"));
+	AddGo(new TextGo("TrainPlayerAtk"));
+	AddGo(new TextGo("TrainPlayerDef"));
+	AddGo(new TextGo("TrainPlayerListName"));
+	AddGo(new TextGo("TrainPlayerListPoint"));
+	AddGo(new TextGo("TrainByUsePoint"));
+	AddGo(new TextGo("TrainPlayerReturnBText"));
+	AddGo(new TextGo("TrainPlayerLeftPointText"));
+
+	// Contract
 	AddGo(new TextGo("SponsorContractDescribe"));
 	AddGo(new TextGo("SelectedSponsorCountText"));
 	AddGo(new TextGo("SponsorContractAcceptText"));
@@ -324,13 +426,88 @@ void SceneHome::AddGoText()
 	AddGo(new TextGo("UsingEquipUiText"));
 	AddGo(new TextGo("MakeEquipUiText"));
 	AddGo(new TextGo("CurPartsEquipUiText"));
+	for (int i = 0; i < 4; i++)
+	{
+		std::stringstream ss;
+		ss << "EquipItemNameSlot" << i;
+		AddGo(new TextGo(ss.str()));
+		ss << "Stat";
+		AddGo(new TextGo(ss.str()));
+		ss.str("");
+		ss << "EquipItemType" << i;
+		AddGo(new TextGo(ss.str()));
+		ss.str("");
+		ss << "HavePartsText" << i;
+		AddGo(new TextGo(ss.str()));
+	}
+	for (int i = 0; i < 3; i++)
+	{
+		std::stringstream ss;
+		ss << "MakeItemPartsText" << i;
+		AddGo(new TextGo(ss.str()));
+		ss.str("");
+		ss << "MakeItemBText"<<i;
+		AddGo(new TextGo(ss.str()));
+		ss.str("");
+		ss << "MakingItemText" << i;
+		AddGo(new TextGo(ss.str()));
+		ss << "Time";
+		AddGo(new TextGo(ss.str()));
+	}
+	for (int i = 0; i < 2; i++)
+	{
+		std::stringstream ss;
+		ss << "CanCraftExText" << i;
+		AddGo(new TextGo(ss.str()));
+	}
 
+	// EquipChange
+	AddGo(new TextGo("PopupUiText"));
+	AddGo(new TextGo("EquipItemText"));
+	AddGo(new TextGo("EquipItemValText"));
+	AddGo(new TextGo("EquipingText"));
+	AddGo(new TextGo("LookItemText"));
+	AddGo(new TextGo("LookItemValText"));
+	AddGo(new TextGo("ExitEquipPopBText"));
+
+	// EquipMake
+	AddGo(new TextGo("SelectPartsText"));
+	AddGo(new TextGo("SelectPartsResetBText"));
+	for (int i = 0; i < 4; i++)
+	{
+		std::stringstream ss;
+		ss << "UsingCraftPartsText" << i;
+		AddGo(new TextGo(ss.str()));
+		ss << "Cur";
+		AddGo(new TextGo(ss.str()));
+		ss << "Text";
+		AddGo(new TextGo(ss.str()));
+
+		for (int j = 0; j < 4; j++)
+		{
+			ss.str("");
+			ss << "InputPartsBt" << i << "Text" << j;
+			AddGo(new TextGo(ss.str()));
+		}
+		ss.str("");
+		ss << "CraftUiUsingCount" << i;
+		AddGo(new TextGo(ss.str()));
+
+		ss.str("");
+		ss << "CraftUiUsingPartsText" << i;
+		AddGo(new TextGo(ss.str()));
+	}
+	AddGo(new TextGo("CraftUiCurMoneyText"));
+	AddGo(new TextGo("CraftUiPartsHeadText"));
+	AddGo(new TextGo("CraftUiUseDateText"));
+	AddGo(new TextGo("CraftUiUseCostText"));
+	AddGo(new TextGo("CraftingBText"));
 }
 
 
 void SceneHome::MakeMainUi()
 {
-
+	auto stringtable = DATATABLE_MGR.Get<StringTable>(DataTable::Ids::String);
 	SpriteGo* ground = (SpriteGo*)FindGo("Ground");
 	ground->SetOrigin(Origins::TC);
 	ground->SetSize(FRAMEWORK.GetWindowSize().x / ground->GetSize().x,
@@ -453,7 +630,6 @@ void SceneHome::MakeMainUi()
 		ss << "Text";
 		btText = (TextGo*)FindGo(ss.str());
 		btText->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
-		auto stringtable = DATATABLE_MGR.Get<StringTable>(DataTable::Ids::String);
 		btText->text.setString(stringtable->GetW(ss.str()));
 		btText->text.setFillColor(sf::Color::White);
 		btText->text.setCharacterSize(20);
@@ -471,6 +647,10 @@ void SceneHome::MakeMainUi()
 		FRAMEWORK.GetWindowSize().y - 30.f);
 	bt->sortLayer = 101;
 	bt->OnClick = [this]() {
+		if (isMenuOn)
+		{
+			return;
+		}
 		TEAM_MGR.DayPass();
 <<<<<<< HEAD
 		SCENE_MGR.ChangeScene(SceneId::Game);
@@ -497,7 +677,31 @@ void SceneHome::MakeMainUi()
 >>>>>>> e1234829c394dfccf82db0e06054abd0a04faeed
 	};
 
-	TextGo* text = (TextGo*)FindGo("MoneyInfoT");
+	TextGo* text = (TextGo*)FindGo("ProgressPlayText");
+	text->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
+	text->text.setString(stringtable->GetW("Progress"));
+	text->text.setFillColor(sf::Color::Black);
+	text->text.setCharacterSize(18);
+	text->SetOrigin(Origins::TL);
+	text->SetPosition(bt->GetPosition().x - 240, bt->GetPosition().y - 70);
+	text->sortLayer = 103;
+
+	text = (TextGo*)FindGo("DoProgressPlayText");
+	text->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
+	text->text.setString(stringtable->GetW("DoNextProgress"));
+	text->text.setFillColor(sf::Color::Black);
+	text->text.setCharacterSize(18);
+	text->SetOrigin(Origins::TL);
+	text->SetPosition(bt->GetPosition().x - 240, bt->GetPosition().y - 35);
+	text->sortLayer = 103;
+
+	spr = (SpriteGo*)FindGo("PlayBArrow");
+	spr->SetPosition(bt->GetPosition());
+	spr->SetOrigin(Origins::BR);
+	spr->SetSize(uiSizeStart, uiSizeStart);
+	spr->sortLayer = 102;
+
+	text = (TextGo*)FindGo("MoneyInfoT");
 	text->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
 	text->text.setString(std::to_string(TEAM_MGR.GetMoney()));
 	text->text.setFillColor(sf::Color::White);
@@ -560,21 +764,81 @@ void SceneHome::MakeSubUi()
 	rect->rectangle.setFillColor(sf::Color(0, 0, 0, 150));
 
 	MakeSubUiTraining();
-	UiTrainingOpen(false);
 	MakeSubUiSponsorContract();
 	MakeSubUiEquip();
+	UiTrainingOpen(false);
 	UiEquipOpen();
 }
 
 void SceneHome::MakeSubUiTraining()
 {
-	SpriteGo* spr = (SpriteGo*)FindGo("SubUiBack");
+	auto stringtable = DATATABLE_MGR.Get<StringTable>(DataTable::Ids::String);
+	SpriteGo* spr;
+	UiButton* bt;
+	TextGo* text;
+	spr = (SpriteGo*)FindGo("SubUiBack");
 	spr->SetOrigin(Origins::MC);
 	spr->SetPosition(FRAMEWORK.GetWindowSize().x * 0.5f,
 		FRAMEWORK.GetWindowSize().y * 0.44f);
 	spr->SetSize((FRAMEWORK.GetWindowSize().x / spr->GetSize().x) - 0.05f,
 		(FRAMEWORK.GetWindowSize().x / spr->GetSize().x) - 0.05f);
 	spr->sortLayer = 110;
+
+	text = (TextGo*)FindGo("TrainPlayerName");
+	text->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
+	text->text.setString(L"선수 이름");
+	text->text.setCharacterSize(16);
+	text->SetOrigin(Origins::ML);
+	text->SetPosition(50, 150);
+	text->sortLayer = 112;
+
+	text = (TextGo*)FindGo("TrainPlayerAge");
+	text->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
+	text->text.setString(L"0세");
+	text->text.setCharacterSize(16);
+	text->SetOrigin(Origins::MR);
+	text->SetPosition(450, 150);
+	text->sortLayer = 112;
+
+	text = (TextGo*)FindGo("TrainPlayerAtk");
+	text->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
+	text->text.setString("0");
+	text->text.setCharacterSize(16);
+	text->SetOrigin(Origins::ML);
+	text->SetPosition(75, 215);
+	text->sortLayer = 112;
+
+	text = (TextGo*)FindGo("TrainPlayerDef");
+	text->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
+	text->text.setString("0");
+	text->text.setCharacterSize(16);
+	text->SetOrigin(Origins::ML);
+	text->SetPosition(165, 215);
+	text->sortLayer = 112;
+
+	text = (TextGo*)FindGo("TrainPlayerListName");
+	text->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
+	text->text.setString(stringtable->GetW("Name"));
+	text->text.setCharacterSize(16);
+	text->SetOrigin(Origins::MC);
+	text->SetPosition(185, 275);
+	text->sortLayer = 112;
+
+	text = (TextGo*)FindGo("TrainPlayerListPoint");
+	text->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
+	text->text.setString(stringtable->GetW("UnusedPoint"));
+	text->text.setCharacterSize(16);
+	text->SetOrigin(Origins::MC);
+	text->SetPosition(370, 275);
+	text->sortLayer = 112;
+
+	text = (TextGo*)FindGo("TrainByUsePoint");
+	text->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
+	text->text.setString(stringtable->GetW("UsePointTo"));
+	text->text.setCharacterSize(30);
+	text->SetOrigin(Origins::MC);
+	text->SetPosition(860, 175);
+	text->sortLayer = 112;
 
 	for (int i = 0; i < 6; i++)
 	{
@@ -585,6 +849,27 @@ void SceneHome::MakeSubUiTraining()
 		spr->SetSize(2, 2);
 		spr->SetPosition(483 + (spr->GetSize().x * 2.f + 10.f) * (i % 2), 275 + (spr->GetSize().y * 2.f + 10.f) * (i / 2));
 		spr->sortLayer = 111;
+
+		ss << "Name";
+		text = (TextGo*)FindGo(ss.str());
+		text->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
+		text->text.setString(L"특성 이름");
+		text->text.setCharacterSize(16);
+		text->SetOrigin(Origins::ML);
+		text->SetPosition(spr->GetPosition().x+58, 
+			spr->GetPosition().y+25);
+		text->sortLayer = 112;
+
+		ss << "Point";
+		text = (TextGo*)FindGo(ss.str());
+		text->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
+		text->text.setString("0");
+		text->text.setCharacterSize(16);
+		text->SetOrigin(Origins::ML);
+		text->SetPosition(spr->GetPosition().x + 220, 
+			spr->GetPosition().y + 25);
+		text->sortLayer = 112;
+
 		ss.str("");
 		ss << "XpBack" << i;
 		SpriteGo* xpBar = (SpriteGo*)FindGo(ss.str());
@@ -661,16 +946,25 @@ void SceneHome::MakeSubUiTraining()
 		}
 	}
 
+	SpriteGo* leftTrainPoint;
 	for (int i = 0; i < 8; i++)
 	{
 		std::stringstream ss;
 		ss << "LeftTrainingPointGuage" << i;
-		SpriteGo* leftTrainPoint = (SpriteGo*)FindGo(ss.str());
+		leftTrainPoint = (SpriteGo*)FindGo(ss.str());
 		leftTrainPoint->SetOrigin(Origins::MC);
 		leftTrainPoint->SetPosition(1155 - (i * 18), 246);
 		leftTrainPoint->SetSize(2, 2);
 		leftTrainPoint->sortLayer = 113;
 	}
+	text = (TextGo*)FindGo("TrainPlayerLeftPointText");
+	text->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
+	text->text.setString(stringtable->GetW("LeftTrainPoint"));
+	text->text.setCharacterSize(16);
+	text->SetOrigin(Origins::MR);
+	text->SetPosition(leftTrainPoint->GetPosition().x-10,
+		leftTrainPoint->GetPosition().y);
+	text->sortLayer = 112;
 
 	for (int i = 0; i < 4; i++)
 	{
@@ -695,6 +989,16 @@ void SceneHome::MakeSubUiTraining()
 		spr->SetSize(2, 2);
 		spr->sortLayer = 113;
 		
+		ss.str("");
+		ss << "CharacterStatLevel" << i;
+		text = (TextGo*)FindGo(ss.str());
+		text->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
+		text->text.setString("0");
+		text->text.setCharacterSize(11);
+		text->SetOrigin(Origins::MC);
+		text->SetPosition(spr->GetPosition().x + 38,
+			spr->GetPosition().y+7);
+		text->sortLayer = 114;
 	}
 	spr = (SpriteGo*)FindGo("IconAtk0");
 	spr->SetOrigin(Origins::MC);
@@ -708,11 +1012,19 @@ void SceneHome::MakeSubUiTraining()
 	spr->SetSize(2, 2);
 	spr->sortLayer = 111;
 
-	UiButton* bt = (UiButton*)FindGo("TrainPointReturnB");
+	bt = (UiButton*)FindGo("TrainPointReturnB");
 	bt->SetOrigin(Origins::ML);
 	bt->SetPosition(495, 245);
 	bt->SetSize(1.5, 1.2);
 	bt->sortLayer = 111;
+
+	text = (TextGo*)FindGo("TrainPlayerReturnBText");
+	text->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
+	text->text.setString(stringtable->GetW("Reset"));
+	text->text.setCharacterSize(16);
+	text->SetOrigin(Origins::MC);
+	text->SetPosition(bt->GetPosition().x+52, bt->GetPosition().y);
+	text->sortLayer = 112;
 
 	for (int i = 0; i < 12; i++)
 	{
@@ -726,6 +1038,25 @@ void SceneHome::MakeSubUiTraining()
 		bt->OnClick = [this,i]() {
 			UiTrainingPlayerSelect(i);
 		};
+		ss << "Name";
+		text = (TextGo*)FindGo(ss.str());
+		text->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
+		text->text.setString(L"선수 이름");
+		text->text.setCharacterSize(16);
+		text->SetOrigin(Origins::ML);
+		text->SetPosition(bt->GetPosition().x + 10,
+			bt->GetPosition().y + 17);
+		text->sortLayer = 112;
+
+		ss << "Point";
+		text = (TextGo*)FindGo(ss.str());
+		text->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
+		text->text.setString("0");
+		text->text.setCharacterSize(16);
+		text->SetOrigin(Origins::ML);
+		text->SetPosition(bt->GetPosition().x + 320,
+			bt->GetPosition().y + 17);
+		text->sortLayer = 112;
 	}
 }
 
@@ -1137,8 +1468,130 @@ void SceneHome::MainUiClose()
 
 void SceneHome::MakeSubUiEquip()
 {
+	// Base
+	auto stringtable = DATATABLE_MGR.Get<StringTable>(DataTable::Ids::String);
 	SpriteGo* spr;
 	UiButton* bt;
+	TextGo* text;
+	text = (TextGo*)FindGo("UsingEquipUiText");
+	text->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
+	text->text.setString(stringtable->GetW("UsingEquip"));
+	text->text.setCharacterSize(30);
+	text->SetOrigin(Origins::MC);
+	text->SetPosition(250,160);
+	text->sortLayer = 111;
+
+	text = (TextGo*)FindGo("MakeEquipUiText");
+	text->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
+	text->text.setString(stringtable->GetW("MakeEquip"));
+	text->text.setCharacterSize(30);
+	text->SetOrigin(Origins::MC);
+	text->SetPosition(720, 160);
+	text->sortLayer = 111;
+
+	text = (TextGo*)FindGo("CurPartsEquipUiText");
+	text->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
+	text->text.setString(stringtable->GetW("HaveParts"));
+	text->text.setCharacterSize(30);
+	text->SetOrigin(Origins::MC);
+	text->SetPosition(1095, 160);
+	text->sortLayer = 111;
+
+	for (int i = 0; i < 4; i++)
+	{
+		std::stringstream ss;
+		ss << "EquipSlotB" << i;
+		bt = (UiButton*)FindGo(ss.str());
+		bt->SetOrigin(Origins::TL);
+		bt->SetPosition(42, 210 + (i * 75));
+		bt->SetSize(2, 2);
+		bt->sortLayer = 111;
+		bt->OnClick = [this,i]() {
+			if (isPopupOn)
+			{
+				return;
+			}
+			UiEquipChangeOpen(i);
+		};
+
+		ss.str("");
+		ss << "EquipItemNameSlot" << i;
+		text = (TextGo*)FindGo(ss.str());
+		text->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
+		text->text.setString(stringtable->GetW("Headset0"));
+		text->text.setCharacterSize(20);
+		text->SetOrigin(Origins::TL);
+		text->SetPosition(bt->GetPosition().x+75, bt->GetPosition().y +10);
+		text->sortLayer = 112;
+
+		ss << "Stat";
+		text = (TextGo*)FindGo(ss.str());
+		text->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
+		text->text.setString(L"장비 스텟");
+		text->text.setCharacterSize(11);
+		text->SetOrigin(Origins::TL);
+		text->SetPosition(bt->GetPosition().x + 75, bt->GetPosition().y + 35);
+		text->sortLayer = 112;
+
+		ss.str("");
+		ss << "ItemEquipedIcon" << i;
+		spr = (SpriteGo*)FindGo(ss.str());
+		spr->SetOrigin(Origins::MC);
+		spr->SetPosition(bt->GetPosition().x+36 , bt->GetPosition().y + 36);
+		spr->SetSize(2, 2);
+		spr->sortLayer = 112;
+
+		ss.str("");
+		ss << "EquipItemType" << i;
+		text = (TextGo*)FindGo(ss.str());
+		text->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
+		switch (i)
+		{
+		case 0:
+			text->text.setString(stringtable->GetW("Headset"));
+			break;
+		case 1:
+			text->text.setString(stringtable->GetW("Controller"));
+			break;
+		case 2:
+			text->text.setString(stringtable->GetW("Chair"));
+			break;
+		case 3:
+			text->text.setString(stringtable->GetW("Uniform"));
+			break;
+		}
+		text->text.setCharacterSize(14);
+		text->SetOrigin(Origins::TR);
+		text->SetPosition(bt->GetPosition().x + 400, bt->GetPosition().y + 10);
+		text->sortLayer = 112;
+		text->text.setFillColor(sf::Color(100, 100, 100));
+
+		ss.str("");
+		ss << "HavePartsText" << i;
+		text = (TextGo*)FindGo(ss.str());
+		text->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
+		switch (i)
+		{
+		case 0:
+			text->text.setString(stringtable->GetW("SoundChip"));
+			break;
+		case 1:
+			text->text.setString(stringtable->GetW("Switch"));
+			break;
+		case 2:
+			text->text.setString(stringtable->GetW("Screw"));
+			break;
+		case 3:
+			text->text.setString(stringtable->GetW("Fabric"));
+			break;
+		}
+		text->text.setCharacterSize(20);
+		text->SetOrigin(Origins::TL);
+		text->SetPosition(1036,220+(i*75));
+		text->sortLayer = 112;
+
+	}
+
 	for (int i = 0; i < 3; i++)
 	{
 		std::stringstream ss;
@@ -1157,6 +1610,46 @@ void SceneHome::MakeSubUiEquip()
 		bt->SetSize(1.5, 1.5);
 		bt->sortLayer = 111;
 
+		ss.str("");
+		ss << "MakeItemPartsText" << i;
+		text = (TextGo*)FindGo(ss.str());
+		text->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
+		text->text.setString("0");
+		text->text.setCharacterSize(17);
+		text->SetOrigin(Origins::MR);
+		text->SetPosition(spr->GetPosition().x -150 , spr->GetPosition().y + 15);
+		text->sortLayer = 113;
+
+		ss.str("");
+		ss << "MakeItemBText" << i;
+		text = (TextGo*)FindGo(ss.str());
+		text->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
+		text->text.setString(stringtable->GetW("Craft"));
+		text->text.setCharacterSize(17);
+		text->SetOrigin(Origins::MC);
+		text->SetPosition(bt->GetPosition());
+		text->sortLayer = 113;
+
+		ss.str("");
+		ss << "MakingItemText" << i;
+		text = (TextGo*)FindGo(ss.str());
+		text->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
+		text->text.setString(stringtable->GetW("Crafting"));
+		text->text.setCharacterSize(17);
+		text->SetOrigin(Origins::MC);
+		text->SetPosition(spr->GetPosition().x + 140, spr->GetPosition().y - 25);
+		text->sortLayer = 113;
+
+		ss << "Time";
+		AddGo(new TextGo(ss.str()));
+		text = (TextGo*)FindGo(ss.str());
+		text->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
+		text->text.setString(stringtable->GetW("TimeRemaining"));
+		text->text.setCharacterSize(14);
+		text->SetOrigin(Origins::MC);
+		text->SetPosition(spr->GetPosition().x + 140, spr->GetPosition().y);
+		text->sortLayer = 113;
+
 		if (i > 0)
 		{
 			ss.str("");
@@ -1166,22 +1659,369 @@ void SceneHome::MakeSubUiEquip()
 			lockIco->SetPosition(spr->GetPosition().x, spr->GetPosition().y-12.f);
 			lockIco->SetSize(5, 5);
 			lockIco->sortLayer = 111;
+
+			ss.str("");
+			ss << "CanCraftExText" << i-1;
+			text = (TextGo*)FindGo(ss.str());
+			text->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
+			text->text.setString(stringtable->GetW("CanCraftExpend"));
+			text->text.setCharacterSize(17);
+			text->SetOrigin(Origins::MC);
+			text->SetPosition(lockIco->GetPosition().x, lockIco->GetPosition().y + 37);
+			text->sortLayer = 113;
 		}
 
 	}
 
+	// ChangeEquip
+
+	RectGo* rect = (RectGo*)FindGo("PopupUiShade");
+	rect->SetSize(FRAMEWORK.GetWindowSize());
+	rect->sortLayer = 114;
+	rect->sortOrder = -1;
+	rect->rectangle.setFillColor(sf::Color(0, 0, 0, 150));
+
+	for (int i = 0; i < 38; i++)
+	{
+		std::stringstream ss;
+		ss.str("");
+		ss << "EquipItemB" << i;
+		bt = (UiButton*)FindGo(ss.str());
+		bt->SetOrigin(Origins::MC);
+		bt->SetPosition(330 + (63 * (i % 5)), 210 + (63 * (i / 5)));
+		bt->SetSize(2, 2);
+		bt->sortLayer = 115;
+
+		ss << "Sprite";
+		spr = (SpriteGo*)FindGo(ss.str());
+		spr->SetOrigin(Origins::MC);
+		spr->SetPosition(bt->GetPosition());
+		spr->SetSize(2, 2);
+		spr->sortLayer = 115;
+		spr->sortOrder = 1;
+
+		ss << "Lock";
+		spr = (SpriteGo*)FindGo(ss.str());
+		spr->SetOrigin(Origins::MC);
+		spr->SetPosition(bt->GetPosition().x + 15, bt->GetPosition().y - 15);
+		spr->SetSize(2, 2);
+		spr->sortLayer = 115;
+		spr->sortOrder = 2;
+	}
+
+	spr = (SpriteGo*)FindGo("EquipPopup");
+	spr->SetOrigin(Origins::MC);
+	spr->SetPosition(FRAMEWORK.GetWindowSize().x * 0.5, FRAMEWORK.GetWindowSize().y * 0.5 - 30);
+	spr->SetSize(2, 2);
+	spr->sortLayer = 114;
+
+	text = (TextGo*)FindGo("PopupUiText");
+	text->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
+	text->text.setString(stringtable->GetW("ChangeEquip"));
+	text->text.setCharacterSize(30);
+	text->SetOrigin(Origins::MC);
+	text->SetPosition(spr->GetPosition().x, spr->GetPosition().y-215);
+	text->sortLayer = 115;
+
+	text = (TextGo*)FindGo("EquipItemText");
+	text->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
+	text->text.setString(stringtable->GetW("Headset0"));
+	text->text.setCharacterSize(18);
+	text->SetOrigin(Origins::ML);
+	text->SetPosition(665,190);
+	text->sortLayer = 115;
+
+	text = (TextGo*)FindGo("EquipItemValText");
+	text->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
+	text->text.setString(stringtable->GetW("Headset0"));
+	text->text.setCharacterSize(14);
+	text->SetOrigin(Origins::ML);
+	text->SetPosition(665, 220);
+	text->sortLayer = 115;
+
+	text = (TextGo*)FindGo("EquipingText");
+	text->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
+	text->text.setString(stringtable->GetW("Equiping"));
+	text->text.setCharacterSize(14);
+	text->SetOrigin(Origins::MR);
+	text->SetPosition(980, 190);
+	text->sortLayer = 115;
+
+	text = (TextGo*)FindGo("LookItemText");
+	text->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
+	text->text.setString(stringtable->GetW("Headset0"));
+	text->text.setCharacterSize(18);
+	text->SetOrigin(Origins::ML);
+	text->SetPosition(665, 376);
+	text->sortLayer = 115;
+
+	text = (TextGo*)FindGo("LookItemValText");
+	text->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
+	text->text.setString(stringtable->GetW("Headset0"));
+	text->text.setCharacterSize(14);
+	text->SetOrigin(Origins::ML);
+	text->SetPosition(665, 405);
+	text->sortLayer = 115;
+
+	spr = (SpriteGo*)FindGo("ExitEquipPopB");
+	spr->SetOrigin(Origins::MC);
+	spr->SetPosition(930, 540);
+	spr->SetSize(2, 2);
+	spr->sortLayer = 115;
+
+	text = (TextGo*)FindGo("ExitEquipPopBText");
+	text->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
+	text->text.setString(stringtable->GetW("Close"));
+	text->text.setCharacterSize(20);
+	text->SetOrigin(Origins::MC);
+	text->SetPosition(spr->GetPosition());
+	text->sortLayer = 115;
+
+	// Craft
+	
+	text = (TextGo*)FindGo("SelectPartsText");
+	text->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
+	text->text.setString(stringtable->GetW("SelectParts"));
+	text->text.setCharacterSize(25);
+	text->SetOrigin(Origins::MC);
+	text->SetPosition(530, 180);
+	text->sortLayer = 116;
+
+	bt = (UiButton*)FindGo("PartsResetB");
+	bt->SetOrigin(Origins::MC);
+	bt->SetPosition(700, 185);
+	bt->SetSize(1.3, 1);
+	bt->sortLayer = 116;
+
+	text = (TextGo*)FindGo("SelectPartsResetBText");
+	text->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
+	text->text.setString(stringtable->GetW("Reset"));
+	text->text.setCharacterSize(12);
+	text->SetOrigin(Origins::MC);
+	text->SetPosition(bt->GetPosition());
+	text->sortLayer = 117;
+
 	for (int i = 0; i < 4; i++)
 	{
 		std::stringstream ss;
-		ss << "EquipSlotB" << i;
-		bt = (UiButton*)FindGo(ss.str());
+		ss << "CraftSlot" << i;
 		bt = (UiButton*)FindGo(ss.str());
 		bt->SetOrigin(Origins::TL);
-		bt->SetPosition(42, 210+(i*75));
-		bt->SetSize(2, 2);
-		bt->sortLayer = 111;
+		bt->SetPosition(356,225+(65*i));
+		bt->SetSize(1.8, 1.4);
+		bt->sortLayer = 116;
+
+		ss << "Icon";
+		spr = (SpriteGo*)FindGo(ss.str());
+		spr->SetOrigin(Origins::MC);
+		spr->SetPosition(320, 255 + (65 * i));
+		spr->SetSize(2, 2);
+		spr->sortLayer = 117;
+
+		ss << "Bg";
+		spr = (SpriteGo*)FindGo(ss.str());
+		spr->SetOrigin(Origins::MC);
+		spr->SetPosition(320, 255 + (65 * i));
+		spr->SetSize(3, 3);
+		spr->sortLayer = 116;
+
+		ss.str("");
+		ss << "UsingCraftPartsText" << i;
+		text = (TextGo*)FindGo(ss.str());
+		text->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
+		switch (i)
+		{
+		case 0:
+			text->text.setString(stringtable->GetW("SoundChip"));
+			break;
+		case 1:
+			text->text.setString(stringtable->GetW("Switch"));
+			break;
+		case 2:
+			text->text.setString(stringtable->GetW("Screw"));
+			break;
+		case 3:
+			text->text.setString(stringtable->GetW("Fabric"));
+			break;
+		}
+		text->text.setCharacterSize(16);
+		text->SetOrigin(Origins::TL);
+		text->SetPosition(bt->GetPosition().x+10, bt->GetPosition().y + 10);
+		text->sortLayer = 117;
+
+		ss << "Cur";
+		text = (TextGo*)FindGo(ss.str());
+		text->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
+		text->text.setString("0");
+		text->text.setCharacterSize(18);
+		text->text.setOutlineColor(sf::Color::Black);
+		text->text.setOutlineThickness(2);
+		text->SetOrigin(Origins::TR);
+		text->SetPosition(350, 263 + (65 * i));
+		text->sortLayer = 117;
+
+		ss << "Text";
+		text = (TextGo*)FindGo(ss.str());
+		text->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
+		text->text.setString(stringtable->GetW("HavePartsNGold"));
+		text->text.setCharacterSize(16);
+		text->SetOrigin(Origins::TL);
+		text->SetPosition(bt->GetPosition().x + 10, bt->GetPosition().y + 32);
+		text->sortLayer = 117;
+
+		ss.str("");
+		ss << "PartDecrease" << i;
+		bt = (UiButton*)FindGo(ss.str());
+		bt->SetOrigin(Origins::MC);
+		bt->SetPosition(600, 255 + (65 * i));
+		bt->SetSize(0.45, 1);
+		bt->sortLayer = 116;
+
+		ss.str("");
+		ss << "InputPartsBt" << i << "Text1";
+		text = (TextGo*)FindGo(ss.str());
+		text->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
+		text->text.setString("-1");
+		text->text.setCharacterSize(16);
+		text->SetOrigin(Origins::MC);
+		text->SetPosition(bt->GetPosition());
+		text->sortLayer = 117;
+
+		ss.str("");
+		ss << "PartDecrease" << i << "x5";
+		bt = (UiButton*)FindGo(ss.str());
+		bt->SetOrigin(Origins::MC);
+		bt->SetPosition(567, 255 + (65 * i));
+		bt->SetSize(0.45, 1);
+		bt->sortLayer = 116;
+
+		ss.str("");
+		ss << "InputPartsBt" << i << "Text0";
+		text = (TextGo*)FindGo(ss.str());
+		text->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
+		text->text.setString("-5");
+		text->text.setCharacterSize(16);
+		text->SetOrigin(Origins::MC);
+		text->SetPosition(bt->GetPosition());
+		text->sortLayer = 117;
+
+		ss.str("");
+		ss << "PartIncrease" << i;
+		bt = (UiButton*)FindGo(ss.str());
+		bt->SetOrigin(Origins::MC);
+		bt->SetPosition(680, 255 + (65 * i));
+		bt->SetSize(0.45, 1);
+		bt->sortLayer = 116;
+
+		ss.str("");
+		ss << "InputPartsBt" << i << "Text2";
+		text = (TextGo*)FindGo(ss.str());
+		text->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
+		text->text.setString("+1");
+		text->text.setCharacterSize(16);
+		text->SetOrigin(Origins::MC);
+		text->SetPosition(bt->GetPosition());
+		text->sortLayer = 117;
+		
+		ss.str("");
+		ss << "PartIncrease" << i << "x5";
+		bt = (UiButton*)FindGo(ss.str());
+		bt->SetOrigin(Origins::MC);
+		bt->SetPosition(713, 255 + (65 * i));
+		bt->SetSize(0.45, 1);
+		bt->sortLayer = 116;
+
+		ss.str("");
+		ss << "InputPartsBt" << i << "Text3";
+		text = (TextGo*)FindGo(ss.str());
+		text->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
+		text->text.setString("+5");
+		text->text.setCharacterSize(16);
+		text->SetOrigin(Origins::MC);
+		text->SetPosition(bt->GetPosition());
+		text->sortLayer = 117;
+
+		ss.str("");
+		ss << "CraftUiUsingCount" << i;
+		text = (TextGo*)FindGo(ss.str());
+		text->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
+		text->text.setString("0");
+		text->text.setCharacterSize(20);
+		text->SetOrigin(Origins::MC);
+		text->SetPosition(640, 255 + (65 * i));
+		text->sortLayer = 117;
+
+		ss.str("");
+		ss << "CraftUiUsingPartsText" << i;
+		text = (TextGo*)FindGo(ss.str());
+		text->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
+		switch (i)
+		{
+		case 0:
+			text->text.setString(stringtable->GetW("SoundChip"));
+			break;
+		case 1:
+			text->text.setString(stringtable->GetW("Switch"));
+			break;
+		case 2:
+			text->text.setString(stringtable->GetW("Screw"));
+			break;
+		case 3:
+			text->text.setString(stringtable->GetW("Fabric"));
+			break;
+		}
+		text->text.setCharacterSize(15);
+		text->SetOrigin(Origins::ML);
+		text->SetPosition(813, 286 + (36 * i));
+		text->sortLayer = 117;
 	}
-	
+
+	text = (TextGo*)FindGo("CraftUiCurMoneyText");
+	text->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
+	text->text.setString("0");
+	text->text.setCharacterSize(20);
+	text->SetOrigin(Origins::MR);
+	text->SetPosition(988, 184);
+	text->sortLayer = 117;
+
+	text = (TextGo*)FindGo("CraftUiPartsHeadText");
+	text->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
+	text->text.setString(stringtable->GetW("UseParts"));
+	text->text.setCharacterSize(18);
+	text->SetOrigin(Origins::MC);
+	text->SetPosition(880, 245);
+	text->sortLayer = 117;
+
+	text = (TextGo*)FindGo("CraftUiUseDateText");
+	text->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
+	text->text.setString(stringtable->GetW("RemainingTime"));
+	text->text.setCharacterSize(18);
+	text->SetOrigin(Origins::ML);
+	text->SetPosition(780, 428);
+	text->sortLayer = 117;
+
+	text = (TextGo*)FindGo("CraftUiUseCostText");
+	text->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
+	text->text.setString(stringtable->GetW("PartsCost"));
+	text->text.setCharacterSize(18);
+	text->SetOrigin(Origins::ML);
+	text->SetPosition(780,455);
+	text->sortLayer = 117;
+
+	bt = (UiButton*)FindGo("OnCraftB");
+	bt->SetOrigin(Origins::MC);
+	bt->SetPosition(FRAMEWORK.GetWindowSize().x*0.5, 540);
+	bt->SetSize(2, 2);
+	bt->sortLayer = 116;
+
+
+	text = (TextGo*)FindGo("CraftingBText");
+	text->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
+	text->text.setString(stringtable->GetW("CraftGo"));
+	text->text.setCharacterSize(20);
+	text->SetOrigin(Origins::MC);
+	text->SetPosition(bt->GetPosition());
+	text->sortLayer = 117;
 }
 
 void SceneHome::MainUiFunc(int index)
@@ -1293,7 +2133,9 @@ void SceneHome::SubUiBaseOpen(int index, bool on)
 		UiTrainingOpen(false);
 		UiSponsorContractOpen(true, false);
 		UiSponsorContractOpen(false, false);
+		UiEquipOpen(false);
 	};
+	bt->SetActive(on);
 
 	TextGo* text = (TextGo*)FindGo("UiMenuTitleText");
 	text->SetActive(on);
@@ -1311,8 +2153,36 @@ void SceneHome::SubUiBaseOpen(int index, bool on)
 void SceneHome::UiTrainingOpen(bool on)
 {
 	SubUiBaseOpen(6,on);
+	TextGo* text;
 	SpriteGo* spr = (SpriteGo*)FindGo("SubUiBack");
 	spr->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/Origin/Sprite/training_ui_bg.png"));
+
+	text = (TextGo*)FindGo("TrainPlayerListName");
+	text->SetActive(on);
+
+	text = (TextGo*)FindGo("TrainPlayerListPoint");
+	text->SetActive(on);
+
+	text = (TextGo*)FindGo("TrainByUsePoint");
+	text->SetActive(false);
+
+	text = (TextGo*)FindGo("TrainPlayerName");
+	text->SetActive(false);
+
+	text = (TextGo*)FindGo("TrainPlayerAge");
+	text->SetActive(false);
+
+	text = (TextGo*)FindGo("TrainPlayerDef");
+	text->SetActive(false);
+
+	text = (TextGo*)FindGo("TrainPlayerAtk");
+	text->SetActive(false);
+
+	text = (TextGo*)FindGo("TrainPlayerLeftPointText");
+	text->SetActive(false);
+
+	text = (TextGo*)FindGo("TrainPlayerReturnBText");
+	text->SetActive(false);
 
 	for (int i = 0; i < 6; i++)
 	{
@@ -1320,6 +2190,15 @@ void SceneHome::UiTrainingOpen(bool on)
 		ss << "TrainingSlotUi" << i;
 		spr = (SpriteGo*)FindGo(ss.str());
 		spr->SetActive(false);
+
+		ss << "Name";
+		text = (TextGo*)FindGo(ss.str());
+		text->SetActive(false);
+
+		ss << "Point";
+		text = (TextGo*)FindGo(ss.str());
+		text->SetActive(false);
+
 		ss.str("");
 		ss << "XpBack" << i;
 		SpriteGo* xpBar = (SpriteGo*)FindGo(ss.str());
@@ -1388,7 +2267,10 @@ void SceneHome::UiTrainingOpen(bool on)
 		ss << "Line";
 		spr = (SpriteGo*)FindGo(ss.str());
 		spr->SetActive(false);
-
+		ss.str("");
+		ss << "CharacterStatLevel" << i;
+		text = (TextGo*)FindGo(ss.str());
+		text->SetActive(false);
 	}
 	spr = (SpriteGo*)FindGo("IconAtk0");
 	spr->SetActive(on);
@@ -1410,6 +2292,17 @@ void SceneHome::UiTrainingOpen(bool on)
 		bt = (UiButton*)FindGo(ss.str());
 		bt->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/Origin/Sprite/player_list_bg_0.png"));
 		bt->SetActive(on);
+
+		ss << "Name";
+		text = (TextGo*)FindGo(ss.str());
+		text->SetActive(on);
+		text->text.setString(TEAM_MGR.GetPlayerInfo()[i].name);
+
+		ss << "Point";
+		text = (TextGo*)FindGo(ss.str());
+		text->SetActive(on);
+		text->text.setString(std::to_string(TEAM_MGR.GetMaxTrainingPoint()
+			- TEAM_MGR.GetTrainingInfo()[i].usedTrainingPoint));
 	}
 	for (int i = playerNum; i < 12; i++)
 	{
@@ -1417,6 +2310,14 @@ void SceneHome::UiTrainingOpen(bool on)
 		ss << "PlayerList" << i;
 		bt = (UiButton*)FindGo(ss.str());
 		bt->SetActive(false);
+
+		ss << "Name";
+		text = (TextGo*)FindGo(ss.str());
+		text->SetActive(false);
+
+		ss << "Point";
+		text = (TextGo*)FindGo(ss.str());
+		text->SetActive(false);
 	}
 	if (on)
 	{
@@ -1431,15 +2332,71 @@ void SceneHome::UiTrainingOpen(bool on)
 
 void SceneHome::UiTrainingPlayerSelect(int index)
 {
+	auto stringtable = DATATABLE_MGR.Get<StringTable>(DataTable::Ids::String);
+
 	PlayerInfo selectedPlayer = TEAM_MGR.GetPlayerInfo()[index];
 	TrainingInfo* tInfo = &gainTrainingInfo[index];
 	SpriteGo* spr;
+	TextGo* text;
+
+	text = (TextGo*)FindGo("TrainByUsePoint");
+	text->SetActive(true);
+
+	text = (TextGo*)FindGo("TrainPlayerName");
+	text->SetActive(true);
+	text->text.setString(selectedPlayer.name);
+
+	text = (TextGo*)FindGo("TrainPlayerAge");
+	text->SetActive(true);
+	text->text.setString(std::to_wstring(selectedPlayer.age)
+	+ stringtable->GetW("AgeCount"));
+
+	text = (TextGo*)FindGo("TrainPlayerDef");
+	text->SetActive(true);
+	text->text.setString(std::to_string(selectedPlayer.defence));
+
+	text = (TextGo*)FindGo("TrainPlayerAtk");
+	text->SetActive(true);
+	text->text.setString(std::to_string(selectedPlayer.attack));
+
+	text = (TextGo*)FindGo("TrainPlayerLeftPointText");
+	text->SetActive(true);
+
+	text = (TextGo*)FindGo("TrainPlayerReturnBText");
+	text->SetActive(true);
+
 	for (int i = 0; i < 2+ selectedPlayer.knownChamp; i++)
 	{
 		std::stringstream ss;
 		ss << "TrainingSlotUi" << i;
 		spr = (SpriteGo*)FindGo(ss.str());
 		spr->SetActive(true);
+
+		ss << "Name";
+		text = (TextGo*)FindGo(ss.str());
+		text->SetActive(true);
+		switch (i)
+		{
+		case 0:
+			text->text.setString(stringtable->GetW("Attack"));
+			break;
+		case 1:
+			text->text.setString(stringtable->GetW("Defence"));
+			break;
+		default:
+		{
+			std::stringstream champName;
+			champName << "ChampName" << selectedPlayer.proficiency[i - 2].first;
+			text->text.setString(stringtable->GetW(champName.str()));
+		}
+			break;
+		}
+
+
+		ss << "Point";
+		text = (TextGo*)FindGo(ss.str());
+		text->SetActive(true);
+
 		ss.str("");
 		ss << "XpBack" << i;
 		SpriteGo* xpBar = (SpriteGo*)FindGo(ss.str());
@@ -1448,6 +2405,7 @@ void SceneHome::UiTrainingPlayerSelect(int index)
 		ss << "XpCur" << i;
 		xpBar = (SpriteGo*)FindGo(ss.str());
 		xpBar->SetActive(true);
+
 		switch (i)
 		{
 		case 0: 
@@ -1463,7 +2421,7 @@ void SceneHome::UiTrainingPlayerSelect(int index)
 				/ (1300 + (selectedPlayer.proficiency[i - 2].second * 10)), 2.f);
 			break;
 		}
-		
+
 		ss.str("");
 		ss << "XpFuture" << i;
 		xpBar = (SpriteGo*)FindGo(ss.str());
@@ -1582,20 +2540,8 @@ void SceneHome::UiTrainingPlayerSelect(int index)
 			SpriteGo* charIcon = (SpriteGo*)FindGo(ss.str());
 			charIcon->SetActive(true);
 			std::stringstream champ;
-			champ << "graphics/Origin/Sprite/character_icons_";
-			switch (selectedPlayer.proficiency[i-2].first)
-			{
-			case 0:
-				champ << 0;
-				break;
-			case 1:
-				champ << 2;
-				break;
-			default:
-				champ << selectedPlayer.proficiency[i - 2].first + 3;
-				break;
-			}
-			champ << ".png";
+			champ << "graphics/UiFix/character_icons_"<< 
+				selectedPlayer.proficiency[i - 2].first << ".png";
 			charIcon->sprite.setTexture((*RESOURCE_MGR.GetTexture(champ.str())));
 		}
 		if (i == 0)
@@ -1616,6 +2562,15 @@ void SceneHome::UiTrainingPlayerSelect(int index)
 		ss << "TrainingSlotUi" << i;
 		spr = (SpriteGo*)FindGo(ss.str());
 		spr->SetActive(false);
+
+		ss << "Name";
+		text = (TextGo*)FindGo(ss.str());
+		text->SetActive(false);
+
+		ss << "Point";
+		text = (TextGo*)FindGo(ss.str());
+		text->SetActive(false);
+
 		ss.str("");
 		ss << "XpBack" << i;
 		SpriteGo* xpBar = (SpriteGo*)FindGo(ss.str());
@@ -1674,27 +2629,21 @@ void SceneHome::UiTrainingPlayerSelect(int index)
 		{
 			characterIcons->SetActive(true);
 			std::stringstream champ;
-			champ << "graphics/Origin/Sprite/character_icons_";
-			switch (selectedPlayer.proficiency[i].first)
-			{
-			case 0:
-				champ << 0;
-				break;
-			case 1:
-				champ << 2;
-				break;
-			default:
-				champ << selectedPlayer.proficiency[i].first + 3;
-				break;
-			}
-			champ << ".png";
+			champ << "graphics/UiFix/character_icons_" <<
+				selectedPlayer.proficiency[i].first << ".png";
 			characterIcons->sprite.setTexture((*RESOURCE_MGR.GetTexture(champ.str())));
+	
 			ss << "Back";
 			spr = (SpriteGo*)FindGo(ss.str());
 			spr->SetActive(true);
 			ss << "Line";
 			spr = (SpriteGo*)FindGo(ss.str());
 			spr->SetActive(true);
+			ss.str("");
+			ss << "CharacterStatLevel" << i;
+			text = (TextGo*)FindGo(ss.str());
+			text->text.setString(std::to_string(selectedPlayer.proficiency[i].second));
+			text->SetActive(true);
 		}
 		else
 		{
@@ -1705,6 +2654,10 @@ void SceneHome::UiTrainingPlayerSelect(int index)
 			ss << "Line";
 			spr = (SpriteGo*)FindGo(ss.str());
 			spr->SetActive(false);
+			ss.str("");
+			ss << "CharacterStatLevel" << i;
+			text = (TextGo*)FindGo(ss.str());
+			text->SetActive(false);
 		}
 	}
 
@@ -1740,6 +2693,11 @@ void SceneHome::UiTrainingPlayerSelect(int index)
 
 void SceneHome::UiTrainingGaugeUpdate(int index)
 {
+	auto stringtable = DATATABLE_MGR.Get<StringTable>(DataTable::Ids::String);
+	TextGo* text;
+	PlayerInfo selectedPlayer = TEAM_MGR.GetPlayerInfo()[index];
+	TrainingInfo* tInfo = &gainTrainingInfo[index];
+
 	for (int i = 0; i < 8; i++)
 	{
 		std::stringstream ss;
@@ -1796,10 +2754,37 @@ void SceneHome::UiTrainingGaugeUpdate(int index)
 			}
 		}
 	}
+
+	std::stringstream ss;
+	ss << "PlayerList" << index << "Name" << "Point";
+	text = (TextGo*)FindGo(ss.str());
+	text->text.setString(std::to_string(TEAM_MGR.GetMaxTrainingPoint() -
+		tInfo->usedTrainingPoint));
+
+
+	for (int i = 0; i < 4; i++)
+	{
+		std::stringstream ss;
+		ss << "TrainingSlotUi" << i << "Name" << "Point";
+		text = (TextGo*)FindGo(ss.str());
+		switch (i)
+		{
+		case 0:
+			text->text.setString(std::to_string(tInfo->trainingAtk));
+			break;
+		case 1:
+			text->text.setString(std::to_string(tInfo->trainingDef));
+			break;
+		default:
+			text->text.setString(std::to_string(tInfo->trainingChamp[i-2]));
+			break;
+		}
+	}
 }
 
 void SceneHome::UiSponsorContractOpen(bool contract, bool on)
 {
+	isMenuOn = on;
 	selectedSponsorIndex = -1;
 	auto stringtable = DATATABLE_MGR.Get<StringTable>(DataTable::Ids::String);
 	SubUiBaseOpen(8, on);
@@ -2163,31 +3148,22 @@ void SceneHome::UpdateMoney()
 
 void SceneHome::Recruit(int grade, int slotNum)
 {
-	PlayerInfo player;
-	std::wstring name;
-	int age;
-	int attack;
-	int defence;
-	int knownChamp;
-	std::vector<std::pair<int, int>> proficiency;
-	int knownCharacter;
-	std::vector<int> characteristic;
-	int contract_cost;
-	int potential;
 	switch (grade)
 	{
+	case -1:
+		TEAM_MGR.Recruit(slotNum, MakeDefaultPlayer());
 	case 0:
 		if (TEAM_MGR.GetMoney() < 10 || TEAM_MGR.CheckRecruitSlot(slotNum) == true)
 		{
 			return;
 		}
-		MakeLocalPlayer(player);
+		TEAM_MGR.Recruit(slotNum, MakeLocalPlayer());
 		TEAM_MGR.UseMoney(10);
 		break;
 	default:
 		break;
 	}
-	TEAM_MGR.Recruit(slotNum, player);
+
 }
 
 void SceneHome::NewYear()
@@ -2207,7 +3183,7 @@ void SceneHome::NewYear()
 		{
 			for (int j = 0; j < 4; j++)
 			{
-				MakeLocalPlayer(newAiTeams[i].player[j]);
+				newAiTeams[i].player[j] = MakeLocalPlayer();
 			}
 		}
 		break;
@@ -2215,6 +3191,51 @@ void SceneHome::NewYear()
 		break;
 	}
 	TEAM_MGR.SetAiTeams(newAiTeams);
+}
+
+PlayerInfo SceneHome::MakeDefaultPlayer()
+{
+	PlayerInfo player;
+	{
+		std::stringstream ss;
+		ss << "PlayerName" << Utils::RandomRange(0, 9);
+		auto stringtable = DATATABLE_MGR.Get<StringTable>(DataTable::Ids::String);
+		player.name = stringtable->GetW(ss.str());
+	}
+	player.age = Utils::RandomRange(19, 22);
+	player.attack = Utils::RandomRange(6, 9);
+	player.defence = 15 - player.attack;
+	player.knownChamp = Utils::RandomRange(1, 3);
+	for (int i = 0; i < player.knownChamp; i++)
+	{
+		while (true)
+		{
+			int champCode = Utils::RandomRange(0, TEAM_MGR.GetAbleChamps() - 1);
+			bool checker = true;
+			for (int j = 0; j < i; j++)
+			{
+				if (player.proficiency[j].first == champCode)
+				{
+					checker = false;
+				}
+			}
+			if (checker)
+			{
+				player.proficiency.push_back({ champCode,Utils::RandomRange(2, 4) });
+				break;
+			}
+		}
+	}
+	player.knownCharacter = Utils::RandomRange(0, 3);
+	for (int i = 0; i < player.knownCharacter; i++)
+	{
+		player.characteristic.push_back(
+			Utils::RandomRange(0, TEAM_MGR.GetAbleCharacteristic() - 1));
+	}
+	player.contract_cost = 0;
+	player.potential = 0;
+
+	return player;
 }
 
 void SceneHome::SponsorContract(int index)
@@ -2340,8 +3361,9 @@ void SceneHome::UiSponsorSelect(int index)
 }
 
 
-void SceneHome::MakeLocalPlayer(PlayerInfo& player)
+PlayerInfo SceneHome::MakeLocalPlayer()
 {
+	PlayerInfo player;
 	{
 		std::stringstream ss;
 		ss << "PlayerName" << Utils::RandomRange(0, 9);
@@ -2380,6 +3402,8 @@ void SceneHome::MakeLocalPlayer(PlayerInfo& player)
 	}
 	player.contract_cost = Utils::RandomRange(95, 105 + (player.knownChamp * 10) + (player.knownCharacter * 10));
 	player.potential = 0;
+
+	return player;
 }
 
 void SceneHome::TestingCheats()
@@ -2437,7 +3461,759 @@ void SceneHome::UiEquipOpen(bool on)
 {
 	SubUiBaseOpen(9,on);
 	auto stringtable = DATATABLE_MGR.Get<StringTable>(DataTable::Ids::String);
+	auto itemTable = DATATABLE_MGR.Get<ItemTable>(DataTable::Ids::Item);
+	std::vector<int> equipedGear = TEAM_MGR.GetEquipedGear();
+	SpriteGo* spr;
+	UiButton* bt;
+	TextGo* text;
 
-	SpriteGo* spr = (SpriteGo*)FindGo("SubUiBack");
+	spr = (SpriteGo*)FindGo("SubUiBack");
 	spr->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/UiFix/equipment_bg.png"));
+
+	// Base
+	text = (TextGo*)FindGo("UsingEquipUiText");
+	text->SetActive(on);
+
+	text = (TextGo*)FindGo("MakeEquipUiText");
+	text->SetActive(on);
+
+	text = (TextGo*)FindGo("CurPartsEquipUiText");
+	text->SetActive(on);
+
+	for (int i = 0; i < 4; i++)
+	{
+		std::stringstream ss;
+		ss << "EquipSlotB" << i;
+		bt = (UiButton*)FindGo(ss.str());
+		bt->SetActive(on);
+		bt->OnEnter = [bt,this]() {
+			if (isPopupOn)
+			{
+				return;
+			}
+			bt->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/UiFix/equipment_slot_bg_1.png"));
+		};
+		bt->OnExit = [bt,this]() {
+			if (isPopupOn)
+			{
+				return;
+			}
+			bt->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/UiFix/equipment_slot_bg_0.png"));
+		};
+
+		ss.str("");
+		ss << "EquipItemNameSlot" << i;
+		text = (TextGo*)FindGo(ss.str());
+		text->SetActive(on);
+		ReturnItemName(*text, i, equipedGear[i]);
+
+		ss << "Stat";
+		text = (TextGo*)FindGo(ss.str());
+		text->text.setString(ReturnEquipStats(i, equipedGear[i]));
+		text->SetActive(on);
+
+		ss.str("");
+		ss << "ItemEquipedIcon" << i;
+		spr = (SpriteGo*)FindGo(ss.str());
+		spr->SetActive(on);
+		sf::Texture* tex = RESOURCE_MGR.GetTexture(itemTable->Get(i, equipedGear[i]).textureId);
+		spr->sprite.setTexture(*tex);
+		spr->sprite.setTextureRect({ 0,0,(int)tex->getSize().x,(int)tex->getSize().y });
+		spr->SetOrigin(Origins::MC);
+
+		ss.str("");
+		ss << "EquipItemType" << i;
+		text = (TextGo*)FindGo(ss.str());
+		text->SetActive(on);
+
+		ss.str("");
+		ss << "HavePartsText" << i;
+		text = (TextGo*)FindGo(ss.str());
+		switch (i)
+		{
+		case 0:
+		{
+			std::wstringstream wss;
+			wss << stringtable->GetW("SoundChip") << std::endl
+				<< TEAM_MGR.GetParts(i) << stringtable->GetW("Count");
+			text->text.setString(wss.str());
+		}
+			break;
+		case 1:
+		{
+			std::wstringstream wss;
+			wss << stringtable->GetW("Switch") << std::endl
+				<< TEAM_MGR.GetParts(i) << stringtable->GetW("Count");
+			text->text.setString(wss.str());
+		}
+			break;
+		case 2:
+		{
+			std::wstringstream wss;
+			wss << stringtable->GetW("Screw") << std::endl
+				<< TEAM_MGR.GetParts(i) << stringtable->GetW("Count");
+			text->text.setString(wss.str());
+		}
+			break;
+		case 3:
+		{
+			std::wstringstream wss;
+			wss << stringtable->GetW("Fabric") << std::endl
+				<< TEAM_MGR.GetParts(i) << stringtable->GetW("Count");
+			text->text.setString(wss.str());
+		}
+			break;
+		}
+		text->SetActive(on);
+	}
+
+	std::vector<ItemMakeSlot> craftSlot = TEAM_MGR.GetCraftSlot();
+
+	for (int i = 0; i < 3; i++)
+	{
+		bool slotOpen = on && i < TEAM_MGR.GetCraftSlotCount();
+		bool slotClose = on && i >= TEAM_MGR.GetCraftSlotCount();
+
+		std::stringstream ss;
+		ss << "Equipmake" << i;
+		spr = (SpriteGo*)FindGo(ss.str());
+		spr->SetActive(on);
+		if (slotOpen)
+		{
+			if (craftSlot[i].inCrafting)
+			{
+				spr->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/UiFix/equipment_making_slot_bg_2.png"));
+			}
+			else
+			{
+				spr->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/UiFix/equipment_making_slot_bg_0.png"));
+			}
+		}
+		
+
+		ss.str("");
+		ss << "EquipMakeB" << i;
+		bt = (UiButton*)FindGo(ss.str());
+		bt->SetActive(slotOpen);
+		if (craftSlot[i].inCrafting)
+		{
+			bt->SetActive(false);
+		}
+		bt->OnClick = [i,this]() {
+			if (!TEAM_MGR.GetCraftSlot()[i].inCrafting)
+			{
+				UiEquipMakeOpen(i);
+			}
+			else if (TEAM_MGR.GetCraftSlot()[i].leftDate == 0)
+			{
+				UiCraftFinish();
+			}
+		};
+
+		ss.str("");
+		ss << "MakeItemPartsText" << i;
+		text = (TextGo*)FindGo(ss.str());
+		text->SetActive(slotOpen);
+		if (!craftSlot[i].inCrafting)
+		{
+			text->SetActive(false);
+		}
+
+		ss.str("");
+		ss << "MakeItemBText" << i;
+		text = (TextGo*)FindGo(ss.str());
+		text->SetActive(slotOpen);
+		if (craftSlot[i].inCrafting)
+		{
+			text->SetActive(false);
+		}
+
+		ss.str("");
+		ss << "MakingItemText" << i;
+		text = (TextGo*)FindGo(ss.str());
+		text->SetActive(slotOpen);
+		if (!craftSlot[i].inCrafting)
+		{
+			text->SetActive(false);
+		}
+
+		ss << "Time";
+		AddGo(new TextGo(ss.str()));
+		text = (TextGo*)FindGo(ss.str());
+		text->SetActive(slotOpen);
+		if (!craftSlot[i].inCrafting)
+		{
+			text->SetActive(false);
+		}
+
+
+		if (i > 0)
+		{
+			ss.str("");
+			ss << "ItemMakeLock" << i - 1;
+			SpriteGo* lockIco = (SpriteGo*)FindGo(ss.str());
+			lockIco->SetActive(slotClose);
+
+			ss.str("");
+			ss << "CanCraftExText" << i - 1;
+			text = (TextGo*)FindGo(ss.str());
+			text->SetActive(slotClose);
+		}
+
+	}
+
+	// ChangeEquip
+
+	RectGo* rect = (RectGo*)FindGo("PopupUiShade");
+	rect->SetActive(false);
+
+	for (int i = 0; i < 38; i++)
+	{
+		std::stringstream ss;
+		ss.str("");
+		ss << "EquipItemB" << i;
+		bt = (UiButton*)FindGo(ss.str());
+		bt->SetActive(false);
+		ss << "Sprite";
+		spr = (SpriteGo*)FindGo(ss.str());
+		spr->SetActive(false);
+
+		ss << "Lock";
+		spr = (SpriteGo*)FindGo(ss.str());
+		spr->SetActive(false);
+	}
+
+	spr = (SpriteGo*)FindGo("EquipPopup");
+	spr->SetActive(false);
+
+	text = (TextGo*)FindGo("PopupUiText");
+	text->SetActive(false);
+
+	text = (TextGo*)FindGo("EquipItemText");
+	text->SetActive(false);
+
+	text = (TextGo*)FindGo("EquipItemValText");
+	text->SetActive(false);
+
+	text = (TextGo*)FindGo("EquipingText");
+	text->SetActive(false);
+
+	text = (TextGo*)FindGo("LookItemText");
+	text->SetActive(false);
+
+	text = (TextGo*)FindGo("LookItemValText");
+	text->SetActive(false);
+
+	spr = (SpriteGo*)FindGo("ExitEquipPopB");
+	spr->SetActive(false);
+
+	text = (TextGo*)FindGo("ExitEquipPopBText");
+	text->SetActive(false);
+
+	// Craft
+
+	spr = (SpriteGo*)FindGo("EquipPopup");
+	spr->SetActive(false);
+	
+	text = (TextGo*)FindGo("PopupUiText");
+	text->SetActive(false);
+
+	spr = (SpriteGo*)FindGo("ExitEquipPopB");
+	spr->SetActive(false);
+
+	text = (TextGo*)FindGo("ExitEquipPopBText");
+	text->SetActive(false);
+
+	text = (TextGo*)FindGo("SelectPartsText");
+	text->SetActive(false);
+
+	bt = (UiButton*)FindGo("PartsResetB");
+	bt->SetActive(false);
+	text = (TextGo*)FindGo("SelectPartsResetBText");
+	text->SetActive(false);
+
+	for (int i = 0; i < 4; i++)
+	{
+		std::stringstream ss;
+		ss << "CraftSlot" << i;
+		bt = (UiButton*)FindGo(ss.str());
+		bt->SetActive(false);
+
+		ss << "Icon";
+		spr = (SpriteGo*)FindGo(ss.str());
+		spr->SetActive(false);
+
+		ss << "Bg";
+		spr = (SpriteGo*)FindGo(ss.str());
+		spr->SetActive(false);
+
+		ss.str("");
+		ss << "UsingCraftPartsText" << i;
+		text = (TextGo*)FindGo(ss.str());
+		text->SetActive(false);
+
+		ss << "Cur";
+		text = (TextGo*)FindGo(ss.str());
+		text->SetActive(false);
+
+		ss << "Text";
+		text = (TextGo*)FindGo(ss.str());
+		text->SetActive(false);
+
+		ss.str("");
+		ss << "PartDecrease" << i;
+		bt = (UiButton*)FindGo(ss.str());
+		bt->SetActive(false);
+
+		ss.str("");
+		ss << "InputPartsBt" << i << "Text1";
+		text = (TextGo*)FindGo(ss.str());
+		text->SetActive(false);
+
+		ss.str("");
+		ss << "PartDecrease" << i << "x5";
+		bt = (UiButton*)FindGo(ss.str());
+		bt->SetActive(false);
+
+		ss.str("");
+		ss << "InputPartsBt" << i << "Text0";
+		text = (TextGo*)FindGo(ss.str());
+		text->SetActive(false);
+
+		ss.str("");
+		ss << "PartIncrease" << i;
+		bt = (UiButton*)FindGo(ss.str());
+		bt->SetActive(false);
+
+		ss.str("");
+		ss << "InputPartsBt" << i << "Text2";
+		text = (TextGo*)FindGo(ss.str());
+		text->SetActive(false);
+
+		ss.str("");
+		ss << "PartIncrease" << i << "x5";
+		bt = (UiButton*)FindGo(ss.str());
+		bt->SetActive(false);
+		ss.str("");
+		ss << "InputPartsBt" << i << "Text3";
+		text = (TextGo*)FindGo(ss.str());
+		text->SetActive(false);
+
+		ss.str("");
+		ss << "CraftUiUsingCount" << i;
+		text = (TextGo*)FindGo(ss.str());
+		text->SetActive(false);
+
+		ss.str("");
+		ss << "CraftUiUsingPartsText" << i;
+		text = (TextGo*)FindGo(ss.str());
+		text->SetActive(false);
+	}
+
+	text = (TextGo*)FindGo("CraftUiCurMoneyText");
+	text->SetActive(false);
+
+	text = (TextGo*)FindGo("CraftUiPartsHeadText");
+	text->SetActive(false);
+
+	text = (TextGo*)FindGo("CraftUiUseDateText");
+	text->SetActive(false);
+
+	text = (TextGo*)FindGo("CraftUiUseCostText");
+	text->SetActive(false);
+
+	bt = (UiButton*)FindGo("OnCraftB");
+	bt->SetActive(false);
+
+	text = (TextGo*)FindGo("CraftingBText");
+	text->SetActive(false);
+}
+
+void SceneHome::UiEquipChangeOpen(int type, bool on)
+{
+	isPopupOn = true;
+	auto stringtable = DATATABLE_MGR.Get<StringTable>(DataTable::Ids::String);
+	auto itemTable = DATATABLE_MGR.Get<ItemTable>(DataTable::Ids::Item);
+	std::vector<int> equipedGear = TEAM_MGR.GetEquipedGear();
+
+	SpriteGo* spr;
+	UiButton* bt;
+	TextGo* text;
+	RectGo* rect = (RectGo*)FindGo("PopupUiShade");
+	rect->SetActive(on);
+	int itemCount = 0;
+
+
+	switch (type)
+	{
+	case 0:
+		itemCount = 31;
+		break;
+	case 1:
+		itemCount = 37;
+		break;
+	case 2:
+		itemCount = 29;
+		break;
+	case 3:
+		itemCount = 32;
+		break;
+	}
+
+	for (int i = 0; i < itemCount; i++)
+	{
+		std::stringstream ss;
+		ss.str("");
+		ss << "EquipItemB" << i;
+		bt = (UiButton*)FindGo(ss.str());
+		bt->SetActive(on);
+		if (equipedGear[type] == i)
+		{
+			bt->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/Origin/Sprite/equipment_icon_bg_2.png"));
+		}
+		else
+		{
+			bt->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/Origin/Sprite/equipment_icon_bg_0.png"));
+		}
+		if (!TEAM_MGR.GetGearOpen(type, i))
+		{
+			std::stringstream ss2;
+			ss2 << "EquipItemB" << i << "Sprite";
+			SpriteGo* spr = (SpriteGo*)FindGo(ss2.str());
+			spr->sprite.setColor(sf::Color(50, 50, 50));
+			ss2 << "Lock";
+			spr = (SpriteGo*)FindGo(ss2.str());
+			spr->SetActive(on);
+		}
+		bt->OnClick = [this,type,i, itemCount]() {
+			if (TEAM_MGR.GetGearOpen(type,i))
+			{
+				TEAM_MGR.SetEquipedGear(type, i);
+
+				TextGo* text = (TextGo*)FindGo("EquipItemText");
+				ReturnItemName(*text, type, i);
+
+				text = (TextGo*)FindGo("EquipItemValText");
+				text->text.setString(ReturnEquipStats(type,i));		
+				for (int j = 0; j < itemCount; j++)
+				{
+					std::stringstream ss;
+					ss.str("");
+					ss << "EquipItemB" << j;
+					UiButton* bt = (UiButton*)FindGo(ss.str());
+					if (j == i)
+					{
+						bt->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/Origin/Sprite/equipment_icon_bg_2.png"));
+					}
+					else
+					{
+						bt->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/Origin/Sprite/equipment_icon_bg_0.png"));
+					}
+				}
+			}
+		};
+
+		bt->OnEnter = [bt,this, type, i]() {
+			TextGo* text = (TextGo*)FindGo("LookItemText");
+			ReturnItemName(*text, type, i);
+
+			text = (TextGo*)FindGo("LookItemValText");
+			text->text.setString(ReturnEquipStats(type, i));
+
+			if (TEAM_MGR.GetEquipedGear()[type] != i)
+			{
+				bt->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/Origin/Sprite/equipment_icon_bg_1.png"));
+			}
+		};
+		bt->OnExit = [bt, type, i]() {
+			if (TEAM_MGR.GetEquipedGear()[type] != i)
+			{
+				bt->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/Origin/Sprite/equipment_icon_bg_0.png"));
+			}
+		};
+
+		ss << "Sprite";
+		spr = (SpriteGo*)FindGo(ss.str());
+		spr->SetActive(on);
+		sf::Texture* tex = RESOURCE_MGR.GetTexture(itemTable->Get(type, i).textureId);
+		spr->sprite.setTexture(*tex);
+		spr->sprite.setTextureRect({ 0,0,(int)tex->getSize().x,(int)tex->getSize().y });
+		spr->SetOrigin(Origins::MC);
+	}
+	for (int i = itemCount; i < 37; i++)
+	{
+		std::stringstream ss;
+		ss.str("");
+		ss << "EquipItemB" << i;
+		bt = (UiButton*)FindGo(ss.str());
+		bt->SetActive(false);
+
+		ss << "Sprite";
+		spr = (SpriteGo*)FindGo(ss.str());
+		spr->SetActive(false);
+
+		ss << "Lock";
+		spr = (SpriteGo*)FindGo(ss.str());
+		spr->SetActive(false);
+	}
+
+	spr = (SpriteGo*)FindGo("EquipPopup");
+	spr->SetActive(on);
+	spr->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/UiFix/equipment_change_popup_bg.png"));
+
+	text = (TextGo*)FindGo("PopupUiText");
+	text->SetActive(on);
+	text->text.setString(stringtable->GetW("ChangeEquip"));
+
+	text = (TextGo*)FindGo("EquipItemText");
+	text->SetActive(on);
+
+	text = (TextGo*)FindGo("EquipItemValText");
+	text->SetActive(on);
+
+	text = (TextGo*)FindGo("EquipingText");
+	text->SetActive(on);
+
+	text = (TextGo*)FindGo("LookItemText");
+	text->SetActive(on);
+
+	text = (TextGo*)FindGo("LookItemValText");
+	text->SetActive(on);
+
+	bt = (UiButton*)FindGo("ExitEquipPopB");
+	bt->SetActive(on);
+	bt->OnClick = [this, type]() {
+		UiEquipChangeOpen(type, false);
+		UiEquipOpen();
+		isPopupOn = false;
+	};
+
+	text = (TextGo*)FindGo("ExitEquipPopBText");
+	text->SetActive(on);
+}
+
+
+void SceneHome::UiEquipMakeOpen(int index, bool on)
+{
+	isPopupOn = true;
+	auto stringtable = DATATABLE_MGR.Get<StringTable>(DataTable::Ids::String);
+	SpriteGo* spr;
+	UiButton* bt;
+	TextGo* text;
+	RectGo* rect = (RectGo*)FindGo("PopupUiShade");
+	rect->SetActive(on);
+
+	spr = (SpriteGo*)FindGo("EquipPopup");
+	spr->SetActive(on);
+	spr->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/UiFix/equipment_make_popup_ui_bg.png"));
+
+	text = (TextGo*)FindGo("PopupUiText");
+	text->SetActive(on);
+	text->text.setString(stringtable->GetW("CraftEquip"));
+
+	bt = (UiButton*)FindGo("ExitEquipPopB");
+	bt->SetActive(on);
+	bt->OnClick = [this, index]() {
+		UiEquipMakeOpen(index, false);
+		UiEquipOpen();
+		isPopupOn = false;
+	};
+
+	text = (TextGo*)FindGo("ExitEquipPopBText");
+	text->SetActive(on);
+
+	text = (TextGo*)FindGo("SelectPartsText");
+	text->SetActive(on);
+
+	bt = (UiButton*)FindGo("PartsResetB");
+	bt->SetActive(on);
+	text = (TextGo*)FindGo("SelectPartsResetBText");
+	text->SetActive(on);
+
+	for (int i = 0; i < 4; i++)
+	{
+		std::stringstream ss;
+		ss << "CraftSlot" << i;
+		bt = (UiButton*)FindGo(ss.str());
+		bt->SetActive(on);
+
+		ss << "Icon";
+		spr = (SpriteGo*)FindGo(ss.str());
+		spr->SetActive(on);
+
+		ss << "Bg";
+		spr = (SpriteGo*)FindGo(ss.str());
+		spr->SetActive(on);
+
+		ss.str("");
+		ss << "UsingCraftPartsText" << i;
+		text = (TextGo*)FindGo(ss.str());
+		text->SetActive(on);
+
+		ss << "Cur";
+		text = (TextGo*)FindGo(ss.str());
+		text->SetActive(on);
+
+		ss << "Text";
+		text = (TextGo*)FindGo(ss.str());
+		text->SetActive(on);
+
+		ss.str("");
+		ss << "PartDecrease" << i;
+		bt = (UiButton*)FindGo(ss.str());
+		bt->SetActive(on);
+
+		ss.str("");
+		ss << "InputPartsBt" << i << "Text1";
+		text = (TextGo*)FindGo(ss.str());
+		text->SetActive(on);
+
+		ss.str("");
+		ss << "PartDecrease" << i << "x5";
+		bt = (UiButton*)FindGo(ss.str());
+		bt->SetActive(on);
+
+		ss.str("");
+		ss << "InputPartsBt" << i << "Text0";
+		text = (TextGo*)FindGo(ss.str());
+		text->SetActive(on);
+
+		ss.str("");
+		ss << "PartIncrease" << i;
+		bt = (UiButton*)FindGo(ss.str());
+		bt->SetActive(on);
+
+		ss.str("");
+		ss << "InputPartsBt" << i << "Text2";
+		text = (TextGo*)FindGo(ss.str());
+		text->SetActive(on);
+
+		ss.str("");
+		ss << "PartIncrease" << i << "x5";
+		bt = (UiButton*)FindGo(ss.str());
+		bt->SetActive(on);
+		ss.str("");
+		ss << "InputPartsBt" << i << "Text3";
+		text = (TextGo*)FindGo(ss.str());
+		text->SetActive(on);
+
+		ss.str("");
+		ss << "CraftUiUsingCount" << i;
+		text = (TextGo*)FindGo(ss.str());
+		text->SetActive(on);
+
+		ss.str("");
+		ss << "CraftUiUsingPartsText" << i;
+		text = (TextGo*)FindGo(ss.str());
+		text->SetActive(on);
+	}
+
+	text = (TextGo*)FindGo("CraftUiCurMoneyText");
+	text->SetActive(on);
+
+	text = (TextGo*)FindGo("CraftUiPartsHeadText");
+	text->SetActive(on);
+
+	text = (TextGo*)FindGo("CraftUiUseDateText");
+	text->SetActive(on);
+
+	text = (TextGo*)FindGo("CraftUiUseCostText");
+	text->SetActive(on);
+
+	bt = (UiButton*)FindGo("OnCraftB");
+	bt->SetActive(on);
+
+	text = (TextGo*)FindGo("CraftingBText");
+	text->SetActive(on);
+}
+
+void SceneHome::UiCraftFinish(bool on)
+{
+}
+
+std::wstring SceneHome::ReturnEquipStats(int itemType, int itemNum)
+{
+	auto stringtable = DATATABLE_MGR.Get<StringTable>(DataTable::Ids::String);
+	auto itemTable = DATATABLE_MGR.Get<ItemTable>(DataTable::Ids::Item);
+	ItemInfo item = itemTable->Get(itemType, itemNum);
+
+	std::wstringstream wss;
+
+	if (item.atk !=0)
+	{
+		wss << stringtable->GetW("Attack") << " +" << item.atk << std::endl;
+	}
+	if (item.def != 0)
+	{
+		wss << stringtable->GetW("Defence") << " +" << item.def << std::endl;
+	}
+	if (item.atkSpeed != 0)
+	{
+		wss << stringtable->GetW("AtkSpeed") << " +" << item.atkSpeed << std::endl;
+	}
+	if (item.coolDown != 0)
+	{
+		wss << stringtable->GetW("SkillCooldown") << " +" << item.coolDown << std::endl;
+	}
+	if (item.hpDrain != 0)
+	{
+		wss << stringtable->GetW("HpDrain") << " +" << item.hpDrain << std::endl;
+	}
+	if (item.proficiencyType != 0)
+	{
+		std::stringstream ss;
+		ss << "ChampType" << (item.proficiencyType - 1);
+		wss << stringtable->GetW(ss.str()) << stringtable->GetW("ChampTypePro") << " +" << item.proficiencyValue << std::endl;
+	}
+	if (item.champProficiency != 0)
+	{
+		std::stringstream ss;
+		ss << "ChampName" << (item.champProficiency - 1);
+		wss << stringtable->GetW(ss.str()) << stringtable->GetW("ChampPro") << " +" << item.champProficiencyValue << std::endl;
+	}
+	
+	
+	return wss.str();
+}
+
+void SceneHome::ReturnItemName(TextGo& text, int type, int num)
+{
+	auto stringtable = DATATABLE_MGR.Get<StringTable>(DataTable::Ids::String);
+	auto itemTable = DATATABLE_MGR.Get<ItemTable>(DataTable::Ids::Item);
+	std::stringstream ss;
+	switch (type)
+	{
+	case 0:
+		ss << "Headset";
+		break;
+	case 1:
+		ss << "Controller";
+		break;
+	case 2:
+		ss << "Chair";
+		break;
+	case 3:
+		ss << "Uniform";
+		break;
+	}
+	ss << num;
+	text.text.setString(stringtable->GetW(ss.str()));
+	switch (itemTable->Get(type, num).grade)
+	{
+	case 0:
+		text.text.setFillColor(sf::Color::White);
+		break;
+	case 1:
+		text.text.setFillColor(sf::Color(0, 128, 64));
+		break;
+	case 2:
+		text.text.setFillColor(sf::Color(0, 128, 255));
+		break;
+	case 3:
+		text.text.setFillColor(sf::Color(163, 73, 164));
+		break;
+	case 4:
+		text.text.setFillColor(sf::Color(255, 128, 0));
+		break;
+	}
 }

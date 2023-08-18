@@ -9,6 +9,7 @@ enum class Phase
 	Pick,
 	Ready,
 	Battle,
+	Result,
 };
 
 enum class Team
@@ -63,6 +64,8 @@ enum class TagetingOrder
 	CarryPlayer,
 	Heal,
 	RowHealth,
+	CircleInRangeEnemy,
+	CircleInRangeTeam,
 };
 
 struct State
@@ -80,7 +83,9 @@ struct State
 	AnimatioControler animaition;
 };
 
-struct Skill
+struct ChampionSkill
 {
+	std::string skillId;
+	float skillCoolTime;
 	AnimatioControler animaition;
 };

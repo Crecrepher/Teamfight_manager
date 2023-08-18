@@ -32,8 +32,6 @@ PlayerName6,Doran
 PlayerName7,Peanut
 PlayerName8,Chovy
 PlayerName9,BeryL
-<<<<<<< HEAD
-=======
 SponContract,스폰서 계약
 SponContractDiscribe,이번 시즌의 스폰서 계약 후보 목록입니다. 어떤 스폰서와 계약할 지 결정해주세요.
 SelectedSponsor,선택한 스폰서
@@ -88,7 +86,7 @@ Switch,스위치
 Screw,나사
 Fabric,천 조각
 Headset,해드셋
-Cntroller,컨트롤러
+Controller,컨트롤러
 Chair,의자
 Uniform,유니폼
 CanCraftExpend,시설 개선을 통해 제작 슬롯을 확장할 수 있습니다.
@@ -234,9 +232,37 @@ Uniform28,레이싱 슈트
 Uniform29,비키니
 Uniform30,미이라
 Uniform31,거북이 등껍질
->>>>>>> e1234829c394dfccf82db0e06054abd0a04faeed
-LineUp1,선발 명단
-LineUp2,다음
-LineUp3,특성 보기
-LineUp4,출전 선수
-LineUp5,후보 선수
+AgeCount,세
+Name,이름
+UnusedPoint,미사용 포인트
+UsePointTo,희망하는 능력치에 훈련 포인트를 투자하세요.
+LeftTrainPoint,남은 훈련포인트
+ChampName0,궁수
+ChampName1,격투가
+ChampName2,기사
+ChampName3,몽크
+ChampName4,닌자
+ChampName5,성직자
+ChampName6,화염술사
+ChampName7,검사
+ChampName8,무녀
+ChampName9,광전사
+ChampName10,소총수
+ChampName11,얼음술사
+ChampName12,마검사
+ChampName13,방패병
+Attack,공격력
+Defence,방어력
+Progress,진행
+DoNextProgress,다음 일정을 진행합니다
+AtkSpeed,공격 속도
+SkillCooldown,기술 쿨타임 감소
+HpDrain,흡혈
+ChampType0,전사
+ChampType1,원거리
+ChampType2,암살자
+ChampType3,마법사
+ChampType4,전투 보조
+ChampTypePro,계열 챔피언 숙련도
+ChampPro,챔피언 숙련도
+Count,개

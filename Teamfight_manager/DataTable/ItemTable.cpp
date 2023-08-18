@@ -46,11 +46,11 @@ void ItemTable::Release()
 	}
 }
 
-const ItemInfo& ItemTable::Get(TeamMgr::ItemType item)
+const ItemInfo& ItemTable::Get(int item,int code)
 {
 	auto& table = tables[(int)item];
 
-	auto find = table.find((int)item);
+	auto find = table.find(code);
 	if (find == table.end())
 	{
 		std::cout << "ERR: Undefined" << std::endl;

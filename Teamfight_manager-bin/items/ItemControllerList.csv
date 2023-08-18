@@ -22,7 +22,7 @@ Code,TEXTUREID,Grade,Atk,Def,AtkSpeed,CoolDown,HpDrain,ProficiencyCode,Proficien
 20,graphics/Origin/Sprite/items_controller_0.png,2,0,0,2,0,0,4,1,0,0
 21,graphics/Origin/Sprite/items_controller_21.png,2,0,0,3,0,0,5,1,0,0
 22,graphics/Origin/Sprite/items_controller_33.png,2,0,0,0,3,0,5,1,0,0
-23,graphics/Origin/Sprite/items_controller_30.png,2,0,0,1,0,0,0,0,10,1
+23,graphics/Origin/Sprite/items_controller_30.png,2,0,0,1,0,0,0,0,11,1
 24,graphics/Origin/Sprite/items_controller_7.png,2,2,2,0,0,0,0,0,0,0
 25,graphics/Origin/Sprite/items_controller_6.png,2,2,2,1,0,0,0,0,0,0
 26,graphics/Origin/Sprite/items_controller_13.png,3,8,0,0,0,0,0,0,0,0

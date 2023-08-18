@@ -1,7 +1,8 @@
 #pragma once
 #include "Scene.h"
 #include "TeamMgr.h"
- // 임시 추가
+
+class TextGo;
 
 class SceneHome : public Scene
 {
@@ -20,6 +21,7 @@ protected:
 
 	bool backClick = true;
 	bool isMenuOn = false;
+	bool isPopupOn = false;
 
 	std::vector<Sponsor> newSponsor;
 	int selectedSponsorIndex = -1;
@@ -67,11 +69,17 @@ public:
 	void UiSponsorSelect(int index);
 
 	void UiEquipOpen(bool on = true);
+	void UiEquipChangeOpen(int type,bool on = true);
+	void UiEquipMakeOpen(int index, bool on = true);
+	void UiCraftFinish(bool on = true);
+	std::wstring ReturnEquipStats(int itemType, int itemNum);
+	void ReturnItemName(TextGo& text,int type, int num);
 
 	void UpdateMoney();
 	void Recruit(int grade,int slotNum);
 	void NewYear();
-	void MakeLocalPlayer(PlayerInfo& player);
+	PlayerInfo MakeDefaultPlayer();
+	PlayerInfo MakeLocalPlayer();
 	
 	void TestingCheats();
 };

@@ -1,0 +1,14 @@
+ID,FPS,LOOPTYPE,,
+Attack,10,0,,
+,,,,
+TEXTUREID,LEFT,TOP,WIDTH,HEIGHT
+graphics/CustomSprite/berserker_96pix.png,576,480,96,96
+graphics/CustomSprite/berserker_96pix.png,672,480,96,96
+graphics/CustomSprite/berserker_96pix.png,768,480,96,96
+graphics/CustomSprite/berserker_96pix.png,0,576,96,96
+graphics/CustomSprite/berserker_96pix.png,96,576,96,96
+graphics/CustomSprite/berserker_96pix.png,192,576,96,96
+graphics/CustomSprite/berserker_96pix.png,288,576,96,96
+graphics/CustomSprite/berserker_96pix.png,384,576,96,96
+graphics/CustomSprite/berserker_96pix.png,480,576,96,96
+graphics/CustomSprite/berserker_96pix.png,576,576,96,96

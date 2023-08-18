@@ -76,8 +76,6 @@ RESOURCE_TYPES 1.TEX 2.FONT 3.SOUND 4.ANI,RESOURCE_PATH
 0,graphics/LeagueSystem/Lineup/lineup_ui_team_title_bg_3.png
 0,graphics/LeagueSystem/Lineup/Black_0.png
 0,graphics/LeagueSystem/Lineup/draft_slot_0.png
-<<<<<<< HEAD
-=======
 0,graphics/LeagueSystem/Lineup/draft_arrow1.png
 0,graphics/LeagueSystem/Lineup/draft_arrow2.png
 0,graphics/LeagueSystem/Lineup/lineup_ui_bg_swap.png
@@ -89,5 +87,26 @@ RESOURCE_TYPES 1.TEX 2.FONT 3.SOUND 4.ANI,RESOURCE_PATH
 0,graphics/LeagueSystem/Banpick/champion_slot_hover_white.png
 0,graphics/LeagueSystem/Banpick/champion_slot_hover_blue.png
 0,graphics/LeagueSystem/Banpick/champion_slot_hover_red.png
+0,graphics/LeagueSystem/Banpick/championSlot1.png
+0,graphics/LeagueSystem/Banpick/championSlot2.png
+0,graphics/LeagueSystem/Banpick/championSlot3.png
+0,graphics/LeagueSystem/Banpick/championSlot4.png
+0,graphics/LeagueSystem/Banpick/championSlot5.png
+0,graphics/LeagueSystem/Banpick/championSlot6.png
+0,graphics/LeagueSystem/Banpick/championSlot7.png
+0,graphics/LeagueSystem/Banpick/championSlot8.png
+0,graphics/LeagueSystem/Banpick/championSlot9.png
+0,graphics/LeagueSystem/Banpick/championSlot10.png
+0,graphics/LeagueSystem/Banpick/championSlot11.png
+0,graphics/LeagueSystem/Banpick/championSlot12.png
+0,graphics/LeagueSystem/Banpick/championSlot13.png
+0,graphics/LeagueSystem/Banpick/championSlot14.png
+0,graphics/LeagueSystem/Banpick/championSlot15.png
+0,graphics/LeagueSystem/Banpick/championSlot16.png
+0,graphics/LeagueSystem/Banpick/championSlot17.png
+0,graphics/LeagueSystem/Banpick/championSlot18.png
+0,graphics/LeagueSystem/Banpick/champion_Ban_Slot1.png
+0,graphics/LeagueSystem/Banpick/champion_Ban_Slot2.png
 0,graphics/LeagueSystem/Banpick/banpick_sheet.png
->>>>>>> e1234829c394dfccf82db0e06054abd0a04faeed
+0,graphics/LeagueSystem/Banpick/banpick_sheet2.png
+0,graphics/LeagueSystem/Banpick/banpick_sheet3.png
