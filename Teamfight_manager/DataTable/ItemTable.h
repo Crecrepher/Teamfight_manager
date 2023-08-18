@@ -21,6 +21,8 @@ class ItemTable : public DataTable
 {
 protected:
 	std::vector<std::unordered_map<int, ItemInfo>> tables;
+
+
 public:
 	ItemTable() : DataTable(DataTable::Ids::Item), tables((int)TeamMgr::ItemType::TypeCount) {};
 	virtual ~ItemTable() override { Release(); }
@@ -29,7 +31,7 @@ public:
 	//virtual bool LoadFromCsv(std::string path) override;
 	virtual void Release() override;
 
-	const ItemInfo& Get(TeamMgr::ItemType item);
+	const ItemInfo& Get(int item, int code);
 };
 
 
