@@ -42,8 +42,17 @@ protected:
 	AnimatioControler banAnimation3;
 
 	std::vector<UiButton*> championSlot;
-	int champCount = 14;
+	int champCount = 14; // 챔피언 최대수를 결정
+	std::vector<UiButton*> swapSlot;
+	int swapChampCount = 4; // 3~5 팀원수 결정
+
+	int swapChampCountCheck = 3;
+	int selectedButtonIndex = -1;
+	UiButton* selectedButton = nullptr;
+	sf::Vector2f tempPosition = { 0, 0 };
 	bool selectCheck = true;
+	bool isSwapCheck = true;
+	bool isSwapCheck2 = false;
 
 
 	sf::Vector2f BanSlotPosition1 = { 363, 661 };
@@ -90,6 +99,8 @@ public:
 	
 	void AiSelect();
 
+	void SwapSlot();
+	void SwapSlotFalse();
 };
 
 template<typename T>

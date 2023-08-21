@@ -17,6 +17,8 @@
 #include "UiButton.h"
 #include "TeamMgr.h"
 
+#include <algorithm>
+
 SceneGame::SceneGame() : Scene(SceneId::Game)
 {
 	resourceListPath = "tables/GameResourceList.csv";
@@ -50,9 +52,11 @@ void SceneGame::Init()
 
 	//벡터 임시위치
 	championSlot = std::vector<UiButton*>(champCount);
+	swapSlot = std::vector<UiButton*>(swapChampCount);
 
 	UiInit();
 	ButtonInit();
+	SwapSlot();
 
 	//애니메이션 추가 임시위치
 	banSheet = new SpriteGo("", "BanSheet");
@@ -124,7 +128,7 @@ void SceneGame::Enter()
 	banAnimation.Play("Idle"); // 무조건 한번만 호출되게
 	banSheet->SetOrigin(Origins::MC);
 	currentPhase = Phase::None;
-	banChamps = std::vector<int>(6,-1);
+	banChamps = std::vector<int>(14,-1);
 
 	redScore = 0;
 	blueScore = 0;
@@ -173,7 +177,6 @@ void SceneGame::Update(float dt)
 		std::cout << INPUT_MGR.GetMousePos().x << "\t"
 			<< INPUT_MGR.GetMousePos().y << std::endl;
 	}
-	Scene::Update(dt);
 	banAnimation.Update(dt);
 
 	selectCheck = true;
@@ -349,60 +352,18 @@ void SceneGame::ChangeTeam()
 
 void SceneGame::LeaguePhase(float dt)
 {
-	// 노랑 버튼 누르고 Ui 띄우고 플레이어 선택 마우스
-	// 선발명단만 하고
-	// 스왑페이즈를 만들어라 스왑페이즈에 전술까지 넣어야 하기 때문에
-	// 
-	// 마우스 좌표 테스트
-	/*sf::Vector2f mousePos = INPUT_MGR.GetMousePos();
-	sf::Vector2f uiMousePos = ScreenToUiPos(mousePos);
-	std::cout << "마우스x: " << uiMousePos.x << "마우스y: " << uiMousePos.y << std::endl;*/
 
 	LineUpTrue();
 
 	UiButton* ui = (UiButton*)FindGo("Next Button");
 
-	FindGo("Line Up Text1")->SetActive(true);
-	FindGo("Line Up Text2")->SetActive(true);
-	FindGo("Line Up Text3")->SetActive(true);
-	FindGo("Line Up Text4")->SetActive(true);
-	FindGo("Line Up Text5")->SetActive(true);
-	FindGo("Enemy Team Name Text")->SetActive(true);
-
-	FindGo("Player Member Text1")->SetActive(true);
-	FindGo("Player Member Text2")->SetActive(true);
-	FindGo("Player Member Text3")->SetActive(true);
-	FindGo("Player Member Text4")->SetActive(true);
-	FindGo("Player Member Text5")->SetActive(true);
-	FindGo("Player Member Text6")->SetActive(true);
-
-	FindGo("Enemy Member Text1")->SetActive(true);
-	FindGo("Enemy Member Text2")->SetActive(true);
-	FindGo("Enemy Member Text3")->SetActive(true);
-	FindGo("Enemy Member Text4")->SetActive(true);
-
-	FindGo("Pleyer Team Title1")->SetActive(true);
-	FindGo("Enemy Team Title1")->SetActive(true);
-
-	FindGo("Player Draft Slot1")->SetActive(true);
-	FindGo("Player Draft Slot2")->SetActive(true);
-	FindGo("Player Draft Slot3")->SetActive(true);
-	FindGo("Player Draft Slot4")->SetActive(true);
-	FindGo("Player Draft Slot5")->SetActive(true);
-	FindGo("Player Draft Slot6")->SetActive(true);
-
-	FindGo("Enemy Draft Slot1")->SetActive(true);
-	FindGo("Enemy Draft Slot2")->SetActive(true);
-	FindGo("Enemy Draft Slot3")->SetActive(true);
-	FindGo("Enemy Draft Slot4")->SetActive(true);
-	FindGo("Draft Arrow1")->SetActive(true);
-
-
 	ui->OnClick = [this, ui]()
 
 	{
+		FindGo("Draft_Slot_Blue_Clicked")->SetActive(false);
 		std::cout << "벤 페이즈!" << std::endl;
 		LineUpFalse();
+		SwapSlotFalse();
 		ChangePhase(Phase::Ban);
 	};
 
@@ -666,7 +627,7 @@ void SceneGame::UiInit()
 	// 리그시스템 선발명단 - 텍스트
 	{
 		TextGo* lineupText1 = (TextGo*)AddGo(new TextGo("Line Up Text1"));
-		lineupText1->sortLayer = 102;
+		lineupText1->sortLayer = 104;
 		lineupText1->sortOrder = 1;
 		lineupText1->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
 		lineupText1->text.setCharacterSize(37);
@@ -678,7 +639,7 @@ void SceneGame::UiInit()
 		lineupText1->SetActive(false);
 
 		TextGo* lineupText2 = (TextGo*)AddGo(new TextGo("Line Up Text2"));
-		lineupText2->sortLayer = 103;
+		lineupText2->sortLayer = 104;
 		lineupText2->sortOrder = 1;
 		lineupText2->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
 		lineupText2->text.setCharacterSize(23);
@@ -689,7 +650,7 @@ void SceneGame::UiInit()
 		lineupText2->SetActive(false);
 
 		TextGo* lineupText3 = (TextGo*)AddGo(new TextGo("Line Up Text3"));
-		lineupText3->sortLayer = 103;
+		lineupText3->sortLayer = 104;
 		lineupText3->sortOrder = 1;
 		lineupText3->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
 		lineupText3->text.setCharacterSize(17);
@@ -700,7 +661,7 @@ void SceneGame::UiInit()
 		lineupText3->SetActive(false);
 
 		TextGo* lineupText4 = (TextGo*)AddGo(new TextGo("Line Up Text4"));
-		lineupText4->sortLayer = 103;
+		lineupText4->sortLayer = 104;
 		lineupText4->sortOrder = 1;
 		lineupText4->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
 		lineupText4->text.setCharacterSize(17);
@@ -711,7 +672,7 @@ void SceneGame::UiInit()
 		lineupText4->SetActive(false);
 
 		TextGo* lineupText5 = (TextGo*)AddGo(new TextGo("Line Up Text5"));
-		lineupText5->sortLayer = 103;
+		lineupText5->sortLayer = 104;
 		lineupText5->sortOrder = 1;
 		lineupText5->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
 		lineupText5->text.setCharacterSize(17);
@@ -722,7 +683,7 @@ void SceneGame::UiInit()
 		lineupText5->SetActive(false);
 
 		TextGo* lineupText6 = (TextGo*)AddGo(new TextGo("Enemy Team Name Text"));
-		lineupText6->sortLayer = 103;
+		lineupText6->sortLayer = 104;
 		lineupText6->sortOrder = 1;
 		lineupText6->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
 		lineupText6->text.setCharacterSize(17);
@@ -733,7 +694,7 @@ void SceneGame::UiInit()
 		lineupText6->SetActive(false);
 
 		TextGo* lineupText7 = (TextGo*)AddGo(new TextGo("Player Member Text1"));
-		lineupText7->sortLayer = 103;
+		lineupText7->sortLayer = 105;
 		lineupText7->sortOrder = 1;
 		lineupText7->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
 		lineupText7->text.setCharacterSize(17);
@@ -744,7 +705,7 @@ void SceneGame::UiInit()
 		lineupText7->SetActive(false);
 
 		TextGo* lineupText8 = (TextGo*)AddGo(new TextGo("Player Member Text2"));
-		lineupText8->sortLayer = 103;
+		lineupText8->sortLayer = 105;
 		lineupText8->sortOrder = 1;
 		lineupText8->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
 		lineupText8->text.setCharacterSize(17);
@@ -755,7 +716,7 @@ void SceneGame::UiInit()
 		lineupText8->SetActive(false);
 
 		TextGo* lineupText9 = (TextGo*)AddGo(new TextGo("Player Member Text3"));
-		lineupText9->sortLayer = 103;
+		lineupText9->sortLayer = 105;
 		lineupText9->sortOrder = 1;
 		lineupText9->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
 		lineupText9->text.setCharacterSize(17);
@@ -766,7 +727,7 @@ void SceneGame::UiInit()
 		lineupText9->SetActive(false);
 
 		TextGo* lineupText10 = (TextGo*)AddGo(new TextGo("Player Member Text4"));
-		lineupText10->sortLayer = 103;
+		lineupText10->sortLayer = 105;
 		lineupText10->sortOrder = 1;
 		lineupText10->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
 		lineupText10->text.setCharacterSize(17);
@@ -777,7 +738,7 @@ void SceneGame::UiInit()
 		lineupText10->SetActive(false);
 
 		TextGo* lineupText11 = (TextGo*)AddGo(new TextGo("Player Member Text5"));
-		lineupText11->sortLayer = 103;
+		lineupText11->sortLayer = 105;
 		lineupText11->sortOrder = 1;
 		lineupText11->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
 		lineupText11->text.setCharacterSize(17);
@@ -788,7 +749,7 @@ void SceneGame::UiInit()
 		lineupText11->SetActive(false);
 
 		TextGo* lineupText12 = (TextGo*)AddGo(new TextGo("Player Member Text6"));
-		lineupText12->sortLayer = 103;
+		lineupText12->sortLayer = 105;
 		lineupText12->sortOrder = 1;
 		lineupText12->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
 		lineupText12->text.setCharacterSize(17);
@@ -799,7 +760,7 @@ void SceneGame::UiInit()
 		lineupText12->SetActive(false);
 
 		TextGo* lineupText13 = (TextGo*)AddGo(new TextGo("Enemy Member Text1"));
-		lineupText13->sortLayer = 103;
+		lineupText13->sortLayer = 105;
 		lineupText13->sortOrder = 1;
 		lineupText13->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
 		lineupText13->text.setCharacterSize(17);
@@ -810,7 +771,7 @@ void SceneGame::UiInit()
 		lineupText13->SetActive(false);
 
 		TextGo* lineupText14 = (TextGo*)AddGo(new TextGo("Enemy Member Text2"));
-		lineupText14->sortLayer = 103;
+		lineupText14->sortLayer = 105;
 		lineupText14->sortOrder = 1;
 		lineupText14->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
 		lineupText14->text.setCharacterSize(17);
@@ -821,7 +782,7 @@ void SceneGame::UiInit()
 		lineupText14->SetActive(false);
 
 		TextGo* lineupText15 = (TextGo*)AddGo(new TextGo("Enemy Member Text3"));
-		lineupText15->sortLayer = 103;
+		lineupText15->sortLayer = 105;
 		lineupText15->sortOrder = 1;
 		lineupText15->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
 		lineupText15->text.setCharacterSize(17);
@@ -832,7 +793,7 @@ void SceneGame::UiInit()
 		lineupText15->SetActive(false);
 
 		TextGo* lineupText16 = (TextGo*)AddGo(new TextGo("Enemy Member Text4"));
-		lineupText16->sortLayer = 103;
+		lineupText16->sortLayer = 105;
 		lineupText16->sortOrder = 1;
 		lineupText16->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
 		lineupText16->text.setCharacterSize(17);
@@ -846,7 +807,7 @@ void SceneGame::UiInit()
 	{
 		SpriteGo* pleyerTeamTitle1 = (SpriteGo*)AddGo(new SpriteGo("graphics/LeagueSystem/Lineup/lineup_ui_team_title_bg_0.png", "Pleyer Team Title1"));
 		pleyerTeamTitle1->sprite.setScale(2, 2);
-		pleyerTeamTitle1->sortLayer = 102;
+		pleyerTeamTitle1->sortLayer = 103;
 		pleyerTeamTitle1->sortOrder = 1;
 		pleyerTeamTitle1->SetPosition(290, 200);
 		pleyerTeamTitle1->SetOrigin(Origins::MC);
@@ -854,16 +815,24 @@ void SceneGame::UiInit()
 
 		SpriteGo* enemyTeamTitle1 = (SpriteGo*)AddGo(new SpriteGo("graphics/LeagueSystem/Lineup/lineup_ui_team_title_bg_2.png", "Enemy Team Title1"));
 		enemyTeamTitle1->sprite.setScale(2, 2);
-		enemyTeamTitle1->sortLayer = 102;
+		enemyTeamTitle1->sortLayer = 103;
 		enemyTeamTitle1->sortOrder = 1;
 		enemyTeamTitle1->SetPosition(990, 200);
 		enemyTeamTitle1->SetOrigin(Origins::MC);
 		enemyTeamTitle1->SetActive(false);
 
+		SpriteGo* subTitle = (SpriteGo*)AddGo(new SpriteGo("graphics/LeagueSystem/Lineup/subTitle.png", "Sub_Title"));
+		subTitle->sprite.setScale(1.9, 1.4);
+		subTitle->sortLayer = 103;
+		subTitle->sortOrder = 1;
+		subTitle->SetPosition(684, 200);
+		subTitle->SetOrigin(Origins::MC);
+		subTitle->SetActive(false);
+
 		// 리소스 있어서 추가는 했는데 안쓸듯
 		SpriteGo* pleyerTeamTitle2 = (SpriteGo*)AddGo(new SpriteGo("graphics/LeagueSystem/Lineup/Black_0.png", "Pleyer Team Title2"));
 		pleyerTeamTitle2->sprite.setScale(2, 2);
-		pleyerTeamTitle2->sortLayer = 102;
+		pleyerTeamTitle2->sortLayer = 103;
 		pleyerTeamTitle2->sortOrder = 1;
 		pleyerTeamTitle2->SetPosition(680, 200);
 		pleyerTeamTitle2->SetOrigin(Origins::MC);
@@ -871,93 +840,101 @@ void SceneGame::UiInit()
 
 		SpriteGo* enemyTeamTitle2 = (SpriteGo*)AddGo(new SpriteGo("graphics/LeagueSystem/Lineup/lineup_ui_team_title_bg_3.png", "Enemy Team Title2"));
 		enemyTeamTitle2->sprite.setScale(2, 2);
-		enemyTeamTitle2->sortLayer = 102;
+		enemyTeamTitle2->sortLayer = 103;
 		enemyTeamTitle2->sortOrder = 1;
 		enemyTeamTitle2->SetPosition(0, 0);
 		enemyTeamTitle2->SetOrigin(Origins::MC);
 		enemyTeamTitle2->SetActive(false);
+
+		SpriteGo* draftSlotBlueWhite = (SpriteGo*)AddGo(new SpriteGo("graphics/LeagueSystem/Lineup/draft_slot_0_white.png", "Draft_Slot_White"));
+		draftSlotBlueWhite->sprite.setScale(2, 2);
+		draftSlotBlueWhite->sortLayer = 104;
+		draftSlotBlueWhite->sortOrder = 1;
+		draftSlotBlueWhite->SetPosition(0, 0);
+		draftSlotBlueWhite->SetOrigin(Origins::MC);
+		draftSlotBlueWhite->SetActive(false);
+
+		SpriteGo* draftSlotRedWhite = (SpriteGo*)AddGo(new SpriteGo("graphics/LeagueSystem/Lineup/draft_slot_1_white.png", "Draft_Slot_Red_White"));
+		draftSlotRedWhite->sprite.setScale(2, 2);
+		draftSlotRedWhite->sortLayer = 104;
+		draftSlotRedWhite->sortOrder = 1;
+		draftSlotRedWhite->SetPosition(0, 0);
+		draftSlotRedWhite->SetOrigin(Origins::MC);
+		draftSlotRedWhite->SetActive(false);
+
+		SpriteGo* draftSlotBlueClicked = (SpriteGo*)AddGo(new SpriteGo("graphics/LeagueSystem/Lineup/draft_slot_0_clicked.png", "Draft_Slot_Blue_Clicked"));
+		draftSlotBlueClicked->sprite.setScale(2, 2);
+		draftSlotBlueClicked->sortLayer = 104;
+		draftSlotBlueClicked->sortOrder = 1;
+		draftSlotBlueClicked->SetPosition(0, 0);
+		draftSlotBlueClicked->SetOrigin(Origins::MC);
+		draftSlotBlueClicked->SetActive(false);
+
+		SpriteGo* draftSlotRedClicked = (SpriteGo*)AddGo(new SpriteGo("graphics/LeagueSystem/Lineup/draft_slot_1_clicked.png", "Draft_Slot_Red_Clicked"));
+		draftSlotRedClicked->sprite.setScale(2, 2);
+		draftSlotRedClicked->sortLayer = 104;
+		draftSlotRedClicked->sortOrder = 1;
+		draftSlotRedClicked->SetPosition(0, 0);
+		draftSlotRedClicked->SetOrigin(Origins::MC);
+		draftSlotRedClicked->SetActive(false);
 	}
-	// 드래프트 슬롯  
+	// 드래프트 슬롯
 	{
-		SpriteGo* draftSlot1 = (SpriteGo*)AddGo(new SpriteGo("graphics/LeagueSystem/Lineup/draft_slot_0.png", "Player Draft Slot1"));
-		draftSlot1->sprite.setScale(2, 2);
-		draftSlot1->sortLayer = 102;
-		draftSlot1->sortOrder = 1;
-		draftSlot1->SetPosition(204, 309);
-		draftSlot1->SetOrigin(Origins::MC);
-		draftSlot1->SetActive(false);
-
-		SpriteGo* draftSlot2 = (SpriteGo*)AddGo(new SpriteGo("graphics/LeagueSystem/Lineup/draft_slot_0.png", "Player Draft Slot2"));
-		draftSlot2->sprite.setScale(2, 2);
-		draftSlot2->sortLayer = 102;
-		draftSlot2->sortOrder = 1;
-		draftSlot2->SetPosition(375, 309);
-		draftSlot2->SetOrigin(Origins::MC);
-		draftSlot2->SetActive(false);
-
-		SpriteGo* draftSlot3 = (SpriteGo*)AddGo(new SpriteGo("graphics/LeagueSystem/Lineup/draft_slot_0.png", "Player Draft Slot3"));
-		draftSlot3->sprite.setScale(2, 2);
-		draftSlot3->sortLayer = 102;
-		draftSlot3->sortOrder = 1;
-		draftSlot3->SetPosition(204, 477);
-		draftSlot3->SetOrigin(Origins::MC);
-		draftSlot3->SetActive(false);
-
-		SpriteGo* draftSlot4 = (SpriteGo*)AddGo(new SpriteGo("graphics/LeagueSystem/Lineup/draft_slot_0.png", "Player Draft Slot4"));
-		draftSlot4->sprite.setScale(2, 2);
-		draftSlot4->sortLayer = 102;
-		draftSlot4->sortOrder = 1;
-		draftSlot4->SetPosition(375, 477);
-		draftSlot4->SetOrigin(Origins::MC);
-		draftSlot4->SetActive(false);
-
-		SpriteGo* draftSlot5 = (SpriteGo*)AddGo(new SpriteGo("graphics/LeagueSystem/Lineup/draft_slot_0.png", "Player Draft Slot5"));
-		draftSlot5->sprite.setScale(2, 2);
-		draftSlot5->sortLayer = 102;
-		draftSlot5->sortOrder = 1;
-		draftSlot5->SetPosition(684, 309);
-		draftSlot5->SetOrigin(Origins::MC);
-		draftSlot5->SetActive(false);
-
-		SpriteGo* draftSlot6 = (SpriteGo*)AddGo(new SpriteGo("graphics/LeagueSystem/Lineup/draft_slot_0.png", "Player Draft Slot6"));
-		draftSlot6->sprite.setScale(2, 2);
-		draftSlot6->sortLayer = 102;
-		draftSlot6->sortOrder = 1;
-		draftSlot6->SetPosition(684, 477);
-		draftSlot6->SetOrigin(Origins::MC);
-		draftSlot6->SetActive(false);
-
-		SpriteGo* draftSlot7 = (SpriteGo*)AddGo(new SpriteGo("graphics/LeagueSystem/Lineup/draft_slot_0.png", "Enemy Draft Slot1"));
+		UiButton* draftSlot7 = (UiButton*)AddGo(new UiButton("graphics/LeagueSystem/Lineup/draft_slot_1.png", "Enemy Draft Slot1"));
 		draftSlot7->sprite.setScale(2, 2);
-		draftSlot7->sortLayer = 102;
+		draftSlot7->sortLayer = 103;
 		draftSlot7->sortOrder = 1;
 		draftSlot7->SetPosition(904, 309);
 		draftSlot7->SetOrigin(Origins::MC);
 		draftSlot7->SetActive(false);
 
-		SpriteGo* draftSlot8 = (SpriteGo*)AddGo(new SpriteGo("graphics/LeagueSystem/Lineup/draft_slot_0.png", "Enemy Draft Slot2"));
+		UiButton* draftSlot8 = (UiButton*)AddGo(new UiButton("graphics/LeagueSystem/Lineup/draft_slot_1.png", "Enemy Draft Slot2"));
 		draftSlot8->sprite.setScale(2, 2);
-		draftSlot8->sortLayer = 102;
+		draftSlot8->sortLayer = 103;
 		draftSlot8->sortOrder = 1;
 		draftSlot8->SetPosition(1076, 309);
 		draftSlot8->SetOrigin(Origins::MC);
 		draftSlot8->SetActive(false);
 
-		SpriteGo* draftSlot9 = (SpriteGo*)AddGo(new SpriteGo("graphics/LeagueSystem/Lineup/draft_slot_0.png", "Enemy Draft Slot3"));
+		UiButton* draftSlot9 = (UiButton*)AddGo(new UiButton("graphics/LeagueSystem/Lineup/draft_slot_1.png", "Enemy Draft Slot3"));
 		draftSlot9->sprite.setScale(2, 2);
-		draftSlot9->sortLayer = 102;
+		draftSlot9->sortLayer = 103;
 		draftSlot9->sortOrder = 1;
 		draftSlot9->SetPosition(904, 477);
 		draftSlot9->SetOrigin(Origins::MC);
 		draftSlot9->SetActive(false);
 
-		SpriteGo* draftSlot10 = (SpriteGo*)AddGo(new SpriteGo("graphics/LeagueSystem/Lineup/draft_slot_0.png", "Enemy Draft Slot4"));
+		UiButton* draftSlot10 = (UiButton*)AddGo(new UiButton("graphics/LeagueSystem/Lineup/draft_slot_1.png", "Enemy Draft Slot4"));
 		draftSlot10->sprite.setScale(2, 2);
-		draftSlot10->sortLayer = 102;
+		draftSlot10->sortLayer = 103;
 		draftSlot10->sortOrder = 1;
 		draftSlot10->SetPosition(1076, 477);
 		draftSlot10->SetOrigin(Origins::MC);
 		draftSlot10->SetActive(false);
+
+		SpriteGo* Draft_Slot_Red_White = (SpriteGo*)FindGo("Draft_Slot_Red_White");
+
+		draftSlot7->OnEnter = [this, draftSlot7, Draft_Slot_Red_White]() {
+			Draft_Slot_Red_White->SetActive(true);
+			Draft_Slot_Red_White->SetPosition(draftSlot7->GetPosition());
+		};
+		draftSlot7->OnExit = [this, Draft_Slot_Red_White]() {
+			Draft_Slot_Red_White->SetActive(false);
+		};
+		draftSlot8->OnEnter = [this, draftSlot8, Draft_Slot_Red_White]() {
+			Draft_Slot_Red_White->SetActive(true);
+			Draft_Slot_Red_White->SetPosition(draftSlot8->GetPosition());
+		};
+		draftSlot8->OnExit = [this, Draft_Slot_Red_White]() {
+			Draft_Slot_Red_White->SetActive(false);
+		};
+		draftSlot9->OnEnter = [this, draftSlot9, Draft_Slot_Red_White]() {
+			Draft_Slot_Red_White->SetActive(true);
+			Draft_Slot_Red_White->SetPosition(draftSlot9->GetPosition());
+		};
+		draftSlot9->OnExit = [this, Draft_Slot_Red_White]() {
+			Draft_Slot_Red_White->SetActive(false);
+		};
 	}
 
 	SpriteGo* lineup = (SpriteGo*)AddGo(new SpriteGo("graphics/LeagueSystem/Lineup/lineup_ui_bg #43820.png", "Line Up"));
@@ -970,7 +947,7 @@ void SceneGame::UiInit()
 
 	SpriteGo* lineupSwap = (SpriteGo*)AddGo(new SpriteGo("graphics/LeagueSystem/Lineup/lineup_ui_bg_swap.png", "Line Up Swap"));
 	lineupSwap->sprite.setScale(2, 2);
-	lineupSwap->sortLayer = 101;
+	lineupSwap->sortLayer = 102;
 	lineupSwap->sortOrder = 1;
 	lineupSwap->SetPosition(FRAMEWORK.GetWindowSize() / 2.f);
 	lineupSwap->SetOrigin(Origins::MC);
@@ -1010,7 +987,7 @@ void SceneGame::UiInit()
 
 	SpriteGo* draftArrow2 = (SpriteGo*)AddGo(new SpriteGo("graphics/LeagueSystem/Lineup/draft_arrow2.png", "Draft Arrow2"));
 	draftArrow2->sprite.setScale(0.9, 0.9);
-	draftArrow2->sortLayer = 102;
+	draftArrow2->sortLayer = 103;
 	draftArrow2->sortOrder = 1;
 	draftArrow2->SetPosition(530, FRAMEWORK.GetWindowSize().y / 2.f);
 	draftArrow2->SetOrigin(Origins::MC);
@@ -1412,7 +1389,7 @@ void SceneGame::UiInit()
 		swapChampCardRedbg->SetOrigin(Origins::TL);
 		swapChampCardRedbg->SetActive(false);
 
-		SpriteGo* swapUibg = (SpriteGo*)AddGo(new SpriteGo("graphics/LeagueSystem/Swap/swap_ui_bg.png", ""));
+		SpriteGo* swapUibg = (SpriteGo*)AddGo(new SpriteGo("graphics/LeagueSystem/Swap/swap_ui_bg.png", "Swap_bg"));
 		swapUibg->sprite.setScale(2, 2);
 		swapUibg->sortLayer = 101;
 		swapUibg->sortOrder = 1;
@@ -1467,6 +1444,9 @@ void SceneGame::ButtonInit()
 		championSlot[i]->SetPosition(278 + ((i % 10) * 78), 233 + ((i / 10) * 113));
 		championSlot[i]->SetActive(false);
 
+		std::stringstream iconTextureRoute;
+		iconTextureRoute << "graphics/UiFix/character_icons_" << i << ".png";
+
 		championSlot[i]->OnEnter = [this, i]() {
 			FindGo("BanSheet")->SetActive(true);
 			banSheet->SetPosition(championSlot[i]->GetPosition());
@@ -1481,6 +1461,7 @@ void SceneGame::ButtonInit()
 			selectCheck = false;
 		};
 		championSlot[i]->OnClick = [this,i]() {
+			
 			std::stringstream ss;
 			ss << "Champion Slot" << i + 1 << "Image";
 			if (currentPhase == Phase::Ban)
@@ -1524,8 +1505,7 @@ void SceneGame::ButtonInit()
 			}
 		};
 		ss << "Image";
-		std::stringstream iconTextureRoute;
-		iconTextureRoute << "graphics/UiFix/character_icons_" << i << ".png";
+
 		AddGo(new UiButton(iconTextureRoute.str(), ss.str()));
 		UiButton* spr = (UiButton*)FindGo(ss.str());
 		spr->SetOrigin(Origins::MC);
@@ -1569,30 +1549,29 @@ void SceneGame::LineUpTrue()
 	FindGo("Player Member Text1")->SetActive(true);
 	FindGo("Player Member Text2")->SetActive(true);
 	FindGo("Player Member Text3")->SetActive(true);
-	FindGo("Player Member Text4")->SetActive(true);
 	FindGo("Player Member Text5")->SetActive(true);
 	FindGo("Player Member Text6")->SetActive(true);
 
 	FindGo("Enemy Member Text1")->SetActive(true);
 	FindGo("Enemy Member Text2")->SetActive(true);
 	FindGo("Enemy Member Text3")->SetActive(true);
-	FindGo("Enemy Member Text4")->SetActive(true);
 
 	FindGo("Pleyer Team Title1")->SetActive(true);
 	FindGo("Enemy Team Title1")->SetActive(true);
+	FindGo("Sub_Title")->SetActive(true);
 
-	FindGo("Player Draft Slot1")->SetActive(true);
-	FindGo("Player Draft Slot2")->SetActive(true);
-	FindGo("Player Draft Slot3")->SetActive(true);
-	FindGo("Player Draft Slot4")->SetActive(true);
-	FindGo("Player Draft Slot5")->SetActive(true);
-	FindGo("Player Draft Slot6")->SetActive(true);
 
 	FindGo("Enemy Draft Slot1")->SetActive(true);
 	FindGo("Enemy Draft Slot2")->SetActive(true);
 	FindGo("Enemy Draft Slot3")->SetActive(true);
-	FindGo("Enemy Draft Slot4")->SetActive(true);
+
 	FindGo("Draft Arrow1")->SetActive(true);
+
+	// FindGo("Player Member Text4")->SetActive(true); // 출전, 후보 선수 1명씩 제외
+	// FindGo("Player Draft Slot4")->SetActive(true);
+	// FindGo("Player Draft Slot6")->SetActive(true);
+	// FindGo("Enemy Member Text4")->SetActive(true); // 기본 3:3이라 적 선수 1명 제외
+	// FindGo("Enemy Draft Slot4")->SetActive(true);
 }
 
 void SceneGame::LineUpFalse()
@@ -1623,18 +1602,13 @@ void SceneGame::LineUpFalse()
 
 	FindGo("Pleyer Team Title1")->SetActive(false);
 	FindGo("Enemy Team Title1")->SetActive(false);
-
-	FindGo("Player Draft Slot1")->SetActive(false);
-	FindGo("Player Draft Slot2")->SetActive(false);
-	FindGo("Player Draft Slot3")->SetActive(false);
-	FindGo("Player Draft Slot4")->SetActive(false);
-	FindGo("Player Draft Slot5")->SetActive(false);
-	FindGo("Player Draft Slot6")->SetActive(false);
+	FindGo("Sub_Title")->SetActive(false);
 
 	FindGo("Enemy Draft Slot1")->SetActive(false);
 	FindGo("Enemy Draft Slot2")->SetActive(false);
 	FindGo("Enemy Draft Slot3")->SetActive(false);
 	FindGo("Enemy Draft Slot4")->SetActive(false);
+
 	FindGo("Draft Arrow1")->SetActive(false);
 }
 
@@ -1659,4 +1633,80 @@ void SceneGame::BanPickFalse()
 void SceneGame::AiSelect()
 {
 	championSlot[Utils::RandomRange(0, champCount - 1)]->OnClick();
+}
+
+void SceneGame::SwapSlot()
+{
+
+	for (int i = 0; i < swapChampCount; i++)
+	{
+		std::stringstream ss;
+		ss << "Swap Slot" << i + 1;
+		swapSlot[i] = (UiButton*)AddGo(new UiButton("graphics/LeagueSystem/Lineup/draft_slot_0.png", ss.str()));
+		swapSlot[i]->sprite.setScale(2, 2);
+		swapSlot[i]->SetOrigin(Origins::MC);
+		swapSlot[i]->sortLayer = 103;
+		swapSlot[i]->sortOrder = 1;
+		swapSlot[i]->SetActive(true);
+
+		if (i < swapChampCountCheck)
+		{
+			swapSlot[i]->SetPosition(204 + ((i % 2) * 171), 309 + ((i / 2) * 168));
+		}
+		else
+		{
+			swapSlot[i]->SetPosition(684 , 309 + ((i / 4) * 168));
+		}
+	
+		swapSlot[i]->OnEnter = [this, i]() {
+			SpriteGo* draftSlotBlueWhite = (SpriteGo*)FindGo("Draft_Slot_White");
+			draftSlotBlueWhite->SetActive(true);
+			draftSlotBlueWhite->SetPosition(swapSlot[i]->GetPosition());
+		};
+		swapSlot[i]->OnExit = [this]() {
+			FindGo("Draft_Slot_White")->SetActive(false);
+		};
+		swapSlot[i]->OnClick = [this, i]() {
+			std::cout << "챔피언 슬롯 클릭" << i << std::endl;
+
+			SpriteGo* draftSlotBlueClicked = (SpriteGo*)FindGo("Draft_Slot_Blue_Clicked");
+
+			if (isSwapCheck && !isSwapCheck2)
+			{
+				FindGo("Line Up Swap")->SetActive(true);
+				FindGo("Draft Arrow2")->SetActive(true);
+				draftSlotBlueClicked->SetActive(true);
+				draftSlotBlueClicked->SetPosition(swapSlot[i]->GetPosition());
+
+				selectedButton = swapSlot[i];
+				tempPosition = selectedButton->GetPosition();
+
+				isSwapCheck = !isSwapCheck;
+				isSwapCheck2 = !isSwapCheck2;
+			}
+			else if (!isSwapCheck && isSwapCheck2)
+			{	
+				FindGo("Line Up Swap")->SetActive(false);
+				FindGo("Draft Arrow2")->SetActive(false);
+				draftSlotBlueClicked->SetActive(false);
+
+				selectedButton->SetPosition(swapSlot[i]->GetPosition());
+				swapSlot[i]->SetPosition(tempPosition);
+
+				isSwapCheck = !isSwapCheck;
+				isSwapCheck2 = !isSwapCheck2;
+				std::cout << "스왑 완료" << std::endl;
+			}
+		};
+	}
+}
+
+void SceneGame::SwapSlotFalse()
+{
+	FindGo("Line Up Swap")->SetActive(false);
+	FindGo("Draft Arrow2")->SetActive(false);
+	for (int i = 0; i < swapSlot.size(); i++)
+	{
+		swapSlot[i]->SetActive(false);
+	}
 }
