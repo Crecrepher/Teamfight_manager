@@ -569,10 +569,11 @@ void SceneHome::MakeMainUi()
 	auto stringtable = DATATABLE_MGR.Get<StringTable>(DataTable::Ids::String);
 
 	RectGo* popTextShade = (RectGo*)FindGo("PopupTextShade");
-	popTextShade->SetOrigin(Origins::MC);
 	popTextShade->SetSize(FRAMEWORK.GetWindowSize());
 	popTextShade->rectangle.setFillColor(sf::Color(56, 58, 64, 200));
 	popTextShade->sortLayer = 100;
+	popTextShade->SetPosition(FRAMEWORK.GetWindowSize() * 0.5f);
+	popTextShade->SetOrigin(Origins::MC);
 
 
 	SpriteGo* ground = (SpriteGo*)FindGo("Ground");

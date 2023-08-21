@@ -120,6 +120,8 @@ void SceneGame::Init()
 	{
 		go->Init();
 	}
+
+
 }
 
 void SceneGame::Release()
@@ -155,6 +157,20 @@ void SceneGame::Enter()
 		bt = (UiButton*)FindGo(ss.str());
 		bt->sprite.setColor(sf::Color::White);
 	}
+
+	LineUpTrue();
+
+	UiButton* ui = (UiButton*)FindGo("Next Button");
+
+	ui->OnClick = [this, ui]()
+
+	{
+		FindGo("Draft_Slot_Blue_Clicked")->SetActive(false);
+		std::cout << "벤 페이즈!" << std::endl;
+		LineUpFalse();
+		SwapSlotFalse();
+		ChangePhase(Phase::Ban);
+	};
 }
 
 void SceneGame::Exit()
@@ -188,6 +204,8 @@ void SceneGame::Update(float dt)
 			<< INPUT_MGR.GetMousePos().y << std::endl;
 	}
 	banAnimation.Update(dt);
+
+	Scene::Update(dt);
 
 	selectCheck = true;
 
@@ -362,19 +380,7 @@ void SceneGame::ChangeTeam()
 void SceneGame::LeaguePhase(float dt)
 {
 
-	LineUpTrue();
 
-	UiButton* ui = (UiButton*)FindGo("Next Button");
-
-	ui->OnClick = [this, ui]()
-
-	{
-		FindGo("Draft_Slot_Blue_Clicked")->SetActive(false);
-		std::cout << "벤 페이즈!" << std::endl;
-		LineUpFalse();
-		SwapSlotFalse();
-		ChangePhase(Phase::Ban);
-	};
 
 }
 
