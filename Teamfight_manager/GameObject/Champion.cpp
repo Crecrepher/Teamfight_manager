@@ -115,7 +115,7 @@ void Champion::BattleUpdate(float dt)
 			if (this->bloodingStack == 0||this->GetHp()==0)
 			{
 				std::cout << "dot ³¡" << std::endl;
-				this->dotDamage == nullptr;
+				this->dotDamage = nullptr;
 				return;
 			}
 

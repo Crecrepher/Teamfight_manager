@@ -39,8 +39,6 @@ void SceneMgr::Init()
 	currentSceneId = startSceneId;
 	currentScene = scenes[(int)currentSceneId];
 	currentScene->Enter();
-
-	SaveLoad();
 }
 
 void SceneMgr::Release()
@@ -73,17 +71,4 @@ void SceneMgr::Draw(sf::RenderWindow& window)
 Scene* SceneMgr::GetCurrScene() const
 {
 	return currentScene;
-}
-
-void SceneMgr::SaveLoad()
-{
-	int data;
-	std::ifstream is{ "save.dat", std::ofstream::binary };
-	if (is.fail()) {
-		std::cout << "세이브 파일이 없습니다" << std::endl;
-		return;
-	}
-	is.read((char*)&data, sizeof(int));
-	hiScore = data;
-	return;
 }

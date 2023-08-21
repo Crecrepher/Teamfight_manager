@@ -28,6 +28,7 @@ void Framework::Init(int width, int height, const std::string& title)
 
 void Framework::Release()
 {
+    TEAM_MGR.Save();
     DATATABLE_MGR.ReleaseAll();
     SCENE_MGR.Release();
 }

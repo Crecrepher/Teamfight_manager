@@ -30,8 +30,6 @@ public:
 	void Draw(sf::RenderWindow& window);
 
 	Scene* GetCurrScene()const;
-
-	void SaveLoad();
 };
 
 #define SCENE_MGR (SceneMgr::Instance())

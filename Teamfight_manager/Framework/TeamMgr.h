@@ -128,7 +128,6 @@ protected:
 	int money = 200;
 
 	std::vector<PlayerInfo> player;
-	std::vector<PlayerInfo> roster;
 	std::vector<TrainingInfo> playerTraining;
 	std::vector<std::vector<int>> dayGrowTable;
 	std::vector<std::vector<int>> trainingGrowTable;
@@ -207,7 +206,6 @@ public:
 	void CheckQuest();
 	LeagueGrade GetLeagueGrade() { return curGrade; }
 	void SetAiTeams(std::vector<AiTeam> aiTeam);
-	std::vector<PlayerInfo> GetRoster();
 	std::vector<AiTeam> GetAiTeamInfo();
 	std::vector<TrainingInfo> GetGrowStats(std::vector<TrainingInfo> playerTraining);
 	void LevelUpdate(int& xp, int& level);
@@ -230,6 +228,7 @@ public:
 	void OpenItem(int type, int code) { gear[type][code] = true; }
 
 	void SaveLoad(int saveSlot);
+	void Save();
 };
 
 #define TEAM_MGR (TeamMgr::Instance())

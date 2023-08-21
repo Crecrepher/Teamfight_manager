@@ -83,7 +83,6 @@ void SceneHome::Enter()
 				Recruit(-1, 0);
 				TEAM_MGR.Employ(0);
 			}
-			gainTrainingInfo = TEAM_MGR.GetTrainingInfo();
 		}
 	}
 	else if (TEAM_MGR.GetTodayDate() == 4)
