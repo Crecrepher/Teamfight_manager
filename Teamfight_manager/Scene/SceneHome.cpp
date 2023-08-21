@@ -847,7 +847,7 @@ void SceneHome::MakeSubUi()
 	UiTrainingOpen(false);
 	UiEquipOpen(false);
 	UiCraftFinish(0,false);
-	UiRecruitOpen(true);
+	UiRecruitOpen(false);
 }
 
 void SceneHome::MakeSubUiRecruit()
