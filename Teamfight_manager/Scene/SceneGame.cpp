@@ -625,6 +625,7 @@ void SceneGame::UiInit()
 	header->SetOrigin(Origins::TL);
 	header->SetActive(false);
 	// 리그시스템 선발명단 - 텍스트
+	//LineUp1,2 등 스트링 테이블 추가해야할 사항 있음
 	{
 		TextGo* lineupText1 = (TextGo*)AddGo(new TextGo("Line Up Text1"));
 		lineupText1->sortLayer = 104;

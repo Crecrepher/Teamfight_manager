@@ -22,13 +22,19 @@ protected:
 	bool backClick = true;
 	bool isMenuOn = false;
 	bool isPopupOn = false;
+	float popTextFade = 3.f;
+	float maxPopTextFade = 3.f;
 
 	std::vector<Sponsor> newSponsor;
 	int selectedSponsorIndex = -1;
 	std::vector<TrainingInfo> gainTrainingInfo;
 	int maxTrainingPoint = 3;
 
+	std::vector<int> equipCraftParts;
+	int craftCost = 0;
+	int craftTime = 0;
 
+	int sky = 0;
 public:
 	SceneHome();
 	virtual ~SceneHome() override;
@@ -48,6 +54,7 @@ public:
 
 	void MakeMainUi();
 	void MakeSubUi();
+	void MakeSubUiRecruit();
 	void MakeSubUiTraining();
 	void MakeSubUiSponsorContract();
 	void MakeSubUiEquip();
@@ -58,6 +65,8 @@ public:
 	void MainUiFunc(int index);
 
 	void SubUiBaseOpen(int index,bool on = true);
+
+	void UiRecruitOpen(bool on = true);
 
 	void UiTrainingOpen(bool on = true);
 	void UiTrainingPlayerSelect(int index);
@@ -71,7 +80,9 @@ public:
 	void UiEquipOpen(bool on = true);
 	void UiEquipChangeOpen(int type,bool on = true);
 	void UiEquipMakeOpen(int index, bool on = true);
-	void UiCraftFinish(bool on = true);
+	int CraftRoll(int type);
+	void UiCraftFinish(int index, bool on = true);
+	void UpdateCraftVal();
 	std::wstring ReturnEquipStats(int itemType, int itemNum);
 	void ReturnItemName(TextGo& text,int type, int num);
 
@@ -80,6 +91,14 @@ public:
 	void NewYear();
 	PlayerInfo MakeDefaultPlayer();
 	PlayerInfo MakeLocalPlayer();
+
+	void UpdatePopDate();
+	void PopTextUpdate(float dt);
+	void PopText();
+
+	void ResetSky();
+
+	bool isPartsEmpty();
 	
 	void TestingCheats();
 };

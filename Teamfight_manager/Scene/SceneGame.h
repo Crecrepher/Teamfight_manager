@@ -11,7 +11,7 @@ class SceneGame : public Scene
 {
 protected:
 	Phase currentPhase=Phase::None;
-	Mode mode=Mode::Duo;
+	Mode mode=Mode::Trio;
 	Team team;
 	Turn currentTurn = Turn::Player;
 	std::string pick = "";

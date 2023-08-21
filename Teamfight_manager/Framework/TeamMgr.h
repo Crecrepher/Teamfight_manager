@@ -69,8 +69,8 @@ struct Sponsor
 struct ItemMakeSlot
 {
 	bool inCrafting = false;
-	int itemType = -1;
-	int itemCode = -1;
+	int itemType = 0;
+	int itemCode = 0;
 	int leftDate = -1;
 	std::vector<int> usedParts = std::vector<int>(4);
 };
@@ -180,6 +180,7 @@ public:
 	int GetMaxTrainingPoint() { return maxTrainingPoint; }
 
 	bool CheckRecruitSlot(int index) { return recruiting_players[index].first; }
+	PlayerInfo GetRecruitSlotInfo(int index) { return recruiting_players[index].second; }
 
 	int GetMoney() { return money; }
 	void EarnMoney(int money) { this->money += money; }
@@ -215,6 +216,8 @@ public:
 	std::vector<ItemMakeSlot>GetCraftSlot() { return craftSlot; }
 	void SetCraftSlot(int index, ItemMakeSlot craftInfo) { craftSlot[index] = craftInfo; }
 	int GetParts(int type) { return gearParts[type]; }
+	int UseParts(int type, int count) { return gearParts[type] = std::max(gearParts[type] - count, 0); }
+	void OpenItem(int type, int code) { gear[type][code] = true; }
 
 	void SaveLoad();
 };
