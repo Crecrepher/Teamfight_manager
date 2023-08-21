@@ -116,3 +116,10 @@ RESOURCE_TYPES 1.TEX 2.FONT 3.SOUND 4.ANI,RESOURCE_PATH
 0,graphics/LeagueSystem/Lineup/draft_slot_1_white.png
 0,graphics/LeagueSystem/Lineup/draft_slot_0_clicked.png
 0,graphics/LeagueSystem/Lineup/draft_slot_1_clicked.png
+0,graphics/CustomSprite/player_shadow.png
+0,graphics/CustomSprite/player_ingame_guage_0.png
+0,graphics/CustomSprite/player_ingame_guage_1.png
+0,graphics/CustomSprite/player_ingame_guage_2.png
+0,graphics/CustomSprite/player_ingame_guage_3.png
+0,graphics/CustomSprite/player_ingame_guage_4.png
+0,graphics/CustomSprite/player_ingame_guage_5.png

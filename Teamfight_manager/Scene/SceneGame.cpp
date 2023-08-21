@@ -98,10 +98,19 @@ void SceneGame::Init()
 	//FindGo("BanSheet_BlueTeam")->SetActive(false);
 	//FindGo("BanSheet_RedTeam")->SetActive(false);
 
+	effectPool.OnCreate = [this](ChampionEffect* effect) {
+		effect->SetEffectType(0);
+		effect->SetPool(&effectPool);
+	};
+	effectPool.Init(100);
+
 	championPool.OnCreate = [this, field](Champion* champion) {
 		champion->ChangeStance(ChampionStance::None);
 		champion->SetField(field);
+		champion->SetEffectPool(&effectPool);
+		champion->sortLayer = 3;
 	};
+
 	championPool.Init();
 
 	// 경기장 x : 366 - 910
@@ -167,6 +176,7 @@ void SceneGame::Exit()
 		blueTeam.clear();
 	}
 	ClearObjectPool(championPool);
+	ClearObjectPool(effectPool);
 	Scene::Exit();
 }
 
@@ -180,7 +190,6 @@ void SceneGame::Update(float dt)
 	banAnimation.Update(dt);
 
 	selectCheck = true;
-	Scene::Update(dt);
 
 	switch (currentPhase)
 	{
@@ -372,14 +381,9 @@ void SceneGame::LeaguePhase(float dt)
 void SceneGame::ChampionPick(int id, Team team)
 {
 	Champion* champ = championPool.Get();
-	champ->SetState(*CHAMPION_MGR.GetChampion(id));
-	champ->UpdateState();
 	champ->SetName(std::to_string((int)team) + "팀 " + std::to_string(step) + "선수");
 	champ->SetOrder(TagetingOrder::Default);
-	champ->SetTeamScore(&redScore);
 	champ->SetDieChampion(&cemetery);
-	champ->SetSkill(*SKILL_MGR.GetSkill(champ->GetCurretState().skillCode1));
-	champ->SetSkill(*SKILL_MGR.GetSkill(champ->GetCurretState().skillCode2));
 	champ->ChangeStance(ChampionStance::None);
 	champ->SetOrigin(Origins::MC);
 	champ->SetSacleX(1);
@@ -391,7 +395,12 @@ void SceneGame::ChampionPick(int id, Team team)
 		champ->SetPosition((Utils::RandomRange(750, 850)), (Utils::RandomRange(300, 450)));
 		champ->SetEnemyTeam(&blueTeam);
 		champ->SetMyTeam(&redTeam);
+		champ->SetTeamScore(&redScore);
 		champ->SetTeamColor(Team::Red);
+		champ->SetState(*CHAMPION_MGR.GetChampion(id));
+		champ->UpdateState(0.f);
+		champ->SetSkill(*SKILL_MGR.GetSkill(champ->GetCurretState().skillCode1));
+		champ->SetSkill(*SKILL_MGR.GetSkill(champ->GetCurretState().skillCode2));
 		redTeam.push_back(champ);
 		break;
 	}
@@ -402,6 +411,10 @@ void SceneGame::ChampionPick(int id, Team team)
 		champ->SetMyTeam(&blueTeam);
 		champ->SetTeamScore(&blueScore);
 		champ->SetTeamColor(Team::Blue);
+		champ->SetState(*CHAMPION_MGR.GetChampion(id));
+		champ->UpdateState(0.f);
+		champ->SetSkill(*SKILL_MGR.GetSkill(champ->GetCurretState().skillCode1));
+		champ->SetSkill(*SKILL_MGR.GetSkill(champ->GetCurretState().skillCode2));
 		blueTeam.push_back(champ);
 		break;
 	}
@@ -514,6 +527,18 @@ void SceneGame::BattlePhase(float dt)
 	text = (TextGo*)FindGo("BlueScoreCounter");
 	text->text.setString(std::to_string(blueScore));
 
+	if (INPUT_MGR.GetKeyDown(sf::Keyboard::Numpad0))
+	{
+		speedUp = 1.f;
+	}
+	if (INPUT_MGR.GetKeyDown(sf::Keyboard::Numpad1))
+	{
+		speedUp = 3.f;
+	}
+	if (INPUT_MGR.GetKeyDown(sf::Keyboard::Numpad2))
+	{
+		speedUp = 60.f;
+	}
 
 	if (!championPool.GetUseList().empty())
 	{
@@ -522,12 +547,12 @@ void SceneGame::BattlePhase(float dt)
 			unit->sortOrder = unit->GetPosition().y;
 		}
 	}
-	battleTimer -= dt;
+	battleTimer -= dt*speedUp;
 	if (battleTimer > 0.f)
 	{
 		for (auto champ : championPool.GetUseList())
 		{
-			champ->BattleUpdate(dt);
+			champ->BattleUpdate(dt*speedUp);
 		}
 	}
 	if (battleTimer <= 0)
@@ -552,7 +577,7 @@ void SceneGame::BattlePhase(float dt)
 		{
 			std::cout << "draw" << std::endl;
 		}
-
+		speedUp = 1.f;
 		ChangePhase(Phase::Result);
 	}
 }

@@ -4,6 +4,7 @@
 #include "SceneGame.h"
 #include "SceneMgr.h"
 #include "SkillMgr.h"
+#include "ChampionEffect.h"
 #include "AnimatioControler.h"
 
 Champion::Champion(const std::string id, const std::string n)
@@ -65,6 +66,7 @@ void Champion::BattleUpdate(float dt)
 
 	SpriteGo::Update(dt);
 
+
 	if (!field->rectangle.getGlobalBounds().contains(this->GetPosition()))
 	{
 		this->SetPosition(Utils::Clamp(this->GetPosition(), { 367,191 }, { 911,499 }));
@@ -77,17 +79,19 @@ void Champion::BattleUpdate(float dt)
 		this->currentState.animaition.Update(dt);
 	}
 
-	UpdateState();
-	
+	UpdateState(dt);
+
 	this->skillTimer += dt;
 	this->attackDelay -= dt * this->currentState.attackSpeed;
+
 
 	//일시적 평타버그해결용 *******나중에지워야함*******
 	////////////////////////////////////////////////////////
 	///////////////////////지워주세요///////////////////////
 	if (currentState.skillCode1 != 1 &&
 		currentState.skillCode1 != 4 &&
-		currentState.skillCode1 !=12&&
+		currentState.skillCode1 != 12 &&
+		currentState.skillCode1 != 6 &&
 		currentState.skillCode1 !=14)
 	{
 		skillTimer = 0;
@@ -102,31 +106,38 @@ void Champion::BattleUpdate(float dt)
 	if (this->bloodingStack > 0 && this->dotDamage != nullptr)
 	{
 		this->bloodingTimer -= dt;
+
 		if (this->bloodingTimer <= 0.f)
 		{
 			this->bloodingTimer = 0.5f;
 			this->bloodingStack--;
+
+			if (this->bloodingStack == 0||this->GetHp()==0)
+			{
+				std::cout << "dot 끝" << std::endl;
+				this->dotDamage == nullptr;
+				return;
+			}
 
 			float damage = 3.f;
 			if (damage >= this->GetHp())
 			{
 				damage = this->GetHp();
 			}
+
 			this->dotDamage->total_Damage += damage;
 			std::cout << this->dotDamage->GetName() << " 입힌 피해 : " << this->dotDamage->total_Damage << std::endl;
 			this->Hit(damage);
+
 			if (this->GetHp() == 0)
 			{
 				this->dotDamage->kill++;
-				(this->dotDamage->teamScore)++;
+				(*this->dotDamage->teamScore)++;
+				this->bloodingStack = 0;
 				std::cout << this->dotDamage->GetName() << " 킬 : " << this->dotDamage->kill << std::endl;
+				return;
 			}
 			std::cout << "dot deal" << damage << std::endl;
-		}
-		if (this->bloodingStack == 0)
-		{
-			std::cout << "dot 끝" << std::endl;
-			this->dotDamage == nullptr;
 		}
 	}
 
@@ -146,7 +157,7 @@ void Champion::BattleUpdate(float dt)
 			this->cemetery->push_back(*it);
 			this->myTeam->erase(it);
 			this->currentState.animaition.Play("Die");
-			this->dotDamage == nullptr;
+			this->dotDamage = nullptr;
 			this->bloodingStack = 0;
 			this->limit = false;
 			this->air = false;
@@ -158,6 +169,17 @@ void Champion::BattleUpdate(float dt)
 			ChampionDie();
 		}
 		return;
+	}	
+	
+	if (this->currentState.animaition.GetCurrentClipId() != "Die")
+	{
+		for (auto deBuff : currentBuff)
+		{
+			if (deBuff->GetType() == BuffType::STUN)
+			{
+				return;
+			}
+		}
 	}
 
 	switch (this->currentStance)
@@ -244,7 +266,7 @@ void Champion::Idle(float dt)
 	{
 		SetSacleX(Utils::Normalize(target->GetPosition() - this->position).x);
 
-		if (this->currentState.charId == "ninja");
+		if (this->currentState.charId=="ninja")
 		{
 			if (this->skillTimer >= this->currentSkill[0].skillCoolTime && this->currentSkill[0].skillCoolTime != 0.f)
 			{
@@ -321,6 +343,7 @@ void Champion::Action(float dt)
 void Champion::Attack(float dt)
 {
 	this->currentState.animaition.Update(dt*this->currentState.attackSpeed);
+	this->sMoveT += dt * this->currentState.attackSpeed;
 	this->SetOrigin(Origins::MC);
 
 	if (this->currentState.charId == "priest" && this->target->currentState.maxHp == this->target->hp)
@@ -335,6 +358,13 @@ void Champion::Attack(float dt)
 	if (this->currentState.animaition.GetCurrentClipId() != "Attack")
 	{
 		this->currentState.animaition.Play("Attack");
+		return;
+	}
+
+	if (!this->currentState.animaition.GetLastFrame() && this->GetTarget()->GetHp() == 0)
+	{
+		std::cout << "이미 죽음" << std::endl;
+		ChangeStance(ChampionStance::Idle);
 		return;
 	}
 
@@ -381,6 +411,8 @@ void Champion::SetState(State path)
 	this->currentState.type = path.type;
 	this->champMgrState.animaition = path.animaition;
 	this->currentState.animaition = path.animaition;
+	SetShadow();
+	SetHpGuage();
 }
 
 void Champion::SetSkill(ChampionSkill code)
@@ -414,7 +446,10 @@ void Champion::SetSacleX(float x)
 
 void Champion::UltimateSkill(float dt)
 {
-
+	this->currentState.animaition.Update(dt * this->currentState.attackSpeed);
+	this->sMoveT += dt * this->currentState.attackSpeed;
+	this->SetOrigin(Origins::MC);
+	SKILL_MGR.ActiveSkill(this->currentState.skillCode2, this);
 }
 
 void Champion::Dead(float dt)
@@ -424,9 +459,7 @@ void Champion::Dead(float dt)
 	if (this->reviveTimer <= 0)
 	{
 		this->hp = this->currentState.maxHp;
-
 		this->target = nullptr;
-
 		auto it = std::find(cemetery->begin(), cemetery->end(), this);
 		this->myTeam->push_back(*it);
 		this->cemetery->erase(it);
@@ -446,6 +479,8 @@ void Champion::Dead(float dt)
 		}
 		this->sprite.setColor(sf::Color(255, 255, 255, 255));
 		ChangeStance(ChampionStance::Idle);
+		this->SetShadow();
+		this->SetHpGuage();
 		return;
 	}
 }
@@ -461,7 +496,7 @@ void Champion::ChampionDie()
 	return;
 }
 
-void Champion::UpdateState()
+void Champion::UpdateState(float dt)
 {
 	this->currentState.maxHp = this->champMgrState.maxHp;
 	this->currentState.attack = this->champMgrState.attack;
@@ -469,6 +504,59 @@ void Champion::UpdateState()
 	this->currentState.attackSpeed = this->champMgrState.attackSpeed;
 	this->currentState.attackRange = this->champMgrState.attackRange;
 	this->currentState.speed = this->champMgrState.speed;
+
+	if (!this->currentBuff.empty())
+	{
+		for (auto it = this->currentBuff.begin(); it != this->currentBuff.end(); )
+		{
+			(*it)->Update(dt);
+
+			if ((*it)->GetCount() == 0)
+			{
+				delete (*it);
+				it = this->currentBuff.erase(it);
+			}
+			else
+			{
+
+				switch ((*it)->GetType())
+				{
+				case BuffType::MAXHP:
+				{
+					this->currentState.maxHp += (*it)->GetValue();
+					break;
+				}
+				case BuffType::ATTACK:
+				{
+					this->currentState.attack += (*it)->GetValue();
+					break;
+				}
+				case BuffType::DEFEND:
+				{
+					this->currentState.defend += (*it)->GetValue();
+					break;
+				}
+				case BuffType::ATTACKSPEED:
+				{
+					this->currentState.attackSpeed += (*it)->GetValue();
+					break;
+				}
+				case BuffType::ATTACKRANGE:
+				{
+					this->currentState.attackRange += (*it)->GetValue();
+					break;
+				}
+				case BuffType::SPEED:
+				{
+					this->currentState.speed += (*it)->GetValue();
+					break;
+				}
+				}
+
+				++it;
+			}
+		}
+	}
 }
 
 void Champion::UseSkill()
@@ -489,6 +577,86 @@ void Champion::SkillChangeIdle()
 Champion* Champion::GetTarget()
 {
 	return this->target;
+}
+
+void Champion::SetBuff(BuffState* state)
+{
+	this->currentBuff.push_back(state);
+}
+
+void Champion::SetShadow()
+{
+	ChampionEffect* shadow = this->pool->Get();
+	sf::IntRect setting = { 0, 0, 20, 10 };
+	shadow->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/CustomSprite/player_shadow.png"));
+	shadow->SetOrigin(Origins::MC);
+	shadow->sprite.setTextureRect(setting);
+	shadow->SetChampion(this);
+	shadow->SetEffectType(2);
+	shadow->SetHight(12.f);
+	shadow->sortLayer = 1;
+
+	SCENE_MGR.GetCurrScene()->AddGo(shadow);
+}
+
+void Champion::SetHpGuage()
+{
+	sf::IntRect setting = { 0,0,30,6 };
+	ChampionEffect* Guage = this->pool->Get();
+	Guage->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/CustomSprite/player_ingame_guage_5.png"));
+	Guage->sprite.setTextureRect(setting);
+	Guage->SetOrigin(Origins::MC);
+	Guage->SetChampion(this);
+	Guage->SetEffectType(1);
+	Guage->SetHight(16.f);
+	Guage->sortLayer = 4;
+	Guage->sortOrder = 2;
+	SCENE_MGR.GetCurrScene()->AddGo(Guage);
+
+	ChampionEffect* hpGuageBg = this->pool->Get();
+	hpGuageBg->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/CustomSprite/player_ingame_guage_0.png"));
+	hpGuageBg->sprite.setTextureRect(setting);
+	hpGuageBg->SetOrigin(Origins::MC);
+	hpGuageBg->SetChampion(this);
+	hpGuageBg->SetEffectType(1);
+	hpGuageBg->SetHight(16.f);
+	hpGuageBg->sortLayer = 4;
+	hpGuageBg->sortOrder = 0;
+	SCENE_MGR.GetCurrScene()->AddGo(hpGuageBg);
+
+
+	setting = { 0,0,29,2 };
+	ChampionEffect* hpGuage = this->pool->Get();
+	if (this->team == Team::Red)
+	{
+		hpGuage->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/CustomSprite/player_ingame_guage_4.png"));
+	}
+	else if (this->team == Team::Blue)
+	{
+		hpGuage->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/CustomSprite/player_ingame_guage_3.png"));
+	}
+	hpGuage->sprite.setTextureRect(setting);
+	hpGuage->SetOrigin(Origins::ML);
+	hpGuage->SetChampion(this);
+	hpGuage->SetEffectType(5);
+	hpGuage->SetHight(15.f);
+	hpGuage->SetWidth(-14.5f);
+	hpGuage->sortLayer = 4;
+	hpGuage->sortOrder = 1;
+	SCENE_MGR.GetCurrScene()->AddGo(hpGuage);
+
+	setting = { 0,0,30,1 };
+	ChampionEffect* coolGuage = this->pool->Get();
+	coolGuage->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/CustomSprite/player_ingame_guage_2.png"));
+	coolGuage->sprite.setTextureRect(setting);
+	coolGuage->SetOrigin(Origins::ML);
+	coolGuage->SetChampion(this);
+	coolGuage->SetEffectType(6);
+	coolGuage->SetHight(17.f);
+	coolGuage->SetWidth(-14.5f);
+	coolGuage->sortLayer = 4;
+	coolGuage->sortOrder = 1;
+	SCENE_MGR.GetCurrScene()->AddGo(coolGuage);
 }
 
 void Champion::SetMyTeam(std::vector<Champion*>* myTeam)
@@ -538,19 +706,20 @@ void Champion::DamageCalculate(float attack)
 		this->kill++;
 		(*this->teamScore)++;
 		std::cout << this->GetName() << " 킬 : " << this->kill << std::endl;
+		return;
 	}
 }
 
 void Champion::HealCalculate(float attack)
 {
 	float heal = attack;
-	if (heal >= this->target->GetHp())
+	if (heal+this->target->GetHp() >= this->target->GetCurretState().maxHp)
 	{
-		heal = this->target->GetHp();
+		heal = this->target->GetCurretState().maxHp - this->target->GetHp();
 	}
 	this->total_Damage += heal;
 	std::cout << this->GetName() << " 회복량 : " << this->total_Damage << std::endl;
-	Heal(heal);
+	this->target->Heal(heal);
 	std::cout << this->target->GetName() << " hp : " << this->target->hp << std::endl;
 }
 
@@ -671,25 +840,25 @@ void Champion::TagetOrderH()
 	if (!myTeam->empty())
 	{
 		float tagetRange = 9999.f;
-			for (auto team : *myTeam)
+		for (auto team : *myTeam)
+		{
+			if (team == this)
 			{
-				if (team == this)
-				{
-					continue;
-				}
+				continue;
+			}
 
-				if (team->GetRowHealth() <= tagetRange)
+			if (team->GetRowHealth() <= tagetRange)
+			{
+				if (team->GetRowHealth() == 0)
 				{
-					if (team->GetRowHealth() == 0)
-					{
-						this->target = nullptr;
-					}
-					tagetRange = team->GetRowHealth();
-					this->target = team;
+					this->target = nullptr;
 				}
+				tagetRange = team->GetRowHealth();
+				this->target = team;
 			}
 		}
 	}
+}
 
 void Champion::TagetOrderLR()
 {
