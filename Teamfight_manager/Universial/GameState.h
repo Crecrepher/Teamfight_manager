@@ -89,3 +89,17 @@ struct ChampionSkill
 	float skillCoolTime;
 	AnimatioControler animaition;
 };
+
+enum class BuffType
+{
+	MAXHP,
+	ATTACK,
+	DEFEND,
+	ATTACKSPEED,
+	ATTACKRANGE,
+	SPEED,
+	BLOODING,
+	BIND,
+	STUN,
+	COOLTIME,
+};

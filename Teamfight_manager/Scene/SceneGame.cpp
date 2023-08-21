@@ -437,7 +437,7 @@ void SceneGame::ChampionPick(int id, Team team)
 		champ->SetTeamScore(&redScore);
 		champ->SetTeamColor(Team::Red);
 		champ->SetState(*CHAMPION_MGR.GetChampion(id));
-		champ->UpdateState();
+		champ->UpdateState(0.f);
 		champ->SetSkill(*SKILL_MGR.GetSkill(champ->GetCurretState().skillCode1));
 		champ->SetSkill(*SKILL_MGR.GetSkill(champ->GetCurretState().skillCode2));
 		redTeam.push_back(champ);
@@ -451,7 +451,7 @@ void SceneGame::ChampionPick(int id, Team team)
 		champ->SetTeamScore(&blueScore);
 		champ->SetTeamColor(Team::Blue);
 		champ->SetState(*CHAMPION_MGR.GetChampion(id));
-		champ->UpdateState();
+		champ->UpdateState(0.f);
 		champ->SetSkill(*SKILL_MGR.GetSkill(champ->GetCurretState().skillCode1));
 		champ->SetSkill(*SKILL_MGR.GetSkill(champ->GetCurretState().skillCode2));
 		blueTeam.push_back(champ);

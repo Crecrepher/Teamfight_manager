@@ -83,38 +83,6 @@ void ChampionEffect::SetChampion(Champion* champion)
 	this->champ = champion;
 }
 
-
-void ChampionEffect::SetAttack(Champion* champ, float dt)
-{
-	if (champ->GetCurretState().charId == "archer")
-	{
-		if (champ->GetCurretState().animaition.GetCurrFrame() == 0&&!champ->GetFrameLimit())
-		{
-			ChampionEffect* attack = this->pool->Get();
-			attack->sortLayer = 4;
-			attack->effect.AddClip(*RESOURCE_MGR.GetAnimationClip("animations/Champions/archer/Attack_Effect.csv"));
-			attack->effect.SetTarget(&attack->sprite);
-			if (champ->GetSacleX() > 0)
-			{
-				attack->sprite.setScale(1, 1);
-				attack->SetPosition(champ->GetPosition());
-			}
-			else if (champ->GetSacleX() < 0)
-			{
-				attack->sprite.setScale(-1, 1);
-				attack->SetPosition(champ->GetPosition());
-			}
-			champ->SetFrameLimit(true);
-		}
-		else if (champ->GetCurretState().animaition.GetLastFrame())
-		{
-			champ->SetFrameLimit(false);
-			Setting();
-		}
-	}
-	this->AnimationUpdate(dt);
-}
-
 void ChampionEffect::BaseUpdate(float dt)
 {
 	if (this->champ->GetCurrentStance() == ChampionStance::Dead)
@@ -166,9 +134,3 @@ void ChampionEffect::CoolTimeUpdate(float dt)
 		this->SetPosition(this->champ->GetPosition().x + this->plusWidth, this->champ->GetPosition().y + this->plusHight);
 	}
 }
-
-void ChampionEffect::AnimationUpdate(float dt)
-{
-	this->effect.Update(dt);
-}
-

@@ -156,6 +156,7 @@
     <ClCompile Include="AiBanPick.cpp" />
     <ClCompile Include="Animation\AnimatioControler.cpp" />
     <ClCompile Include="Animation\AnimatonClip.cpp" />
+    <ClCompile Include="GameObject\BuffState.cpp" />
     <ClCompile Include="GameObject\ChampionEffect.cpp" />
     <ClCompile Include="DataTable\ItemTable.cpp" />
     <ClCompile Include="Framework\ChampionMgr.cpp" />
@@ -204,6 +205,7 @@
     <ClInclude Include="AiBanPick.h" />
     <ClInclude Include="Animation\AnimatioControler.h" />
     <ClInclude Include="Animation\AnimatonClip.h" />
+    <ClInclude Include="GameObject\BuffState.h" />
     <ClInclude Include="GameObject\ChampionEffect.h" />
     <ClInclude Include="DataTable\ItemTable.h" />
     <ClInclude Include="Framework\ChampionMgr.h" />

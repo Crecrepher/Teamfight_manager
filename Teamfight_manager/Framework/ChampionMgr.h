@@ -6,11 +6,11 @@ class ChampionMgr : public Singleton<ChampionMgr>
 	friend Singleton<ChampionMgr>;
 private:
 	ChampionMgr() = default;
-	virtual ~ChampionMgr() =default;
+	virtual ~ChampionMgr() = default;
 
 	std::unordered_map<int, State> champions;
 
-public:	
+public:
 	void Init();
 	void LoadFromCsv(const std::string path);
 

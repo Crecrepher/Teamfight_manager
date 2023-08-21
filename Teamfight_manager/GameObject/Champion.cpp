@@ -66,6 +66,7 @@ void Champion::BattleUpdate(float dt)
 
 	SpriteGo::Update(dt);
 
+
 	if (!field->rectangle.getGlobalBounds().contains(this->GetPosition()))
 	{
 		this->SetPosition(Utils::Clamp(this->GetPosition(), { 367,191 }, { 911,499 }));
@@ -78,17 +79,19 @@ void Champion::BattleUpdate(float dt)
 		this->currentState.animaition.Update(dt);
 	}
 
-	UpdateState();
-	
+	UpdateState(dt);
+
 	this->skillTimer += dt;
 	this->attackDelay -= dt * this->currentState.attackSpeed;
+
 
 	//일시적 평타버그해결용 *******나중에지워야함*******
 	////////////////////////////////////////////////////////
 	///////////////////////지워주세요///////////////////////
 	if (currentState.skillCode1 != 1 &&
 		currentState.skillCode1 != 4 &&
-		currentState.skillCode1 !=12&&
+		currentState.skillCode1 != 12 &&
+		currentState.skillCode1 != 6 &&
 		currentState.skillCode1 !=14)
 	{
 		skillTimer = 0;
@@ -103,32 +106,38 @@ void Champion::BattleUpdate(float dt)
 	if (this->bloodingStack > 0 && this->dotDamage != nullptr)
 	{
 		this->bloodingTimer -= dt;
+
 		if (this->bloodingTimer <= 0.f)
 		{
 			this->bloodingTimer = 0.5f;
 			this->bloodingStack--;
+
+			if (this->bloodingStack == 0||this->GetHp()==0)
+			{
+				std::cout << "dot 끝" << std::endl;
+				this->dotDamage == nullptr;
+				return;
+			}
 
 			float damage = 3.f;
 			if (damage >= this->GetHp())
 			{
 				damage = this->GetHp();
 			}
+
 			this->dotDamage->total_Damage += damage;
 			std::cout << this->dotDamage->GetName() << " 입힌 피해 : " << this->dotDamage->total_Damage << std::endl;
 			this->Hit(damage);
+
 			if (this->GetHp() == 0)
 			{
 				this->dotDamage->kill++;
 				(*this->dotDamage->teamScore)++;
 				this->bloodingStack = 0;
 				std::cout << this->dotDamage->GetName() << " 킬 : " << this->dotDamage->kill << std::endl;
+				return;
 			}
 			std::cout << "dot deal" << damage << std::endl;
-		}
-		if (this->bloodingStack == 0)
-		{
-			std::cout << "dot 끝" << std::endl;
-			this->dotDamage == nullptr;
 		}
 	}
 
@@ -160,6 +169,17 @@ void Champion::BattleUpdate(float dt)
 			ChampionDie();
 		}
 		return;
+	}	
+	
+	if (this->currentState.animaition.GetCurrentClipId() != "Die")
+	{
+		for (auto deBuff : currentBuff)
+		{
+			if (deBuff->GetType() == BuffType::STUN)
+			{
+				return;
+			}
+		}
 	}
 
 	switch (this->currentStance)
@@ -338,7 +358,13 @@ void Champion::Attack(float dt)
 	if (this->currentState.animaition.GetCurrentClipId() != "Attack")
 	{
 		this->currentState.animaition.Play("Attack");
-		this->sMoveT = 0.f;
+		return;
+	}
+
+	if (!this->currentState.animaition.GetLastFrame() && this->GetTarget()->GetHp() == 0)
+	{
+		std::cout << "이미 죽음" << std::endl;
+		ChangeStance(ChampionStance::Idle);
 		return;
 	}
 
@@ -420,7 +446,10 @@ void Champion::SetSacleX(float x)
 
 void Champion::UltimateSkill(float dt)
 {
-
+	this->currentState.animaition.Update(dt * this->currentState.attackSpeed);
+	this->sMoveT += dt * this->currentState.attackSpeed;
+	this->SetOrigin(Origins::MC);
+	SKILL_MGR.ActiveSkill(this->currentState.skillCode2, this);
 }
 
 void Champion::Dead(float dt)
@@ -467,7 +496,7 @@ void Champion::ChampionDie()
 	return;
 }
 
-void Champion::UpdateState()
+void Champion::UpdateState(float dt)
 {
 	this->currentState.maxHp = this->champMgrState.maxHp;
 	this->currentState.attack = this->champMgrState.attack;
@@ -475,6 +504,59 @@ void Champion::UpdateState()
 	this->currentState.attackSpeed = this->champMgrState.attackSpeed;
 	this->currentState.attackRange = this->champMgrState.attackRange;
 	this->currentState.speed = this->champMgrState.speed;
+
+	if (!this->currentBuff.empty())
+	{
+		for (auto it = this->currentBuff.begin(); it != this->currentBuff.end(); )
+		{
+			(*it)->Update(dt);
+
+			if ((*it)->GetCount() == 0)
+			{
+				delete (*it);
+				it = this->currentBuff.erase(it);
+			}
+			else
+			{
+
+				switch ((*it)->GetType())
+				{
+				case BuffType::MAXHP:
+				{
+					this->currentState.maxHp += (*it)->GetValue();
+					break;
+				}
+				case BuffType::ATTACK:
+				{
+					this->currentState.attack += (*it)->GetValue();
+					break;
+				}
+				case BuffType::DEFEND:
+				{
+					this->currentState.defend += (*it)->GetValue();
+					break;
+				}
+				case BuffType::ATTACKSPEED:
+				{
+					this->currentState.attackSpeed += (*it)->GetValue();
+					break;
+				}
+				case BuffType::ATTACKRANGE:
+				{
+					this->currentState.attackRange += (*it)->GetValue();
+					break;
+				}
+				case BuffType::SPEED:
+				{
+					this->currentState.speed += (*it)->GetValue();
+					break;
+				}
+				}
+
+				++it;
+			}
+		}
+	}
 }
 
 void Champion::UseSkill()
@@ -495,6 +577,11 @@ void Champion::SkillChangeIdle()
 Champion* Champion::GetTarget()
 {
 	return this->target;
+}
+
+void Champion::SetBuff(BuffState* state)
+{
+	this->currentBuff.push_back(state);
 }
 
 void Champion::SetShadow()
@@ -619,6 +706,7 @@ void Champion::DamageCalculate(float attack)
 		this->kill++;
 		(*this->teamScore)++;
 		std::cout << this->GetName() << " 킬 : " << this->kill << std::endl;
+		return;
 	}
 }
 

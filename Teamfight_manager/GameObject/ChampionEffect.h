@@ -17,6 +17,7 @@ enum class EffectType
 	CoolTime,
 	Ani,
 };
+
 class ChampionEffect : public SpriteGo
 {
 protected:
@@ -29,28 +30,27 @@ protected:
 
 	ObjectPool<ChampionEffect>* pool;
 public:
-ChampionEffect(const std::string id = "", const std::string n = "");
-virtual ~ChampionEffect() override;
+	ChampionEffect(const std::string id = "", const std::string n = "");
+	virtual ~ChampionEffect() override;
 
-virtual void Init()override;
-virtual void Reset()override;
-virtual void Release() override;
-virtual void Update(float dt)override;
+	virtual void Init()override;
+	virtual void Reset()override;
+	virtual void Release() override;
+	virtual void Update(float dt)override;
 
-void SetPool(ObjectPool<ChampionEffect>* effect) { this->pool = effect; }
-void Setting();
+	void SetPool(ObjectPool<ChampionEffect>* effect) { this->pool = effect; }
+	void Setting();
 
-void SetEffectType(int pick){ this->type = (EffectType)pick; }
-void SetChampion(Champion* champion);
-Champion* GetChampion() { return this->champ; }
-void SetWidth(float num) { this->plusWidth = num; }
-void SetHight(float num) { this->plusHight = num; }
-void SetAttack(Champion* champ, float dt);
+	void SetEffectType(int pick) { this->type = (EffectType)pick; }
 
-void BaseUpdate(float dt);
-void UiUpdate(float dt);
-void HpUpdate(float dt);
-void CoolTimeUpdate(float dt);
-void AnimationUpdate(float dt);
+	void SetChampion(Champion* champion);
+	Champion* GetChampion() { return this->champ; }
+	void SetWidth(float num) { this->plusWidth = num; }
+	void SetHight(float num) { this->plusHight = num; }
+
+	void BaseUpdate(float dt);
+	void UiUpdate(float dt);
+	void HpUpdate(float dt);
+	void CoolTimeUpdate(float dt);
 };
 

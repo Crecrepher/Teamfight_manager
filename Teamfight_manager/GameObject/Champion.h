@@ -3,6 +3,7 @@
 #include "RectGo.h"
 #include "GameState.h"
 #include "ObjectPool.h"
+#include "BuffState.h"
 
 class ChampionEffect;
 
@@ -42,7 +43,7 @@ protected:
 
 	State currentState;
 	std::vector<ChampionSkill> currentSkill;
-
+	std::vector<BuffState*> currentBuff;
 	
 	float hp;
 	float skillTimer;
@@ -63,7 +64,9 @@ protected:
 	bool air = false;
 	bool limit = false;
 
-//	bool ActiveUltiSkill = true;
+	bool ActiveUltiSkill = true;
+	float UesUltiSkillTiming = 0.f;
+
 	//skill용 위치 지정 변수 ( SkillMgr 이 싱글톤 이기 때문에 위치 변수 따로 필요 )
 	sf::Vector2f startPos;
 	sf::Vector2f endPos;
@@ -134,7 +137,7 @@ public:
 	void UltimateSkill(float dt);
 	void Dead(float dt);
 	void ChampionDie();
-	void UpdateState();
+	void UpdateState(float dt);
 
 
 	State GetCurretState() { return this->currentState; }
@@ -152,13 +155,14 @@ public:
 	void SetBloodingStack(int stack) { this->bloodingStack = stack; }
 	void UseBloodingPlayer(Champion* champ) { this->dotDamage = champ; }
 	void SetFrameLimit(bool limit) { this->limit = limit; }
-	bool GetFrameLimit() { return limit; }
-	
-
+	bool GetFrameLimit() { return this->limit; }
+	void SetUltiSkill(bool setting) { this->ActiveUltiSkill = setting; }
+	bool GetUltiSkill() { return this->ActiveUltiSkill; }
 	void SetStartPos(sf::Vector2f pos) { this->startPos = pos; }
 	void SetEndPos(sf::Vector2f pos) { this->endPos = pos; }
 	sf::Vector2f GetStartPos() { return this->startPos; }
 	sf::Vector2f GetEndPos() { return this->endPos; }
+	void SetBuff(BuffState* state);
 
 
 	// 선수에게 넘길 스테이터스

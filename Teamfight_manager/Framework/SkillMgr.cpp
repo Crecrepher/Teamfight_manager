@@ -3,6 +3,7 @@
 #include "ResourceMgr.h"
 #include "rapidcsv.h"
 
+
 void SkillMgr::Init()
 {
 	LoadFromCsv("tables/SkillTable.csv");
@@ -47,6 +48,12 @@ ChampionSkill* SkillMgr::GetSkill(const int code)
 
 void SkillMgr::ActiveSkill(int code, Champion* champ)
 {
+	if (!champ->GetCurretState().animaition.GetLastFrame() && champ->GetTarget()->GetHp() == 0)
+	{
+		std::cout << "이미 죽음" << std::endl;
+		champ->SkillChangeIdle();
+		return;
+	}
 
 	switch (code)
 	{
@@ -65,9 +72,49 @@ void SkillMgr::ActiveSkill(int code, Champion* champ)
 		FighterSkill(champ);
 		break;
 	}
+	case 5:
+	{
+		FighterUltiSkill(champ);
+		break;
+	}
+	case 6:
+	{
+		IcemageSkill(champ);
+		break;
+	}
+	case 7:
+	{
+		IcemageUltiSkill(champ);
+		break;
+	}
+	case 8:
+	{
+		KnightSkill(champ);
+		break;
+	}
+	case 9:
+	{
+		KnightUltiSkill(champ);
+		break;
+	}
+	case 10:
+	{
+		MagicknightSkill(champ);
+		break;
+	}
+	case 11:
+	{
+		MagicknightUltiSkill(champ);
+		break;
+	}
 	case 12:
 	{
 		MonkSkill(champ);
+		break;
+	}
+	case 13:
+	{
+		MonkUltiSkill(champ);
 		break;
 	}
 	case 14:
@@ -75,11 +122,84 @@ void SkillMgr::ActiveSkill(int code, Champion* champ)
 		NinjaSkill(champ);
 		break;
 	}
+	case 15:
+	{
+		NinjaUltiSkill(champ);
+		break;
+	}
+	case 16:
+	{
+		PriestSkill(champ);
+		break;
+	}
+	case 17:
+	{
+		PriestUltiSkill(champ);
+		break;
+	}
+	case 18:
+	{
+		PyromancerSkill(champ);
+		break;
+	}
+	case 19:
+	{
+		PyromancerUltiSkill(champ);
+		break;
+	}
+	case 20:
+	{
+		PythonessSkill(champ);
+		break;
+	}
+	case 21:
+	{
+		PythonessUltiSkill(champ);
+		break;
+	}
+	case 22:
+	{
+		ShieldbearerUltiSkill(champ);
+		break;
+	}
+	case 23:
+	{
+		SoldierSkill(champ);
+		break;
+	}
+	case 24:
+	{
+		SoldierUltiSkill(champ);
+		break;
+	}
+	case 25:
+	{
+		SwordmanSkill(champ);
+		break;
+	}
+	case 26:
+	{
+		SwordmanUltiSkill(champ);
+		break;
+	}
 	}
 }
 
 void SkillMgr::passiveSkill(int code, Champion* champ)
 {
+	switch (code)
+	{
+	case 3:
+	{
+		BerserkerSkill(champ);
+		break;
+	}
+	case 23:
+	{
+		SoldierSkill(champ);
+		break;
+	}
+	}
 }
 
 void SkillMgr::ArcherSkill(Champion* champ)
@@ -185,6 +305,57 @@ void SkillMgr::FighterUltiSkill(Champion* champ)
 {
 }
 
+void SkillMgr::IcemageSkill(Champion* champ)
+{
+	if (champ->GetCurretState().animaition.GetCurrentClipId() != "Skill")
+	{
+		champ->UseSkill();
+		return;
+	}
+
+	if (champ->GetCurretState().animaition.GetCurrFrame() == 3)
+	{
+		if (!champ->GetFrameLimit())
+		{
+			BuffState* state = new BuffState;
+			state->SetType(BuffType::STUN);
+			state->SetCount(3);
+			champ->GetTarget()->SetBuff(state);
+			champ->DamageCalculate(champ->GetCurretState().attack + 5);
+			champ->SetFrameLimit(true);
+		}
+		return;
+	}
+
+	if (champ->GetCurretState().animaition.GetLastFrame())
+	{
+		std::cout << "스킬" << std::endl;
+		champ->SetFrameLimit(false);
+		champ->SkillChangeIdle();
+		return;
+	}
+}
+
+void SkillMgr::IcemageUltiSkill(Champion* champ)
+{
+}
+
+void SkillMgr::KnightSkill(Champion* champ)
+{
+}
+
+void SkillMgr::KnightUltiSkill(Champion* champ)
+{
+}
+
+void SkillMgr::MagicknightSkill(Champion* champ)
+{
+}
+
+void SkillMgr::MagicknightUltiSkill(Champion* champ)
+{
+}
+
 void SkillMgr::MonkSkill(Champion* champ)
 {
 	if (champ->GetCurretState().animaition.GetCurrentClipId() != "Skill")
@@ -210,6 +381,10 @@ void SkillMgr::MonkSkill(Champion* champ)
 		champ->SkillChangeIdle();
 		return;
 	}
+}
+
+void SkillMgr::MonkUltiSkill(Champion* champ)
+{
 }
 
 void SkillMgr::NinjaSkill(Champion* champ)
@@ -253,4 +428,60 @@ void SkillMgr::NinjaSkill(Champion* champ)
 		champ->SkillChangeIdle();
 		return;
 	}
+}
+
+void SkillMgr::NinjaUltiSkill(Champion* champ)
+{
+}
+
+void SkillMgr::PriestSkill(Champion* champ)
+{
+}
+
+void SkillMgr::PriestUltiSkill(Champion* champ)
+{
+}
+
+void SkillMgr::PyromancerSkill(Champion* champ)
+{
+}
+
+void SkillMgr::PyromancerUltiSkill(Champion* champ)
+{
+}
+
+void SkillMgr::PythonessSkill(Champion* champ)
+{
+}
+
+void SkillMgr::PythonessUltiSkill(Champion* champ)
+{
+}
+
+void SkillMgr::ShieldbearerUltiSkill(Champion* champ)
+{
+}
+
+void SkillMgr::SoldierSkill(Champion* champ)
+{
+}
+
+void SkillMgr::SoldierUltiSkill(Champion* champ)
+{
+}
+
+void SkillMgr::SwordmanSkill(Champion* champ)
+{
+}
+
+void SkillMgr::SwordmanUltiSkill(Champion* champ)
+{
+}
+
+void SkillMgr::BerserKerUltiSkill(Champion* champ)
+{
+}
+
+void SkillMgr::ShieldbearerSkill(Champion* champ)
+{
 }
