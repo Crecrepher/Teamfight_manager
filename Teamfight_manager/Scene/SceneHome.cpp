@@ -37,6 +37,7 @@ void SceneHome::Init()
 	worldView.setCenter(centerPos);
 	uiView.setSize(windowSize);
 	uiView.setCenter(centerPos);
+	cloudSpeed = std::vector<float>(7);
 
 	AddGoSprites();
 	AddGoUiButton();
@@ -72,17 +73,16 @@ void SceneHome::Enter()
 	popTextFade = maxPopTextFade;
 
 
-	if (TEAM_MGR.GetTodayDate() == 0)
+	if (TEAM_MGR.GetTodayDate() == 0 && TEAM_MGR.GetPlayerNum() == 0)
 	{
 		NewYear();
 		if (TEAM_MGR.GetTodayYear() == 2021)
 		{
-			Recruit(-1, 0);
-			TEAM_MGR.Employ(0);
-			Recruit(-1, 0);
-			TEAM_MGR.Employ(0);
-			Recruit(-1, 0);
-			TEAM_MGR.Employ(0);
+			for (int i = 0; i < 4; i++)
+			{
+				Recruit(-1, 0);
+				TEAM_MGR.Employ(0);
+			}
 			gainTrainingInfo = TEAM_MGR.GetTrainingInfo();
 		}
 	}
@@ -93,7 +93,7 @@ void SceneHome::Enter()
 
 	MakeMainUi();
 	MakeSubUi();
-
+	SetClouds();
 }
 
 void SceneHome::Exit()
@@ -114,6 +114,7 @@ void SceneHome::Update(float dt)
 		&& !isMenuOn)
 	{
 		MainUiClose();
+		selectedMenu = -1;
 	}
 
 	if (!isPopupOn && popTextFade >= 0.f)
@@ -122,6 +123,7 @@ void SceneHome::Update(float dt)
 	}
 
 	TestingCheats();
+	UpdateClouds(dt);
 }
 
 void SceneHome::Draw(sf::RenderWindow& window)
@@ -133,7 +135,7 @@ void SceneHome::AddGoSprites()
 {
 	//Main
 	AddGo(new SpriteGo("graphics/Origin/Sprite/ground.png", "Ground"));
-	AddGo(new SpriteGo("graphics/Origin/Sprite/house_bg.png", "House"));
+	AddGo(new SpriteGo("graphics/UiFix/house_bg.png", "House"));
 	AddGo(new SpriteGo("graphics/Origin/Sprite/sky_day.png", "Sky"));
 	AddGo(new SpriteGo("graphics/Origin/Sprite/header_bg.png", "HeadUi"));
 	AddGo(new SpriteGo("graphics/Origin/Sprite/header_slot_bg.png", "HeadSlot0"));
@@ -143,6 +145,16 @@ void SceneHome::AddGoSprites()
 	AddGo(new SpriteGo("graphics/Origin/Sprite/header_league_bg.png", "LeagueUi"));
 	AddGo(new SpriteGo("graphics/Origin/Sprite/training_ui_bg.png", "SubUiBack"));
 	AddGo(new SpriteGo("graphics/Origin/Sprite/proceed_button_2.png", "PlayBArrow"));
+
+	AddGo(new SpriteGo("graphics/Origin/Sprite/sponser_logo_new_3.png", "TeamIco"));
+	AddGo(new SpriteGo("graphics/Origin/Sprite/league_icon_0.png", "LeagueIco"));
+
+	for (int i = 0; i < 7; i++)
+	{
+		std::stringstream ss;
+		ss << "Clouds" << i;
+		AddGo(new SpriteGo("graphics/Origin/Sprite/clouds_0.png",ss.str()));
+	}
 
 	//Recruit
 	AddGo(new SpriteGo("graphics/UiFix/player_recruit_card.png", "RecruitBg"));
@@ -206,6 +218,21 @@ void SceneHome::AddGoSprites()
 	AddGo(new SpriteGo("graphics/Origin/Sprite/attack_icon.png", "IconAtk1"));
 	AddGo(new SpriteGo("graphics/Origin/Sprite/defense_icon.png", "IconDef0"));
 	AddGo(new SpriteGo("graphics/Origin/Sprite/defense_icon.png", "IconDef1"));
+
+	// PlayerInfo
+	for (int i = 0; i < 6; i++)
+	{
+		for (int j = 0; j < 4; j++)
+		{
+			std::stringstream ss;
+			ss << "Player" <<i<<  "InfoCharacterIcons" << j;
+			AddGo(new SpriteGo("graphics/Origin/Sprite/character_icons_0.png", ss.str()));
+			ss << "Back";
+			AddGo(new SpriteGo("graphics/Origin/Sprite/champion&player_slot_0.png", ss.str()));
+			ss << "Line";
+			AddGo(new SpriteGo("graphics/Origin/Sprite/champion&player_slot_1.png", ss.str()));
+		}
+	}
 
 	//Sponsor
 	for (int i = 0; i < 9; i++)
@@ -289,6 +316,16 @@ void SceneHome::AddGoUiButton()
 	AddGo(new UiButton("graphics/Origin/Sprite/important_button_0.png", "RecruitB"));
 	AddGo(new UiButton("graphics/Origin/Sprite/default_button_0.png", "RecruitCloseB"));
 	AddGo(new UiButton("graphics/Origin/Sprite/default_button_0.png", "RecruitCanceleB"));
+
+	// PlayerInfo
+	for (int i = 0; i < 6; i++)
+	{
+		std::stringstream ss;
+		ss << "PlayerInfoB" << i;
+		AddGo(new UiButton("graphics/UiFix/slot_normal&hover_0.png", ss.str()));
+	}
+	AddGo(new UiButton("graphics/Origin/Sprite/important_button_0.png", "PlayerFireB"));
+
 
 	// Training
 	for (int i = 0; i < 12; i++)
@@ -407,6 +444,10 @@ void SceneHome::AddGoText()
 	AddGo(new TextGo("ProgressPlayText"));
 	AddGo(new TextGo("DoProgressPlayText"));
 
+	AddGo(new TextGo("TeamNameText"));
+	AddGo(new TextGo("TeamScoreText"));
+	AddGo(new TextGo("LeagueGradeText"));
+
 	AddGo(new TextGo("PopupText"));
 
 	//Recruit
@@ -425,6 +466,22 @@ void SceneHome::AddGoText()
 	AddGo(new TextGo("RecruitCancelBText"));
 	AddGo(new TextGo("RecruitExitBText"));
 	
+	// PlayerInfo
+	for (int i = 0; i < 6; i++)
+	{
+		AddGo(new TextGo("PlayerInfoTName" + std::to_string(i)));
+		AddGo(new TextGo("PlayerInfoTAge" + std::to_string(i)));
+		AddGo(new TextGo("PlayerInfoTAtk" + std::to_string(i)));
+		AddGo(new TextGo("PlayerInfoTDef" + std::to_string(i)));
+		for (int j = 0; j < 4; j++)
+		{
+			AddGo(new TextGo("PlayerInfoT" + std::to_string(i)
+				+ "ChampLV" + std::to_string(j)));
+		}
+		AddGo(new TextGo("PlayerInfoTCost" + std::to_string(i)));
+	}
+	AddGo(new TextGo("PlayerInfoCount"));
+	AddGo(new TextGo("FireBText"));
 
 	//Training
 	AddGo(new TextGo("TrainPlayerName"));
@@ -609,6 +666,18 @@ void SceneHome::MakeMainUi()
 	leagueUi->SetSize(2, 2);
 	leagueUi->sortLayer = 106;
 
+	spr = (SpriteGo*)FindGo("TeamIco");
+	spr->SetPosition(5, 5);
+	spr->SetOrigin(Origins::TL);
+	spr->SetSize(2, 2);
+	spr->sortLayer = 107;
+
+	spr = (SpriteGo*)FindGo("LeagueIco");
+	spr->SetPosition(20, 95);
+	spr->SetOrigin(Origins::MC);
+	spr->SetSize(2, 2);
+	spr->sortLayer = 107;
+
 	float uiSizeHead = 2.0f;
 	spr = (SpriteGo*)FindGo("HeadSlot0");
 	spr->SetPosition(FRAMEWORK.GetWindowSize().x * 0.6f + 30.f, 10.f);
@@ -650,6 +719,7 @@ void SceneHome::MakeMainUi()
 		bt->SetPosition(15.f + 15.f * i + (bt->GetSize().x * i * uiSizeMainB),
 			FRAMEWORK.GetWindowSize().y - 30.f);
 		bt->sortLayer = 100;
+		bt->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/Origin/Sprite/main_menu_button_0.png"));
 		bt->OnClick = [this, i]() {
 			if (isMenuOn)
 			{
@@ -658,6 +728,39 @@ void SceneHome::MakeMainUi()
 			MainUiClose();
 			MainUiOpen((MainMenuType)i);
 			backClick = false;
+			for (int j = 0; j < 5; j++)
+			{
+				std::stringstream bName;
+				bName << "MainB" << i;
+				UiButton* mainBt = (UiButton*)FindGo(bName.str());
+				if (i != j)
+				{
+					mainBt->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/Origin/Sprite/main_menu_button_2.png"));
+					bName << "Text";
+					TextGo* tx = (TextGo*)FindGo(bName.str());
+					tx->text.setFillColor(sf::Color::Black);
+				}
+				else
+				{
+					mainBt->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/Origin/Sprite/main_menu_button_0.png"));
+					bName << "Text";
+					TextGo* tx = (TextGo*)FindGo(bName.str());
+					tx->text.setFillColor(sf::Color::White);
+				}
+			}
+			selectedMenu = i;
+		};
+		bt->OnEnter = [this,i, bt]() {
+			if (i != selectedMenu)
+			{
+				bt->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/Origin/Sprite/main_menu_button_1.png"));
+			}
+		};
+		bt->OnExit = [this, i, bt]() {
+			if (i != selectedMenu)
+			{
+				bt->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/Origin/Sprite/main_menu_button_0.png"));
+			}
 		};
 		int startNum = 0;
 		int endNum = 0;
@@ -679,6 +782,13 @@ void SceneHome::MakeMainUi()
 				backClick = false;
 			};
 			bt2->SetActive(false);
+
+			bt2->OnEnter = [bt2]() {
+				bt2->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/Origin/Sprite/main_menu_button_1.png"));
+			};
+			bt2->OnExit = [bt2]() {
+				bt2->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/Origin/Sprite/main_menu_button_0.png"));
+			};
 
 			ss2 << "Text";
 			btText = (TextGo*)FindGo(ss2.str());
@@ -799,6 +909,36 @@ void SceneHome::MakeMainUi()
 	text->SetPosition(FRAMEWORK.GetWindowSize().x * 0.5f, 100.f);
 	text->SetOrigin(Origins::TC);
 	text->sortLayer = 101;
+
+	text = (TextGo*)FindGo("TeamNameText");
+	text->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
+	text->text.setString("Smart Burger");
+	text->text.setFillColor(sf::Color::White);
+	text->text.setCharacterSize(20);
+	text->SetOrigin(Origins::ML);
+	text->SetPosition(71, 18);
+	text->sortLayer = 107;
+
+	text = (TextGo*)FindGo("TeamScoreText");
+	text->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
+	std::wstringstream wss;
+	wss << TEAM_MGR.GetWin() << stringtable->GetW("Win") << " "
+		<< TEAM_MGR.GetLose() << stringtable->GetW("Lose");
+	text->text.setString(wss.str());
+	text->text.setFillColor(sf::Color::White);
+	text->text.setCharacterSize(20);
+	text->SetOrigin(Origins::ML);
+	text->SetPosition(71, 53);
+	text->sortLayer = 107;
+
+	text = (TextGo*)FindGo("LeagueGradeText");
+	text->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
+	text->text.setString(std::to_wstring(TEAM_MGR.GetTodayYear()) +L" " + stringtable->GetW("AmatureLeague"));
+	text->text.setFillColor(sf::Color::White);
+	text->text.setCharacterSize(18);
+	text->SetOrigin(Origins::ML);
+	text->SetPosition(42,93);
+	text->sortLayer = 107;
 }
 
 
@@ -843,6 +983,7 @@ void SceneHome::MakeSubUi()
 	rect->rectangle.setFillColor(sf::Color(0, 0, 0, 150));
 
 	MakeSubUiTraining();
+	MakeSubUiPlayerInfo();
 	MakeSubUiSponsorContract();
 	MakeSubUiEquip();
 	MakeSubUiRecruit();
@@ -850,6 +991,7 @@ void SceneHome::MakeSubUi()
 	UiEquipOpen(false);
 	UiCraftFinish(0,false);
 	UiRecruitOpen(false);
+	UiPlayerInfoOpen(false);
 }
 
 void SceneHome::MakeSubUiRecruit()
@@ -991,6 +1133,152 @@ void SceneHome::MakeSubUiRecruit()
 	text->text.setCharacterSize(16);
 	text->SetOrigin(Origins::ML);
 	text->SetPosition(661, 338);
+	text->sortLayer = 112;
+}
+
+void SceneHome::MakeSubUiPlayerInfo()
+{
+	auto stringtable = DATATABLE_MGR.Get<StringTable>(DataTable::Ids::String);
+	SpriteGo* spr;
+	UiButton* bt;
+	TextGo* text;
+	
+	for (int i = 0; i < 6; i++)
+	{
+		std::stringstream ss;
+		ss << "PlayerInfoB" << i;
+		bt = (UiButton*)FindGo(ss.str());
+		bt->SetOrigin(Origins::MC);
+		bt->SetPosition(FRAMEWORK.GetWindowSize().x * 0.5f,
+			FRAMEWORK.GetWindowSize().y * 0.227f+(64.f*i));
+		bt->SetSize(2, 2);
+		bt->sortLayer = 111;
+		bt->OnClick = [this,i]() {
+			selectedSponsorIndex = i;
+			for (int j = 0; j < 6; j++)
+			{
+				std::stringstream name;
+				name << "PlayerInfoB" << j;
+				UiButton* slot = (UiButton*)FindGo(name.str());
+				if (i != j)
+				{
+					slot->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/UiFix/slot_normal&hover_0.png"));
+				}
+				else
+				{
+					slot->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/UiFix/slot_normal&hover_1.png"));
+				}
+			}
+		};
+
+		for (int j = 0; j < 4; j++)
+		{
+			SpriteGo* icon;
+			std::stringstream ss2;
+			ss2 << "Player" << i << "InfoCharacterIcons" << j;
+			icon = (SpriteGo*)FindGo(ss2.str());
+			sf::Vector2u texSize = icon->sprite.getTexture()->getSize();
+			icon->sprite.setTextureRect({ std::max(0,(int)texSize.x / 2 - 12), 0,25,25});
+			icon->SetPosition(bt->GetPosition().x +200+(j*60), bt->GetPosition().y);
+			icon->SetOrigin(Origins::MC);
+			icon->SetSize(2, 2);
+			icon->sortLayer = 113;
+
+			ss2 << "Back";
+			spr = (SpriteGo*)FindGo(ss2.str());
+			spr->SetOrigin(Origins::MC);
+			spr->SetPosition(icon->GetPosition());
+			spr->SetSize(2, 2);
+			spr->sortLayer = 112; 
+			
+			ss2 << "Line";
+			spr = (SpriteGo*)FindGo(ss2.str());
+			spr->SetOrigin(Origins::MC);
+			spr->SetPosition(icon->GetPosition());
+			spr->SetSize(2, 2);
+			spr->sortLayer = 114;
+
+
+
+			text = (TextGo*)FindGo("PlayerInfoT" + std::to_string(i)
+				+ "ChampLV" + std::to_string(j));
+			text->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
+			text->text.setString(L"7");
+			text->text.setCharacterSize(14);
+			text->SetOrigin(Origins::MC);
+			text->SetPosition(icon->GetPosition().x + 12, icon->GetPosition().y - 17);
+			text->sortLayer = 115;
+		}
+
+
+		text = (TextGo*)FindGo(("PlayerInfoTName" + std::to_string(i)));
+		text->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
+		text->text.setString(L"Name");
+		text->text.setCharacterSize(19);
+		text->SetOrigin(Origins::ML);
+		text->SetPosition(bt->GetPosition().x - 500, bt->GetPosition().y - 1);
+		text->sortLayer = 112;
+
+		text = (TextGo*)FindGo(("PlayerInfoTAge" + std::to_string(i)));
+		text->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
+		text->text.setString(L"20 Age");
+		text->text.setCharacterSize(19);
+		text->SetOrigin(Origins::ML);
+		text->SetPosition(bt->GetPosition().x - 300, bt->GetPosition().y - 1);
+		text->sortLayer = 112;
+
+		text = (TextGo*)FindGo(("PlayerInfoTAtk" + std::to_string(i)));
+		text->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
+		text->text.setString(L"20");
+		text->text.setCharacterSize(19);
+		text->SetOrigin(Origins::ML);
+		text->SetPosition(bt->GetPosition().x - 60.f, bt->GetPosition().y - 1);
+		text->sortLayer = 112;
+
+		text = (TextGo*)FindGo(("PlayerInfoTDef" + std::to_string(i)));
+		text->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
+		text->text.setString(L"20");
+		text->text.setCharacterSize(19);
+		text->SetOrigin(Origins::ML);
+		text->SetPosition(bt->GetPosition().x + 60.f, bt->GetPosition().y - 1);
+		text->sortLayer = 112;
+
+		text = (TextGo*)FindGo(("PlayerInfoTCost" + std::to_string(i)));
+		text->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
+		text->text.setString(L"20");
+		text->text.setCharacterSize(19);
+		text->SetOrigin(Origins::MR);
+		text->SetPosition(bt->GetPosition().x + 470.f, bt->GetPosition().y -1);
+		text->sortLayer = 112;
+	}
+	
+	bt = (UiButton*)FindGo("PlayerFireB");
+	bt->SetOrigin(Origins::MC);
+	bt->SetPosition(FRAMEWORK.GetWindowSize().x * 0.5f, 555);
+	bt->SetSize(2, 2);
+	bt->sortLayer = 111;
+	bt->OnClick = [this]() {
+		if (selectedSponsorIndex >= 0 && TEAM_MGR.GetPlayerNum() > 4)
+		{
+			TEAM_MGR.FirePlayer(selectedSponsorIndex);
+			UiPlayerInfoOpen(true);
+		}	
+	};
+
+	text = (TextGo*)FindGo("PlayerInfoCount");
+	text->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
+	text->text.setString(L"6/6");
+	text->text.setCharacterSize(20);
+	text->SetOrigin(Origins::ML);
+	text->SetPosition(35,555);
+	text->sortLayer = 112;
+
+	text = (TextGo*)FindGo("FireBText");
+	text->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
+	text->text.setString(stringtable->GetW("FirePlayer"));
+	text->text.setCharacterSize(20);
+	text->SetOrigin(Origins::MC);
+	text->SetPosition(bt->GetPosition());
 	text->sortLayer = 112;
 }
 
@@ -1678,6 +1966,16 @@ void SceneHome::MainUiOpen(MainMenuType Type)
 
 void SceneHome::MainUiClose()
 {
+	for (int i = 0; i < 5; i++)
+	{
+		std::stringstream ss;
+		ss << "MainB" << i;
+		UiButton* bt = (UiButton*)FindGo(ss.str());
+		bt->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/Origin/Sprite/main_menu_button_0.png"));
+		ss << "Text";
+		TextGo* btText = (TextGo*)FindGo(ss.str());
+		btText->text.setFillColor(sf::Color::White);
+	}
 	for (int i = 5; i < 23; i++)
 	{
 		std::stringstream ss;
@@ -2343,7 +2641,7 @@ void SceneHome::MainUiFunc(int index)
 		isMenuOn = true;//임시코드
 		break;
 	case 7:
-		TEAM_MGR.ShowPlayer();
+		UiPlayerInfoOpen();
 		break;
 	case 8:
 		UiSponsorContractOpen(false,true);
@@ -2398,6 +2696,7 @@ void SceneHome::MainUiFunc(int index)
 void SceneHome::SubUiBaseOpen(int index, bool on)
 {
 	auto stringtable = DATATABLE_MGR.Get<StringTable>(DataTable::Ids::String);
+	isPopupOn = on;
 
 	SpriteGo* spr = (SpriteGo*)FindGo("SubUiBack");
 	spr->SetActive(on);
@@ -2413,6 +2712,7 @@ void SceneHome::SubUiBaseOpen(int index, bool on)
 		UiSponsorContractOpen(true, false);
 		UiSponsorContractOpen(false, false);
 		UiEquipOpen(false);
+		UiPlayerInfoOpen(false);
 	};
 	bt->SetActive(on);
 
@@ -2496,7 +2796,7 @@ void SceneHome::UiRecruitOpen(bool on)
 
 	bt = (UiButton*)FindGo("RecruitB");
 	bt->SetActive(on);
-	bt->OnClick = [this]() {
+	bt->OnClick = [this, stringtable]() {
 		if (!TEAM_MGR.CheckRecruitSlot(0))
 		{
 			if (TEAM_MGR.GetMoney() < 10)
@@ -2516,9 +2816,13 @@ void SceneHome::UiRecruitOpen(bool on)
 			{
 				return;
 			}
-			else if (true)
+			else if (!TEAM_MGR.IsCanRecruit())
 			{
-
+				UiRecruitOpen(false);
+				TextGo* text = (TextGo*)FindGo("PopupText");
+				text->text.setString(L"\n" + stringtable->GetW("PlayerIsMax"));
+				popTextFade = maxPopTextFade;
+				text->SetOrigin(Origins::MC);
 			}
 			else
 			{
@@ -2551,33 +2855,241 @@ void SceneHome::UiRecruitOpen(bool on)
 
 	text = (TextGo*)FindGo("RecruitBText");
 	text->SetActive(on);
+	if (recruitAble)
+	{
+		text->text.setString(stringtable->GetW("Recruit"));
+		text->SetOrigin(Origins::MC);
+	}
+	else
+	{
+		text->text.setString(stringtable->GetW("PlayerSearch"));
+		text->SetOrigin(Origins::MC);
+	}
+	
 
 	bt = (UiButton*)FindGo("RecruitCanceleB");
 	bt->SetActive(recruitAble);
+	bt->OnClick = [this]() {
+		TEAM_MGR.DeleteRecruitSlot(0);
+		UiRecruitOpen(true);
+	};
 
 	text = (TextGo*)FindGo("RecruitCancelBText");
 	text->SetActive(recruitAble);
 
 	bt = (UiButton*)FindGo("RecruitCloseB");
 	bt->SetActive(on);
+	bt->OnClick = [this]() {
+		UiRecruitOpen(false);
+	};
 
 	text = (TextGo*)FindGo("RecruitExitBText");
 	text->SetActive(on);
 
 	text = (TextGo*)FindGo("RecruitName");
 	text->SetActive(recruitAble);
+	if (recruitAble)
+	{
+		text->text.setString(player.name);
+		text->SetOrigin(Origins::ML);
+	}
 
 	text = (TextGo*)FindGo("RecruitAge");
 	text->SetActive(recruitAble);
+	if (recruitAble)
+	{
+		text->text.setString(std::to_wstring(player.age)+stringtable->GetW("AgeCount"));
+		text->SetOrigin(Origins::MC);
+	}
 
 	text = (TextGo*)FindGo("RecruitCost");
 	text->SetActive(recruitAble);
+	if (recruitAble)
+	{
+		text->text.setString(std::to_wstring(player.contract_cost));
+		text->SetOrigin(Origins::ML);
+	}
 
 	text = (TextGo*)FindGo("RecruitAtk");
 	text->SetActive(recruitAble);
+	if (recruitAble)
+	{
+		text->text.setString(std::to_wstring(player.attack));
+		text->SetOrigin(Origins::ML);
+	}
 
 	text = (TextGo*)FindGo("RecruitDef");
 	text->SetActive(recruitAble);
+	if (recruitAble)
+	{
+		text->text.setString(std::to_wstring(player.defence));
+		text->SetOrigin(Origins::ML);
+	}
+}
+
+void SceneHome::UiPlayerInfoOpen(bool on)
+{
+	selectedSponsorIndex = -1;
+	SubUiBaseOpen(7, on);
+	auto stringtable = DATATABLE_MGR.Get<StringTable>(DataTable::Ids::String);
+	int playerCount = TEAM_MGR.GetPlayerNum();
+	std::vector<PlayerInfo> playerInfo = TEAM_MGR.GetPlayerInfo();
+	SpriteGo* spr;
+	UiButton* bt;
+	TextGo* text;
+
+	spr = (SpriteGo*)FindGo("SubUiBack");
+	spr->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/Origin/Sprite/squad_ui_bg.png"));
+
+
+	for (int i = 0; i < playerCount; i++)
+	{
+		std::stringstream ss;
+		ss << "PlayerInfoB" << i;
+		bt = (UiButton*)FindGo(ss.str());
+		bt->SetActive(on);
+		bt->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/UiFix/slot_normal&hover_0.png"));
+
+		for (int j = 0; j < playerInfo[i].knownChamp; j++)
+		{
+			SpriteGo* icon;
+			std::stringstream ss2;
+			ss2 << "Player" << i << "InfoCharacterIcons" << j;
+			icon = (SpriteGo*)FindGo(ss2.str());
+			icon->SetActive(on);
+			std::stringstream champ;
+			champ << "graphics/UiFix/character_icons_" <<
+				playerInfo[i].proficiency[j].first << ".png";
+			icon->sprite.setTexture((*RESOURCE_MGR.GetTexture(champ.str())));
+			sf::Vector2u texSize = icon->sprite.getTexture()->getSize();
+			icon->sprite.setTextureRect({ std::max(0,(int)texSize.x / 2 - 12), 0,25,25 });
+
+			ss2 << "Back";
+			spr = (SpriteGo*)FindGo(ss2.str());
+			spr->SetActive(on);
+
+			ss2 << "Line";
+			spr = (SpriteGo*)FindGo(ss2.str());
+			spr->SetActive(on);
+
+			text = (TextGo*)FindGo("PlayerInfoT" + std::to_string(i)
+				+ "ChampLV" + std::to_string(j));
+			text->SetActive(on);
+			text->text.setString(std::to_string(playerInfo[i].proficiency[j].second));
+			text->SetOrigin(Origins::MC);
+		}
+		for (int j = playerInfo[i].knownChamp; j < 4; j++)
+		{
+			SpriteGo* icon;
+			std::stringstream ss2;
+			ss2 << "Player" << i << "InfoCharacterIcons" << j;
+			icon = (SpriteGo*)FindGo(ss2.str());
+			icon->SetActive(false);
+
+			ss2 << "Back";
+			spr = (SpriteGo*)FindGo(ss2.str());
+			spr->SetActive(false);
+
+			ss2 << "Line";
+			spr = (SpriteGo*)FindGo(ss2.str());
+			spr->SetActive(false);
+
+			text = (TextGo*)FindGo("PlayerInfoT" + std::to_string(i)
+				+ "ChampLV" + std::to_string(j));
+			text->SetActive(false);
+		}
+
+
+		text = (TextGo*)FindGo(("PlayerInfoTName" + std::to_string(i)));
+		text->SetActive(on);
+		text->text.setString(playerInfo[i].name);
+		text->SetOrigin(Origins::ML);
+
+		text = (TextGo*)FindGo(("PlayerInfoTAge" + std::to_string(i)));
+		text->SetActive(on);
+		text->text.setString(std::to_string(playerInfo[i].age));
+		text->SetOrigin(Origins::ML);
+
+		text = (TextGo*)FindGo(("PlayerInfoTAtk" + std::to_string(i)));
+		text->SetActive(on);
+		text->text.setString(std::to_string(playerInfo[i].attack));
+		text->SetOrigin(Origins::ML);
+
+		text = (TextGo*)FindGo(("PlayerInfoTDef" + std::to_string(i)));
+		text->SetActive(on);
+		text->text.setString(std::to_string(playerInfo[i].defence));
+		text->SetOrigin(Origins::ML);
+
+		text = (TextGo*)FindGo(("PlayerInfoTCost" + std::to_string(i)));
+		text->SetActive(on);
+		text->text.setString(std::to_string(playerInfo[i].contract_cost));
+		text->SetOrigin(Origins::MR);
+	}
+
+	for (int i = playerCount; i < 6; i++)
+	{
+		std::stringstream ss;
+		ss << "PlayerInfoB" << i;
+		bt = (UiButton*)FindGo(ss.str());
+		bt->SetActive(false);
+
+		for (int j = 0; j < 4; j++)
+		{
+			SpriteGo* icon;
+			std::stringstream ss2;
+			ss2 << "Player" << i << "InfoCharacterIcons" << j;
+			icon = (SpriteGo*)FindGo(ss2.str());
+			icon->SetActive(false);
+
+			ss2 << "Back";
+			spr = (SpriteGo*)FindGo(ss2.str());
+			spr->SetActive(false);
+
+			ss2 << "Line";
+			spr = (SpriteGo*)FindGo(ss2.str());
+			spr->SetActive(false);
+
+			text = (TextGo*)FindGo("PlayerInfoT" + std::to_string(i)
+				+ "ChampLV" + std::to_string(j));
+			text->SetActive(false);
+		}
+
+		text = (TextGo*)FindGo(("PlayerInfoTName" + std::to_string(i)));
+		text->SetActive(false);
+
+		text = (TextGo*)FindGo(("PlayerInfoTAge" + std::to_string(i)));
+		text->SetActive(false);
+
+		text = (TextGo*)FindGo(("PlayerInfoTAtk" + std::to_string(i)));
+		text->SetActive(false);
+
+		text = (TextGo*)FindGo(("PlayerInfoTDef" + std::to_string(i)));
+		text->SetActive(false);
+
+		text = (TextGo*)FindGo(("PlayerInfoTCost" + std::to_string(i)));
+		text->SetActive(false);
+	}
+
+	bt = (UiButton*)FindGo("PlayerFireB");
+	bt->SetActive(on);
+	if (TEAM_MGR.GetPlayerNum() > 4)
+	{
+		bt->sprite.setColor(sf::Color::White);
+	}
+	else
+	{
+		bt->sprite.setColor(sf::Color(100,100,100));
+	}
+
+	text = (TextGo*)FindGo("PlayerInfoCount");
+	text->SetActive(on);
+	std::wstringstream wss;
+	wss << stringtable->GetW("HavePlayers") << TEAM_MGR.GetPlayerNum() << L"/"
+		<< TEAM_MGR.MaxPlayerNum();
+	text->text.setString(wss.str());
+
+	text = (TextGo*)FindGo("FireBText");
+	text->SetActive(on);
 }
 
 void SceneHome::UiTrainingOpen(bool on)
@@ -2973,6 +3485,8 @@ void SceneHome::UiTrainingPlayerSelect(int index)
 			champ << "graphics/UiFix/character_icons_"<< 
 				selectedPlayer.proficiency[i - 2].first << ".png";
 			charIcon->sprite.setTexture((*RESOURCE_MGR.GetTexture(champ.str())));
+			sf::Vector2u texSize = charIcon->sprite.getTexture()->getSize();
+			charIcon->sprite.setTextureRect({ std::max(0,(int)texSize.x / 2 - 12), 0,25,25 });
 		}
 		if (i == 0)
 		{
@@ -3062,7 +3576,9 @@ void SceneHome::UiTrainingPlayerSelect(int index)
 			champ << "graphics/UiFix/character_icons_" <<
 				selectedPlayer.proficiency[i].first << ".png";
 			characterIcons->sprite.setTexture((*RESOURCE_MGR.GetTexture(champ.str())));
-	
+			sf::Vector2u texSize = characterIcons->sprite.getTexture()->getSize();
+			characterIcons->sprite.setTextureRect({ std::max(0,(int)texSize.x / 2 - 12), 0,25,25 });
+			
 			ss << "Back";
 			spr = (SpriteGo*)FindGo(ss.str());
 			spr->SetActive(true);
@@ -3933,11 +4449,6 @@ void SceneHome::TestingCheats()
 	}
 }
 
-void SceneHome::PopText()
-{
-	
-}
-
 void SceneHome::ResetSky()
 {
 	sky = (sky + 1) % 3;
@@ -3953,6 +4464,52 @@ void SceneHome::ResetSky()
 	case 2:
 		spr->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/Origin/Sprite/sky_night.png"));
 		break;
+	}
+
+	SetClouds();
+}
+
+void SceneHome::SetClouds()
+{
+	for (int i = 0; i < 7; i++)
+	{
+		std::stringstream ss;
+		ss << "Clouds" << i;
+		SpriteGo* spr = (SpriteGo*)FindGo(ss.str());
+		ss.str("");
+		ss << "graphics/Origin/Sprite/clouds_" << Utils::RandomRange(0,7)*3 + sky
+			<<".png";
+		spr->sprite.setTexture(*RESOURCE_MGR.GetTexture(ss.str()));
+		spr->sprite.setTextureRect({ 0,0,(int)spr->sprite.getTexture()->getSize().x,(int)spr->sprite.getTexture()->getSize().y});
+		spr->SetOrigin(Origins::MC);
+		spr->SetPosition(Utils::RandomRange(0.f,FRAMEWORK.GetWindowSize().x),
+			Utils::RandomRange(75.f, 460.f));
+		spr->SetSize(2, 2);
+		cloudSpeed[i] = Utils::RandomRange(0.5f, 1.f);
+	}
+}
+
+void SceneHome::UpdateClouds(float dt)
+{
+	for (int i = 0; i < 7; i++)
+	{
+		std::stringstream ss;
+		ss << "Clouds" << i;
+		SpriteGo* spr = (SpriteGo*)FindGo(ss.str());
+		spr->SetPosition(spr->GetPosition().x - (dt * 100.f * cloudSpeed[i]), spr->GetPosition().y);
+		if (spr->GetPosition().x < -100.f)
+		{
+			ss.str("");
+			ss << "graphics/Origin/Sprite/clouds_" << Utils::RandomRange(0, 7) * 3 + sky
+				<< ".png";
+			spr->sprite.setTexture(*RESOURCE_MGR.GetTexture(ss.str()));
+			spr->sprite.setTextureRect({ 0,0,(int)spr->sprite.getTexture()->getSize().x,(int)spr->sprite.getTexture()->getSize().y });
+			spr->SetOrigin(Origins::MC);
+			spr->SetPosition(FRAMEWORK.GetWindowSize().x+100,
+				Utils::RandomRange(75.f, 460.f));
+			spr->SetSize(2, 2);
+			cloudSpeed[i] = Utils::RandomRange(0.5f, 1.f);
+		}
 	}
 }
 

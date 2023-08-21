@@ -280,3 +280,9 @@ VacationDay,선수단 전체 휴가
 Recruit,영입
 PlayerSearch,탐색 (10g)
 Cancel,취소
+PlayerIsMax,선수는 6명까지 고용 가능합니다
+FirePlayer,방출
+HavePlayers,보유선수: 
+AmatureLeague,아마추어 리그
+Win,승
+Lose,패

@@ -33,6 +33,7 @@ void TextGo::SetOrigin(float x, float y)
 	text.setOrigin(x, y);
 }
 
+
 void TextGo::Init()
 {
 

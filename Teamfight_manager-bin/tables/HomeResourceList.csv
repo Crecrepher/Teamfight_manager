@@ -295,3 +295,10 @@ RESOURCE_TYPES 0.TEX 1.FONT 2.SOUND 3.ANI,RESOURCE_PATH
 0,graphics/Origin/Sprite/equipment_making_slot_bg_0.png
 0,graphics/Origin/Sprite/equipment_making_slot_bg_1.png
 0,graphics/UiFix/player_recruit_card.png
+0,graphics/Origin/Sprite/squad_ui_bg.png
+0,graphics/Origin/Sprite/slot_normal&hover_0.png
+0,graphics/Origin/Sprite/slot_normal&hover_1.png
+0,graphics/UiFix/slot_normal&hover_0.png
+0,graphics/UiFix/slot_normal&hover_1.png
+0,graphics/UiFix/house_bg.png
+0,graphics/Origin/Sprite/sponser_logo_new_3.png

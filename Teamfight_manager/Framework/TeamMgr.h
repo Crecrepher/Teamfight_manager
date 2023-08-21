@@ -119,6 +119,8 @@ protected:
 	TeamMgr() = default;
 	virtual	~TeamMgr() = default;
 
+	int saveSlotNum = 0;
+
 	int ableChamp = 9; //Ã¨ÇÇ¾ð°¡´É
 	int ableCharacteristic = 36; //Æ¯¼º°¹¼ö
 
@@ -170,17 +172,25 @@ public:
 	void Init();
 	void InitGrowTable();
 
+	int GetWin() { return win; };
+	int GetLose() { return lose; };
+
 	void ShowPlayer();
 	void Recruit(int index, PlayerInfo player);
 	void Employ(int index);
 	int GetPlayerNum() { return playerNum; }
+	int MaxPlayerNum() { return MaxPlayer; }
 	std::vector<PlayerInfo> GetPlayerInfo() { return player; }
+	void FirePlayer(int index);
+
+	bool CheckRecruitSlot(int index) { return recruiting_players[index].first; }
+	void DeleteRecruitSlot(int index);
+	PlayerInfo GetRecruitSlotInfo(int index) { return recruiting_players[index].second; }
+	bool IsCanRecruit() { return playerNum < MaxPlayer; }
+
 	std::vector<TrainingInfo> GetTrainingInfo() { return playerTraining; }
 	void SetTrainingInfo(std::vector<TrainingInfo> trainingInfo) { playerTraining = trainingInfo; }
 	int GetMaxTrainingPoint() { return maxTrainingPoint; }
-
-	bool CheckRecruitSlot(int index) { return recruiting_players[index].first; }
-	PlayerInfo GetRecruitSlotInfo(int index) { return recruiting_players[index].second; }
 
 	int GetMoney() { return money; }
 	void EarnMoney(int money) { this->money += money; }
@@ -219,7 +229,7 @@ public:
 	int UseParts(int type, int count) { return gearParts[type] = std::max(gearParts[type] - count, 0); }
 	void OpenItem(int type, int code) { gear[type][code] = true; }
 
-	void SaveLoad();
+	void SaveLoad(int saveSlot);
 };
 
 #define TEAM_MGR (TeamMgr::Instance())

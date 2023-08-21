@@ -96,6 +96,20 @@ void TeamMgr::Employ(int index)
 	playerTraining.push_back(TrainingInfo());
 }
 
+void TeamMgr::FirePlayer(int index)
+{
+	std::vector<PlayerInfo>::iterator it = player.begin();
+	it += index;
+	player.erase(it);
+	playerNum--;
+}
+
+void TeamMgr::DeleteRecruitSlot(int index) 
+{
+	recruiting_players[index].second = PlayerInfo();
+	recruiting_players[index].first = false;
+}
+
 TeamMgr::Schedule TeamMgr::GetSchedule(int date)
 {
 	std::vector<int> vacation = { 27,28,29,32,33,34,43,44,45,46 };
@@ -312,9 +326,11 @@ void TeamMgr::ContractSponsor(Sponsor sponsor)
 	contractedSponsor++;
 }
 
-void TeamMgr::SaveLoad()
+void TeamMgr::SaveLoad(int saveSlot)
 {
-	std::ifstream is{ "OWSave.dat", std::ofstream::binary };
+	std::stringstream ss;
+	ss << "TFMSave" << saveSlotNum << ".dat";
+	std::ifstream is{ ss.str(), std::ofstream::binary};
 	if (is.fail()) {
 		std::cout << "세이브 파일이 없습니다" << std::endl;
 		return;

@@ -16,8 +16,11 @@ public:
 		GAME,
 		SYSTEM,
 	};
+
 protected:
 	bool cheatMode = true;
+
+	int selectedMenu = -1;
 
 	bool backClick = true;
 	bool isMenuOn = false;
@@ -35,6 +38,7 @@ protected:
 	int craftTime = 0;
 
 	int sky = 0;
+	std::vector<float> cloudSpeed;
 public:
 	SceneHome();
 	virtual ~SceneHome() override;
@@ -55,6 +59,7 @@ public:
 	void MakeMainUi();
 	void MakeSubUi();
 	void MakeSubUiRecruit();
+	void MakeSubUiPlayerInfo();
 	void MakeSubUiTraining();
 	void MakeSubUiSponsorContract();
 	void MakeSubUiEquip();
@@ -67,6 +72,8 @@ public:
 	void SubUiBaseOpen(int index,bool on = true);
 
 	void UiRecruitOpen(bool on = true);
+
+	void UiPlayerInfoOpen(bool on = true);
 
 	void UiTrainingOpen(bool on = true);
 	void UiTrainingPlayerSelect(int index);
@@ -94,9 +101,10 @@ public:
 
 	void UpdatePopDate();
 	void PopTextUpdate(float dt);
-	void PopText();
 
 	void ResetSky();
+	void SetClouds();
+	void UpdateClouds(float dt);
 
 	bool isPartsEmpty();
 	
