@@ -388,11 +388,13 @@ void SceneGame::ChampionPick(int id, Team team)
 {
 	Champion* champ = championPool.Get();
 	champ->SetName(std::to_string((int)team) + "ÆÀ " + std::to_string(step) + "¼±¼ö");
-	champ->SetOrder(TagetingOrder::Default);
+	champ->SetOrder(TargetingOrder::Default);
 	champ->SetDieChampion(&cemetery);
 	champ->ChangeStance(ChampionStance::None);
 	champ->SetOrigin(Origins::MC);
 	champ->SetSacleX(1);
+	champ->SetUltiTimer(Utils::RandomRange(20.f, 40.f));
+	
 
 	switch (team)
 	{
@@ -539,7 +541,7 @@ void SceneGame::BattlePhase(float dt)
 	}
 	if (INPUT_MGR.GetKeyDown(sf::Keyboard::Numpad1))
 	{
-		speedUp = 3.f;
+		speedUp = 2.f;
 	}
 	if (INPUT_MGR.GetKeyDown(sf::Keyboard::Numpad2))
 	{
@@ -558,7 +560,7 @@ void SceneGame::BattlePhase(float dt)
 	{
 		for (auto champ : championPool.GetUseList())
 		{
-			champ->BattleUpdate(dt*speedUp);
+			champ->BattleUpdate(dt*1.5f*speedUp);
 		}
 	}
 	if (battleTimer <= 0)
