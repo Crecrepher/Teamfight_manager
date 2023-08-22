@@ -36,7 +36,7 @@ protected:
 	Team team;
 
 	ChampionStance currentStance;
-	TagetingOrder currentOrder;
+	TargetingOrder currentOrder;
 	
 	State champMgrState;
 	ChampionSkill skillMgrSkill;
@@ -63,6 +63,7 @@ protected:
 	float bind = 0.f;
 	bool air = false;
 	bool limit = false;
+	bool interaction = false;
 
 	bool ActiveUltiSkill = true;
 	float UesUltiSkillTiming = 0.f;
@@ -104,7 +105,7 @@ public:
 	void SetState(State path);
 	void SetSkill(ChampionSkill code);
 	void ReleaseSkill();
-	void SetOrder(TagetingOrder order) { this->currentOrder = order; }
+	void SetOrder(TargetingOrder order) { this->currentOrder = order; }
 	void SetSacleX(float x);
 	float GetSacleX() { return this->sprite.getScale().x; }
 	void SetTeamColor(Team color) { team = color; }
@@ -116,16 +117,22 @@ public:
 	void HealCalculate(float attack);
 	float GetHpPercent() { return this->GetHp() / this->currentState.maxHp; }
 	float GetCoolTimePercent() { return this->skillTimer / this->currentSkill[0].skillCoolTime; }
+	float GetUltiTimer() {return this->UesUltiSkillTiming;}
+	void SetUltiTimer(float num) { this->UesUltiSkillTiming = num; }
+	void SetInteraction(bool on) { this->interaction = on; }
+	bool GetInteranction() { return this->interaction; }
 
 	// 타겟팅
 	void FindTaget();
-	void TagetOrderSR();
-	void TagetOrderCP();
-	void TagetOrderH();
-	void TagetOrderRH();
-	void TagetOrderLR();
-	void TagetOrderCIE(int code, float range, float value);
-	void TagetOrderCIT(int code, float range, float value);
+	void TargetOrderSR();
+	void TargetOrderCP();
+	void TargetOrderH();
+	void TargetOrderRH();
+	void TargetOrderLR();
+	void TargetOrderCIE(int code, float range, float value);
+	void TargetOrderCIT(int code, float range, float value);
+	void TargetOrderCITB(int code, float range, BuffState* state);
+	void TargetAggro();
 
 	float GetRowHealth();
 
@@ -145,8 +152,10 @@ public:
 
 	//Skill Mgr 상호작용
 	void UseSkill();
+	void UseUltiSkill();
 	void SkillChangeIdle();
 	Champion* GetTarget();
+	void SetTarget(Champion* champ);
 	void SetBind(float t) { this->bind = t; }
 	float GetMoveTime() { return this->sMoveT; }
 	void SetMoveTime(float t) { this->sMoveT = t; }
@@ -163,6 +172,11 @@ public:
 	sf::Vector2f GetStartPos() { return this->startPos; }
 	sf::Vector2f GetEndPos() { return this->endPos; }
 	void SetBuff(BuffState* state);
+	void SetMyTeamBuff(BuffState* state);
+	float GetBarrier();
+	void TargetRangeDamage(float range, float value);
+	bool CurrBuffEmpty();
+	void BuffUpdate(float dt);
 
 
 	// 선수에게 넘길 스테이터스

@@ -81,20 +81,29 @@ void Champion::BattleUpdate(float dt)
 
 	UpdateState(dt);
 
-	this->skillTimer += dt;
+	this->skillTimer += dt/1.5f;
+	this->UesUltiSkillTiming -= dt / 1.5f;
+
+	if (this->UesUltiSkillTiming <= 0.f)
+	{
+		this->UesUltiSkillTiming = 0.f;
+	}
+
 	this->attackDelay -= dt * this->currentState.attackSpeed;
 
 
 	//일시적 평타버그해결용 *******나중에지워야함*******
 	////////////////////////////////////////////////////////
 	///////////////////////지워주세요///////////////////////
-	if (currentState.skillCode1 != 1 &&
-		currentState.skillCode1 != 4 &&
-		currentState.skillCode1 != 12 &&
-		currentState.skillCode1 != 6 &&
-		currentState.skillCode1 !=14)
+	if (currentState.skillCode1 == 10 &&
+		currentState.skillCode1 == 18)
 	{
 		skillTimer = 0;
+	}
+
+	if (this->currentState.charId !="knight" && this->currentState.charId != "monk")
+	{
+		ActiveUltiSkill = false;
 	}
 	////////////////////////////////////////////////////////
 
@@ -114,19 +123,21 @@ void Champion::BattleUpdate(float dt)
 
 			if (this->bloodingStack == 0||this->GetHp()==0)
 			{
-				std::cout << "dot 끝" << std::endl;
-				this->dotDamage = nullptr;
+				//std::cout << "dot 끝" << std::endl;
+				this->dotDamage == nullptr;
 				return;
 			}
 
-			float damage = 3.f;
+			float damage = ((this->dotDamage->currentState.attack/15.f) * 100 + 99 +
+				this->currentState.defend) / (100 + this->currentState.defend);
+
 			if (damage >= this->GetHp())
 			{
 				damage = this->GetHp();
 			}
 
 			this->dotDamage->total_Damage += damage;
-			std::cout << this->dotDamage->GetName() << " 입힌 피해 : " << this->dotDamage->total_Damage << std::endl;
+			//std::cout << this->dotDamage->GetName() << " 입힌 피해 : " << this->dotDamage->total_Damage << std::endl;
 			this->Hit(damage);
 
 			if (this->GetHp() == 0)
@@ -134,10 +145,10 @@ void Champion::BattleUpdate(float dt)
 				this->dotDamage->kill++;
 				(*this->dotDamage->teamScore)++;
 				this->bloodingStack = 0;
-				std::cout << this->dotDamage->GetName() << " 킬 : " << this->dotDamage->kill << std::endl;
+				//std::cout << this->dotDamage->GetName() << " 킬 : " << this->dotDamage->kill << std::endl;
 				return;
 			}
-			std::cout << "dot deal" << damage << std::endl;
+			//std::cout << "dot deal" << damage << std::endl;
 		}
 	}
 
@@ -153,6 +164,24 @@ void Champion::BattleUpdate(float dt)
 			this->currentState.animaition.Stop();
 			this->currentState.animaition = this->champMgrState.animaition;
 			this->currentState.animaition.SetTarget(&this->sprite);
+
+			if(!this->currentBuff.empty())
+			{ 
+
+				for (auto it = this->currentBuff.begin(); it != this->currentBuff.end(); ++it)
+				{
+					std::cout << "캐릭터 :" << "\t" << this->currentState.charId << std::endl;
+					std::cout << "Delete All" << std::endl;
+					std::cout << "사용자 : " << "\t" << this << std::endl;
+					std::cout << "BuffType : " << "\t" << (int)(*it)->GetType() << std::endl;
+					std::cout << "주소값 : " << "\t" << (*it) << std::endl << std::endl;
+					
+					delete (*it);
+				}
+				this->currentBuff.clear();
+			}
+
+
 			auto it = std::find(myTeam->begin(), myTeam->end(), this);
 			this->cemetery->push_back(*it);
 			this->myTeam->erase(it);
@@ -173,7 +202,7 @@ void Champion::BattleUpdate(float dt)
 	
 	if (this->currentState.animaition.GetCurrentClipId() != "Die")
 	{
-		for (auto deBuff : currentBuff)
+		for (auto deBuff : this->currentBuff)
 		{
 			if (deBuff->GetType() == BuffType::STUN)
 			{
@@ -181,6 +210,8 @@ void Champion::BattleUpdate(float dt)
 			}
 		}
 	}
+
+	
 
 	switch (this->currentStance)
 	{
@@ -201,11 +232,17 @@ void Champion::BattleUpdate(float dt)
 	}
 	case ChampionStance::Attack:
 	{
+
 		Attack(dt);
 		break;
 	}
 	case ChampionStance::Skill:
 	{
+		if (this->currentState.charId == "fighter" || this->currentState.charId == "berserker" || this->currentState.charId == "priest")
+		{
+			Skill(dt / 1.5f);
+			break;
+		}
 		Skill(dt);
 		break;
 	}
@@ -266,9 +303,17 @@ void Champion::Idle(float dt)
 	{
 		SetSacleX(Utils::Normalize(target->GetPosition() - this->position).x);
 
-		if (this->currentState.charId=="ninja")
+		if (this->currentState.charId=="ninja"|| this->currentState.charId=="knight"|| this->currentState.charId == "priest")
 		{
 			if (this->skillTimer >= this->currentSkill[0].skillCoolTime && this->currentSkill[0].skillCoolTime != 0.f)
+			{
+				ChangeStance(ChampionStance::Skill);
+				return;
+			}
+		}
+		else if (this->currentState.charId == "berserker"|| this->currentState.charId == "shieldbearer")
+		{
+			if (this->skillTimer >= this->currentSkill[0].skillCoolTime)
 			{
 				ChangeStance(ChampionStance::Skill);
 				return;
@@ -323,10 +368,43 @@ void Champion::Move(float dt)
 
 void Champion::Action(float dt)
 {
-	if (abs(Utils::Distance(this->GetPosition(), this->target->GetPosition())) <= this->currentState.attackRange && this->skillTimer >= this->currentSkill[0].skillCoolTime && this->currentSkill[0].skillCoolTime!=0.f)
+	if (abs(Utils::Distance(this->GetPosition(), this->target->GetPosition())) <= this->currentState.attackRange && this->UesUltiSkillTiming == 0.f && this->ActiveUltiSkill==true)
 	{
+		ChangeStance(ChampionStance::UltimateSkill);
+		return;
+	}
+
+	if (abs(Utils::Distance(this->GetPosition(), this->target->GetPosition())) <= this->currentState.attackRange && this->skillTimer >= this->currentSkill[0].skillCoolTime)
+	{
+		if(this->currentState.charId=="berserker"&&this->attackDelay>0.f)
+		{ 
+			return;
+		}
+		else if (this->currentState.charId == "shieldbearer" && this->attackDelay < 0.f)
+		{
+			this->ChangeStance(ChampionStance::Attack);
+			return;
+		}
 		ChangeStance(ChampionStance::Skill);
 		return;
+	}
+	else if (abs(Utils::Distance(this->GetPosition(), this->target->GetPosition())) <= this->currentState.attackRange && this->attackDelay <= 0.f && this->currentState.charId=="priest")
+	{
+		if (this->currentState.charId == "priest" && this->GetTarget()->currentState.maxHp == this->GetTarget()->GetHp())
+		{
+			ChangeStance(ChampionStance::Idle);
+			return;
+		}
+		else if (this->currentState.charId == "priest" && this->GetTarget()->GetHp() == 0)
+		{
+			ChangeStance(ChampionStance::Idle);
+			return;
+		}
+		else
+		{
+			ChangeStance(ChampionStance::Attack);
+			return;
+		}
 	}
 	else if (abs(Utils::Distance(this->GetPosition(), this->target->GetPosition())) <= this->currentState.attackRange&&this->attackDelay<=0.f)
 	{
@@ -346,15 +424,6 @@ void Champion::Attack(float dt)
 	this->sMoveT += dt * this->currentState.attackSpeed;
 	this->SetOrigin(Origins::MC);
 
-	if (this->currentState.charId == "priest" && this->target->currentState.maxHp == this->target->hp)
-	{
-		return;
-	}
-	else if (this->currentState.charId == "priest" && this->target->hp == 0)
-	{
-		return;
-	}
-
 	if (this->currentState.animaition.GetCurrentClipId() != "Attack")
 	{
 		this->currentState.animaition.Play("Attack");
@@ -363,14 +432,14 @@ void Champion::Attack(float dt)
 
 	if (!this->currentState.animaition.GetLastFrame() && this->GetTarget()->GetHp() == 0)
 	{
-		std::cout << "이미 죽음" << std::endl;
+		//std::cout << "이미 죽음" << std::endl;
 		ChangeStance(ChampionStance::Idle);
 		return;
 	}
 
 	if (this->currentState.animaition.GetLastFrame())
 	{
-		std::cout << "공격" << std::endl;
+		//std::cout << "공격" << std::endl;
 		if (this->currentState.charId == "priest")
 		{
 			HealCalculate(this->currentState.attack);
@@ -379,7 +448,7 @@ void Champion::Attack(float dt)
 		{
 			DamageCalculate(this->currentState.attack);
 		}
-		attackDelay = 1.f;
+		this->attackDelay = 1.f;
 		ChangeStance(ChampionStance::Idle);
 		return;
 	}
@@ -387,9 +456,14 @@ void Champion::Attack(float dt)
 
 void Champion::Skill(float dt)
 {
+	if (this->currentState.charId == "berserker"&& abs(Utils::Distance(this->GetPosition(), this->target->GetPosition())) > this->currentState.attackRange)
+	{
+		ChangeStance(ChampionStance::Move);
+		return;
+	}
 	this->currentState.animaition.Update(dt*this->currentState.attackSpeed);
-	this->sMoveT += dt * this->currentState.attackSpeed;
 	this->SetOrigin(Origins::MC);
+	this->sMoveT += dt * this->currentState.attackSpeed;
 	SKILL_MGR.ActiveSkill(this->currentState.skillCode1, this);
 }
 
@@ -447,8 +521,8 @@ void Champion::SetSacleX(float x)
 void Champion::UltimateSkill(float dt)
 {
 	this->currentState.animaition.Update(dt * this->currentState.attackSpeed);
-	this->sMoveT += dt * this->currentState.attackSpeed;
 	this->SetOrigin(Origins::MC);
+	this->sMoveT += dt * this->currentState.attackSpeed;
 	SKILL_MGR.ActiveSkill(this->currentState.skillCode2, this);
 }
 
@@ -489,8 +563,8 @@ void Champion::ChampionDie()
 {
 	this->reviveTimer = 3.f;
 	this->death++;
-	std::cout << this->GetName() << "챔피언 죽음" << std::endl;
-	std::cout << this->GetName() << " 데스 : " << this->death << std::endl;
+	//std::cout << this->GetName() << "챔피언 죽음" << std::endl;
+	//std::cout << this->GetName() << " 데스 : " << this->death << std::endl;
 	this->sprite.setColor(sf::Color(0, 0, 0, 0));
 	ChangeStance(ChampionStance::Dead);
 	return;
@@ -513,48 +587,108 @@ void Champion::UpdateState(float dt)
 
 			if ((*it)->GetCount() == 0)
 			{
+				if ((*it)->GetType() == BuffType::AGGRO)
+				{
+					this->SetOrder(TargetingOrder::Default);
+				}
+
+					std::cout << "캐릭터 :" << "\t" << this->currentState.charId << std::endl;
+					std::cout << "erase Buff" << std::endl;
+					std::cout << "사용자 : " << "\t" << this << std::endl;
+					std::cout << "BuffType : " << "\t" << (int)(*it)->GetType() << std::endl;
+					std::cout << "주소값 : " << "\t" << (*it) << std::endl << std::endl;
+
 				delete (*it);
 				it = this->currentBuff.erase(it);
+				continue;
 			}
-			else
+
+			if ((*it)->GetType() == BuffType::BARRIER && (*it)->GetValue() == 0)
 			{
+				std::cout << "캐릭터 :" << "\t" << this->currentState.charId << std::endl;
+				std::cout << "erase barrier" << std::endl;
+				std::cout << "사용자 : " << "\t" << this << std::endl;
+				std::cout << "BuffType : " << "\t" << (int)(*it)->GetType() << std::endl;
+				std::cout << "주소값 : " << "\t" << (*it) << std::endl << std::endl;
 
-				switch ((*it)->GetType())
-				{
-				case BuffType::MAXHP:
-				{
-					this->currentState.maxHp += (*it)->GetValue();
-					break;
-				}
-				case BuffType::ATTACK:
-				{
-					this->currentState.attack += (*it)->GetValue();
-					break;
-				}
-				case BuffType::DEFEND:
-				{
-					this->currentState.defend += (*it)->GetValue();
-					break;
-				}
-				case BuffType::ATTACKSPEED:
-				{
-					this->currentState.attackSpeed += (*it)->GetValue();
-					break;
-				}
-				case BuffType::ATTACKRANGE:
-				{
-					this->currentState.attackRange += (*it)->GetValue();
-					break;
-				}
-				case BuffType::SPEED:
-				{
-					this->currentState.speed += (*it)->GetValue();
-					break;
-				}
-				}
-
-				++it;
+				delete (*it);
+				it = this->currentBuff.erase(it);
+				continue;
 			}
+			switch ((*it)->GetType())
+			{
+			case BuffType::MAXHP:
+			{
+				this->currentState.maxHp += (*it)->GetValue();
+				break;
+			}
+			case BuffType::ATTACK:
+			{
+				this->currentState.attack += (*it)->GetValue();
+				break;
+			}
+			case BuffType::DEFEND:
+			{
+				this->currentState.defend += (*it)->GetValue();
+				break;
+			}
+			case BuffType::ATTACKSPEED:
+			{
+				this->currentState.attackSpeed += (*it)->GetValue();
+				break;
+			}
+			case BuffType::ATTACKRANGE:
+			{
+				this->currentState.attackRange += (*it)->GetValue();
+				break;
+			}
+			case BuffType::SPEED:
+			{
+				this->currentState.speed += (*it)->GetValue();
+				break;
+			}
+			case BuffType::BARRIER:
+			{
+				if ((*it)->GetSide())
+				{
+					switch ((*it)->GetSideType())
+					{
+					case BuffType::MAXHP:
+					{
+						this->currentState.maxHp += (*it)->GetSideValue();
+						break;
+					}
+					case BuffType::ATTACK:
+					{
+						this->currentState.attack += (*it)->GetSideValue();
+						break;
+					}
+					case BuffType::DEFEND:
+					{
+						this->currentState.defend += (*it)->GetSideValue();
+						break;
+					}
+					case BuffType::ATTACKSPEED:
+					{
+						this->currentState.attackSpeed += (*it)->GetSideValue();
+						break;
+					}
+					case BuffType::ATTACKRANGE:
+					{
+						this->currentState.attackRange += (*it)->GetSideValue();
+						break;
+					}
+					case BuffType::SPEED:
+					{
+						this->currentState.speed += (*it)->GetSideValue();
+						break;
+					}
+					}
+				}
+				break;
+			}
+			}
+			++it;
 		}
 	}
 }
@@ -566,11 +700,19 @@ void Champion::UseSkill()
 	this->currentState.animaition.Play("Skill");
 }
 
+void Champion::UseUltiSkill()
+{
+	this->currentState.animaition = this->currentSkill[1].animaition;
+	this->currentState.animaition.SetTarget(&this->sprite);
+	this->currentState.animaition.Play("UltiSkill");
+}
+
 void Champion::SkillChangeIdle()
 {
 	this->skillTimer = 0.f;
 	this->currentState.animaition = this->champMgrState.animaition;
 	this->currentState.animaition.SetTarget(&this->sprite);
+	this->attackDelay = 1.0f;
 	ChangeStance(ChampionStance::Idle);
 }
 
@@ -579,9 +721,135 @@ Champion* Champion::GetTarget()
 	return this->target;
 }
 
+void Champion::SetTarget(Champion* champ)
+{
+	this->target = champ;
+}
+
 void Champion::SetBuff(BuffState* state)
 {
+
+	auto it = std::find(currentBuff.begin(), currentBuff.end(), state);
+
+	std::cout << "캐릭터 :" << "\t" << this->currentState.charId << std::endl;
+		std::cout << "SetBuff" << std::endl;
+		std::cout << "사용자 : " << "\t" << this << std::endl;
+		std::cout << "BuffType : " << "\t" << (int)state->GetType() << std::endl;
+		std::cout << "주소값 : " << "\t" << state << std::endl << std::endl;
+
 	this->currentBuff.push_back(state);
+}
+
+void Champion::SetMyTeamBuff(BuffState* state)
+{
+	for (auto team : *this->myTeam)
+	{
+
+		BuffState* cState = new BuffState;
+
+		*cState = *state;
+
+		std::cout << "캐릭터 :" << "\t" << this->currentState.charId << std::endl;
+			std::cout << "사용자 : " << "\t" << this << std::endl;
+			std::cout << "BuffType : " << "\t" << (int)state->GetType() << std::endl;
+			std::cout << "주소값 : " << "\t" << cState << std::endl << std::endl;
+
+		team->currentBuff.push_back(cState);
+	}
+	delete state;
+}
+
+float Champion::GetBarrier()
+{
+	float total_Barrier = 0.f;
+	for (auto it = this->currentBuff.begin(); it != this->currentBuff.end(); ++it)
+	{
+		if ((*it)->GetType() == BuffType::BARRIER)
+		{
+			total_Barrier = (*it)->GetValue();
+		}
+	}
+
+	return total_Barrier;
+}
+
+void Champion::TargetRangeDamage(float range, float value)
+{
+	if (this->enemyTeam->empty())
+	{
+		return;
+	}
+
+	for (auto enemy : *this->enemyTeam)
+	{
+		if (abs(Utils::Distance(this->GetTarget()->GetPosition(), enemy->GetPosition())) <= range)
+		{
+			float damage = (value * 100 + 99 +
+				enemy->currentState.defend) / (100 + enemy->currentState.defend);
+			if (damage <= 0.f)
+			{
+				damage = 0.f;
+			}
+			else if (damage >= enemy->GetHp() + enemy->GetBarrier())
+			{
+				damage = enemy->GetHp() + enemy->GetBarrier();
+			}
+			this->total_Damage += damage;
+			//std::cout << this->GetName() << " mu 입힌 피해 : " << enemy->currentState.charId << std::endl;
+			enemy->Hit(damage);
+			if (enemy->GetHp() == 0)
+			{
+				this->kill++;
+				(*this->teamScore)++;
+				//std::cout << this->GetName() << " 킬 : " << this->kill << std::endl;
+				return;
+			}
+		}
+	}
+}
+
+bool Champion::CurrBuffEmpty()
+{
+	if (this->currentBuff.empty())
+	{
+		return true;
+	}
+
+	return false;
+}
+
+void Champion::BuffUpdate(float dt)
+{
+	if (!this->currentBuff.empty())
+	{
+		for (auto it = this->currentBuff.begin(); it != this->currentBuff.end(); ++it)
+		{
+			if ((*it)->GetCount() > 900)
+			{
+				switch ((*it)->GetType())
+				{
+				case BuffType::ATTACK:
+				{
+					(*it)->SetValue(3.f / dt);
+					(*it)->SetCount(999);
+					break;
+				}
+				case BuffType::ATTACKSPEED:
+				{
+					(*it)->SetValue(0.2f / dt);
+					(*it)->SetCount(999);
+					break;
+				}
+				case BuffType::SPEED:
+				{
+					(*it)->SetValue(0.8f / dt);
+					(*it)->SetCount(999);
+					break;
+				}
+				}
+			}
+		}
+	}
 }
 
 void Champion::SetShadow()
@@ -608,7 +876,7 @@ void Champion::SetHpGuage()
 	Guage->SetOrigin(Origins::MC);
 	Guage->SetChampion(this);
 	Guage->SetEffectType(1);
-	Guage->SetHight(16.f);
+	Guage->SetHight(23.f);
 	Guage->sortLayer = 4;
 	Guage->sortOrder = 2;
 	SCENE_MGR.GetCurrScene()->AddGo(Guage);
@@ -619,7 +887,7 @@ void Champion::SetHpGuage()
 	hpGuageBg->SetOrigin(Origins::MC);
 	hpGuageBg->SetChampion(this);
 	hpGuageBg->SetEffectType(1);
-	hpGuageBg->SetHight(16.f);
+	hpGuageBg->SetHight(23.f);
 	hpGuageBg->sortLayer = 4;
 	hpGuageBg->sortOrder = 0;
 	SCENE_MGR.GetCurrScene()->AddGo(hpGuageBg);
@@ -639,7 +907,7 @@ void Champion::SetHpGuage()
 	hpGuage->SetOrigin(Origins::ML);
 	hpGuage->SetChampion(this);
 	hpGuage->SetEffectType(5);
-	hpGuage->SetHight(15.f);
+	hpGuage->SetHight(22.f);
 	hpGuage->SetWidth(-14.5f);
 	hpGuage->sortLayer = 4;
 	hpGuage->sortOrder = 1;
@@ -652,7 +920,7 @@ void Champion::SetHpGuage()
 	coolGuage->SetOrigin(Origins::ML);
 	coolGuage->SetChampion(this);
 	coolGuage->SetEffectType(6);
-	coolGuage->SetHight(17.f);
+	coolGuage->SetHight(24.f);
 	coolGuage->SetWidth(-14.5f);
 	coolGuage->sortLayer = 4;
 	coolGuage->sortOrder = 1;
@@ -677,7 +945,43 @@ void Champion::SetDieChampion(std::vector<Champion*>* cemetery)
 void Champion::Hit(float attack)
 {
 	this->total_OnHit += attack;
-	std::cout << this->GetName() << " 당한 피해 : " << this->total_OnHit << std::endl;
+	//std::cout << this->GetName() << " 당한 피해 : " << this->total_OnHit << std::endl;
+	if (this->GetBarrier() > 0.f)
+	{
+		if (this->GetBarrier() >= attack)
+		{
+			for (auto it = this->currentBuff.begin(); it != this->currentBuff.end(); )
+			{
+				if ((*it)->GetType() == BuffType::BARRIER)
+				{
+					(*it)->CalculateValue(-attack);
+					//std::cout << "배리어 수치" << " " << (*it)->GetValue()<<std::endl;
+					return;
+				}
+				else
+				{
+					++it;
+				}
+			}
+		}
+		else if (this->GetBarrier() < attack)
+		{
+			attack -= this->GetBarrier();
+			for (auto it = this->currentBuff.begin(); it != this->currentBuff.end(); )
+			{
+				if ((*it)->GetType() == BuffType::BARRIER)
+				{
+					(*it)->SetValue(0.f);
+					//std::cout << "배리어 수치" << " " << (*it)->GetValue();
+					break;
+				}
+				else
+				{
+					++it;
+				}
+			}
+		}
+	}
 	this->hp -= attack;
 }
 
@@ -690,22 +994,59 @@ void Champion::DamageCalculate(float attack)
 {
 	float damage = (attack * 100 + 99 +
 		this->target->currentState.defend) / (100 + this->target->currentState.defend);
+	
+	for (auto enemy : *this->enemyTeam)
+	{
+		if (enemy->currentState.charId == "shieldbearer" && this->GetTarget()->GetInteranction())
+		{
+			Champion* temp = this->GetTarget();
+			this->target = enemy;
+
+			float interactionDamage = damage / 3;
+
+			damage -= interactionDamage;
+
+			if (interactionDamage <= 0.f)
+			{
+				interactionDamage = 0.f;
+			}
+			else if (interactionDamage >= this->target->GetHp() + this->target->GetBarrier())
+			{
+				interactionDamage = this->target->GetHp() + this->target->GetBarrier();
+			}
+			this->total_Damage += interactionDamage;
+			//std::cout << this->GetName() << " 입힌 피해 : " << this->total_Damage << std::endl;
+			this->target->Hit(interactionDamage);
+			if (this->target->GetHp() == 0)
+			{
+				this->kill++;
+				(*this->teamScore)++;
+				//std::cout << this->GetName() << " 킬 : " << this->kill << std::endl;
+				this->target=temp;
+				break;
+			}
+			this->target = temp;
+		}
+	}
+	
 	if (damage <= 0.f)
 	{
 		damage = 0.f;
 	}
-	else if (damage >= this->target->GetHp())
+
+	else if (damage >= this->target->GetHp()+this->target->GetBarrier())
 	{
-		damage = this->target->GetHp();
+		damage = this->target->GetHp() + this->target->GetBarrier();
 	}
+	
 	this->total_Damage += damage;
-	std::cout << this->GetName() << " 입힌 피해 : " << this->total_Damage << std::endl;
+	//std::cout << this->GetName() << " 입힌 피해 : " << this->total_Damage << std::endl;
 	this->target->Hit(damage);
 	if (this->target->GetHp() == 0)
 	{
 		this->kill++;
 		(*this->teamScore)++;
-		std::cout << this->GetName() << " 킬 : " << this->kill << std::endl;
+		//std::cout << this->GetName() << " 킬 : " << this->kill << std::endl;
 		return;
 	}
 }
@@ -718,66 +1059,71 @@ void Champion::HealCalculate(float attack)
 		heal = this->target->GetCurretState().maxHp - this->target->GetHp();
 	}
 	this->total_Damage += heal;
-	std::cout << this->GetName() << " 회복량 : " << this->total_Damage << std::endl;
+	//std::cout << this->GetName() << " 회복량 : " << this->total_Damage << std::endl;
 	this->target->Heal(heal);
-	std::cout << this->target->GetName() << " hp : " << this->target->hp << std::endl;
+	//std::cout << this->target->GetName() << " hp : " << this->target->hp << std::endl;
 }
 
 void Champion::FindTaget()
 {
 	switch (this->currentOrder)
 	{
-	case TagetingOrder::Default:
+	case TargetingOrder::Default:
 	{
 		if (this->currentState.charId == "priest")
 		{
-			TagetOrderH();
+			TargetOrderH();
 		}
 		else
 		{
-			TagetOrderSR();
+			TargetOrderSR();
 		}
 		break;
 	}
-	case TagetingOrder::ShortRange:
+	case TargetingOrder::ShortRange:
 	{
-		TagetOrderSR();
+		TargetOrderSR();
 		break;
 	}
-	case TagetingOrder::LongRange:
+	case TargetingOrder::LongRange:
 	{
-		TagetOrderLR();
+		TargetOrderLR();
 		break;
 	}
-	case TagetingOrder::CarryPlayer:
+	case TargetingOrder::CarryPlayer:
 	{
-		TagetOrderCP();
+		TargetOrderCP();
 		break;
 	}
-	case TagetingOrder::Heal:
+	case TargetingOrder::Heal:
 	{
-		TagetOrderH();
+		TargetOrderH();
 		break;
 	}
-	case TagetingOrder::RowHealth:
+	case TargetingOrder::RowHealth:
 	{
-		TagetOrderRH();
+		TargetOrderRH();
 		break;
 	}
-	case TagetingOrder::CircleInRangeEnemy:
+	case TargetingOrder::CircleInRangeEnemy:
 	{
-		TagetOrderCIE(0, 0.f,0.f);
+		TargetOrderCIE(0, 0.f,0.f);
 		break;
 	}
-	case TagetingOrder::CircleInRangeTeam:
+	case TargetingOrder::CircleInRangeTeam:
 	{
-		TagetOrderCIT(0, 0.f,0.f);
+		TargetOrderCIT(0, 0.f,0.f);
+		break;
+	}
+	case TargetingOrder::Aggro:
+	{
+		TargetAggro();
 		break;
 	}
 	}
 }
 
-void Champion::TagetOrderCP()
+void Champion::TargetOrderCP()
 {
 	if (!enemyTeam->empty())
 	{
@@ -803,7 +1149,7 @@ void Champion::TagetOrderCP()
 	}
 }
 
-void Champion::TagetOrderSR()
+void Champion::TargetOrderSR()
 {
 	if (!enemyTeam->empty())
 	{
@@ -819,7 +1165,7 @@ void Champion::TagetOrderSR()
 	}
 }
 	
-void Champion::TagetOrderRH()
+void Champion::TargetOrderRH()
 {
 	if (!enemyTeam->empty())
 	{
@@ -835,7 +1181,7 @@ void Champion::TagetOrderRH()
 	}
 }
 
-void Champion::TagetOrderH()
+void Champion::TargetOrderH()
 {
 	if (!myTeam->empty())
 	{
@@ -860,7 +1206,7 @@ void Champion::TagetOrderH()
 	}
 }
 
-void Champion::TagetOrderLR()
+void Champion::TargetOrderLR()
 {
 	if (!enemyTeam->empty())
 	{
@@ -876,7 +1222,7 @@ void Champion::TagetOrderLR()
 		}
 	}
 
-void Champion::TagetOrderCIE(int code, float range, float value)
+void Champion::TargetOrderCIE(int code, float range, float value)
 {
 	if (this->enemyTeam->empty())
 	{
@@ -890,7 +1236,7 @@ void Champion::TagetOrderCIE(int code, float range, float value)
 				{
 				case 0:
 				{
-					std::cout << "아무 일도 없었다." << std::endl;
+					//std::cout << "아무 일도 없었다." << std::endl;
 					break;
 				}
 				case 1:
@@ -904,7 +1250,7 @@ void Champion::TagetOrderCIE(int code, float range, float value)
 		}
 	}
 
-void Champion::TagetOrderCIT(int code, float range, float value)
+void Champion::TargetOrderCIT(int code, float range, float value)
 {
 	if (this->myTeam->empty())
 	{
@@ -920,14 +1266,14 @@ void Champion::TagetOrderCIT(int code, float range, float value)
 			{
 			case 0:
 			{
-				std::cout << "아무 일도 없었다." << std::endl;
+				//std::cout << "아무 일도 없었다." << std::endl;
 				break;;
 			}
 			case 1:
 			{
 				if (this->target->GetHp() < this->target->currentState.maxHp)
 				{
-					std::cout << "monkHeal" << std::endl;
+					//std::cout << "monkHeal" << std::endl;
 					HealCalculate(value);
 				}
 				break;
@@ -941,8 +1287,70 @@ void Champion::TagetOrderCIT(int code, float range, float value)
 				HealCalculate(value);
 				break;
 			}
+			case 3:
+			{
+				this->GetTarget()->SetInteraction(true);
+				break;
+			}
 			}
 		}
+		
+		if (code == 3 && abs(Utils::Distance(this->GetPosition(), team->GetPosition())) > range)
+		{
+			team->SetInteraction(false);
+		}
+	}
+}
+
+void Champion::TargetOrderCITB(int code, float range, BuffState* state)
+{
+	if (this->myTeam->empty())
+	{
+		return;
+	}
+
+	for (auto team : *this->myTeam)
+	{
+		if (abs(Utils::Distance(this->GetPosition(), team->GetPosition())) <= range)
+		{
+			this->target = team;
+			switch (code)
+			{
+			case 0:
+			{
+				//std::cout << "아무 일도 없었다." << std::endl;
+				break;;
+			}
+			case 1:
+			{
+				//std::cout << "monkbarrier" << std::endl;
+				BuffState* cState = new BuffState;
+
+				*cState = *state;
+
+				this->GetTarget()->SetBuff(cState);
+				break;
+			}
+			}
+		}
+		
+	}
+	delete state;
+}
+
+void Champion::TargetAggro()
+{
+	if (!this->enemyTeam->empty())
+	{
+		for (auto enemy : *this->enemyTeam)
+		{
+			if (enemy == this->GetTarget())
+			{
+				return;
+			}
+		}
+
+		this->SetOrder(TargetingOrder::Default);
 	}
 }
 

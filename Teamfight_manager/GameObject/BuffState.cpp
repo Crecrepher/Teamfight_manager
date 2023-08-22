@@ -13,7 +13,7 @@ void BuffState::Update(float dt)
 {
 	if (this->buffCount > 0)
 	{
-		this->buffTimer += dt;
+		this->buffTimer += dt/2.f;
 
 		if (this->buffTimer >= 1.f)
 		{

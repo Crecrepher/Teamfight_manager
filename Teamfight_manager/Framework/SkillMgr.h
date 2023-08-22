@@ -48,7 +48,7 @@ public:
 	void SoldierUltiSkill(Champion* champ);
 	void SwordmanSkill(Champion* champ);
 	void SwordmanUltiSkill(Champion* champ);
-	void BerserKerUltiSkill(Champion* champ);
+	void BerserkerUltiSkill(Champion* champ);
 	void ShieldbearerSkill(Champion* champ);
 };
 

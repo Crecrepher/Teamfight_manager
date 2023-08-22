@@ -56,7 +56,7 @@ enum class ChampionType
 	Assist,
 };
 
-enum class TagetingOrder
+enum class TargetingOrder
 {
 	Default=-1,
 	ShortRange,
@@ -66,6 +66,7 @@ enum class TagetingOrder
 	RowHealth,
 	CircleInRangeEnemy,
 	CircleInRangeTeam,
+	Aggro,
 };
 
 struct State
@@ -102,4 +103,6 @@ enum class BuffType
 	BIND,
 	STUN,
 	COOLTIME,
+	AGGRO,
+	BARRIER,
 };

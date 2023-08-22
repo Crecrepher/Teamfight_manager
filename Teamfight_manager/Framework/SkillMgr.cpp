@@ -50,7 +50,7 @@ void SkillMgr::ActiveSkill(int code, Champion* champ)
 {
 	if (!champ->GetCurretState().animaition.GetLastFrame() && champ->GetTarget()->GetHp() == 0)
 	{
-		std::cout << "이미 죽음" << std::endl;
+		//std::cout << "이미 죽음" << std::endl;
 		champ->SkillChangeIdle();
 		return;
 	}
@@ -67,6 +67,12 @@ void SkillMgr::ActiveSkill(int code, Champion* champ)
 		ArcherUltiSkill(champ);
 		break;
 	}
+	case 3:
+	{
+		BerserkerSkill(champ);
+		break;
+	}
+
 	case 4:
 	{
 		FighterSkill(champ);
@@ -182,21 +188,14 @@ void SkillMgr::ActiveSkill(int code, Champion* champ)
 		SwordmanUltiSkill(champ);
 		break;
 	}
-	}
-}
-
-void SkillMgr::passiveSkill(int code, Champion* champ)
-{
-	switch (code)
+	case 27:
 	{
-	case 3:
-	{
-		BerserkerSkill(champ);
+		BerserkerUltiSkill(champ);
 		break;
 	}
-	case 23:
+	case 28:
 	{
-		SoldierSkill(champ);
+		ShieldbearerSkill(champ);
 		break;
 	}
 	}
@@ -227,7 +226,7 @@ void SkillMgr::ArcherSkill(Champion* champ)
 
 	if (champ->GetCurretState().animaition.GetLastFrame())
 	{
-		std::cout << "스킬" << std::endl;
+		//std::cout << "스킬" << std::endl;
 		champ->DamageCalculate(champ->GetCurretState().attack - 10);
 		champ->GetTarget()->SetBind(0.5f);
 		champ->SkillChangeIdle();
@@ -235,14 +234,75 @@ void SkillMgr::ArcherSkill(Champion* champ)
 		return;
 	}
 }
+// 완료
+
 
 void SkillMgr::ArcherUltiSkill(Champion* champ)
 {
 }
 
+
+
 void SkillMgr::BerserkerSkill(Champion* champ)
 {
+	if (champ->CurrBuffEmpty())
+	{
+		BuffState* attack = new BuffState;
+		attack->SetType(BuffType::ATTACK);
+		attack->SetValue(0);
+		attack->SetCount(999);
+		champ->SetBuff(attack);
+		BuffState* speed = new BuffState;
+		speed->SetType(BuffType::SPEED);
+		speed->SetValue(0);
+		speed->SetCount(999);
+		champ->SetBuff(speed);
+		BuffState* atkSP = new BuffState;
+		atkSP->SetType(BuffType::ATTACKSPEED);
+		atkSP->SetValue(0);
+		atkSP->SetCount(999);
+		champ->SetBuff(atkSP);
+
+		champ->SkillChangeIdle();
+		return;
+	}
+	else
+	{
+		champ->BuffUpdate(champ->GetHpPercent()*2.f);
+		
+		if (champ->GetHpPercent() <= 0.4f)
+		{
+			if (champ->GetCurretState().animaition.GetCurrentClipId() != "Skill")
+			{
+				champ->UseSkill();
+				return;
+			}
+
+			if (!champ->GetCurretState().animaition.GetLastFrame() && champ->GetTarget()->GetHp() == 0)
+			{
+				champ->SkillChangeIdle();
+				return;
+			}
+
+			if (champ->GetCurretState().animaition.GetLastFrame())
+			{
+				champ->DamageCalculate(champ->GetCurretState().attack);
+				champ->Heal(champ->GetCurretState().attack / 10.f);
+				champ->SkillChangeIdle();
+				return;
+			}
+		}
+		else
+		{
+			champ->SkillChangeIdle();
+			champ->ChangeStance(ChampionStance::Attack);
+			return;
+		}
+	}
+
 }
+// 완료
+
 
 void SkillMgr::FighterSkill(Champion* champ)
 {
@@ -300,10 +360,14 @@ void SkillMgr::FighterSkill(Champion* champ)
 		return;
 	}
 }
+// 완료
+
 
 void SkillMgr::FighterUltiSkill(Champion* champ)
 {
 }
+
+
 
 void SkillMgr::IcemageSkill(Champion* champ)
 {
@@ -313,13 +377,20 @@ void SkillMgr::IcemageSkill(Champion* champ)
 		return;
 	}
 
+	if (champ->GetCurretState().animaition.GetCurrFrame() < 3 && champ->GetTarget()->GetHp() == 0)
+	{
+		//std::cout << "이미 죽음" << std::endl;
+		champ->SkillChangeIdle();
+		return;
+	}
+
 	if (champ->GetCurretState().animaition.GetCurrFrame() == 3)
 	{
 		if (!champ->GetFrameLimit())
 		{
 			BuffState* state = new BuffState;
 			state->SetType(BuffType::STUN);
-			state->SetCount(3);
+			state->SetCount(1.5);
 			champ->GetTarget()->SetBuff(state);
 			champ->DamageCalculate(champ->GetCurretState().attack + 5);
 			champ->SetFrameLimit(true);
@@ -329,32 +400,92 @@ void SkillMgr::IcemageSkill(Champion* champ)
 
 	if (champ->GetCurretState().animaition.GetLastFrame())
 	{
-		std::cout << "스킬" << std::endl;
+		//std::cout << "스킬" << std::endl;
 		champ->SetFrameLimit(false);
 		champ->SkillChangeIdle();
 		return;
 	}
 }
+// 완료
+
 
 void SkillMgr::IcemageUltiSkill(Champion* champ)
 {
 }
 
+
+
 void SkillMgr::KnightSkill(Champion* champ)
 {
+	if (champ->GetCurretState().animaition.GetCurrentClipId() != "Skill")
+	{
+		champ->UseSkill();
+		return;
+	}
+
+	if (champ->GetCurretState().animaition.GetLastFrame())
+	{
+		champ->TargetOrderLR();
+		BuffState* aggro = new BuffState;
+		aggro->SetType(BuffType::AGGRO);
+		aggro->SetCount(4);
+		champ->GetTarget()->SetBuff(aggro);
+		if (champ->GetTarget()->GetCurretState().charId != "priest")
+		{
+			champ->GetTarget()->SetTarget(champ);
+		}
+		else if (champ->GetTarget()->GetCurretState().charId == "priest")
+		{
+			champ->TargetOrderSR();
+			champ->GetTarget()->SetTarget(champ);
+		}
+		BuffState* buff = new BuffState;
+		buff->SetType(BuffType::DEFEND);
+		buff->SetValue(20);
+		buff->SetCount(4);
+		champ->SetBuff(buff);
+		champ->SkillChangeIdle();
+		return;
+	}
 }
+// 완료
+
 
 void SkillMgr::KnightUltiSkill(Champion* champ)
 {
+	if (champ->GetCurretState().animaition.GetCurrentClipId() != "UltiSkill")
+	{
+		champ->UseUltiSkill();
+		return;
+	}
+
+	if (champ->GetCurretState().animaition.GetLastFrame())
+	{
+		BuffState* buff = new BuffState;
+		buff->SetType(BuffType::DEFEND);
+		buff->SetValue(50);
+		buff->SetCount(5);
+		champ->SetMyTeamBuff(buff);
+		//std::cout << "스킬" << std::endl;
+		champ->SetUltiSkill(false);
+		champ->SkillChangeIdle();
+		return;
+	}
 }
+// 완료
+
 
 void SkillMgr::MagicknightSkill(Champion* champ)
 {
 }
 
+
+
 void SkillMgr::MagicknightUltiSkill(Champion* champ)
 {
 }
+
+
 
 void SkillMgr::MonkSkill(Champion* champ)
 {
@@ -368,7 +499,7 @@ void SkillMgr::MonkSkill(Champion* champ)
 	{
 		if (!champ->GetFrameLimit())
 		{
-			champ->TagetOrderCIT(1, 250.f, 30.f);
+			champ->TargetOrderCIT(1, 250.f, 30.f);
 			champ->SetFrameLimit(true);
 		}
 		return;
@@ -376,16 +507,40 @@ void SkillMgr::MonkSkill(Champion* champ)
 
 	if (champ->GetCurretState().animaition.GetLastFrame())
 	{
-		std::cout << "스킬" << std::endl;
+		//std::cout << "스킬" << std::endl;
 		champ->SetFrameLimit(false);
 		champ->SkillChangeIdle();
 		return;
 	}
 }
+// 완료
+
 
 void SkillMgr::MonkUltiSkill(Champion* champ)
 {
+	if (champ->GetCurretState().animaition.GetCurrentClipId() != "UltiSkill")
+	{
+		champ->UseUltiSkill();
+		return;
+	}
+
+	if (champ->GetCurretState().animaition.GetLastFrame())
+	{
+		BuffState* berrier = new BuffState;
+		berrier->SetType(BuffType::BARRIER);
+		berrier->SetCount(5);
+		berrier->SetValue(70);
+		berrier->SetSide(true);
+		berrier->SetSideType(BuffType::SPEED);
+		berrier->SetSideValue(2.f);
+		champ->TargetOrderCITB(1,300.f, berrier);
+		champ->SetUltiSkill(false);
+		champ->SkillChangeIdle();
+		return;
+	}
 }
+// 완료
+
 
 void SkillMgr::NinjaSkill(Champion* champ)
 {
@@ -399,7 +554,7 @@ void SkillMgr::NinjaSkill(Champion* champ)
 	{
 		if (!champ->GetFrameLimit())
 		{
-			champ->TagetOrderLR();
+			champ->TargetOrderLR();
 
 			sf::Vector2f dir = Utils::Normalize(champ->GetTarget()->GetPosition() - champ->GetPosition());
 
@@ -429,59 +584,298 @@ void SkillMgr::NinjaSkill(Champion* champ)
 		return;
 	}
 }
+// 완료
+
 
 void SkillMgr::NinjaUltiSkill(Champion* champ)
 {
 }
 
+
+
 void SkillMgr::PriestSkill(Champion* champ)
 {
+	if (champ->GetCurretState().animaition.GetCurrentClipId() != "Skill")
+	{
+		champ->UseSkill();
+		return;
+	}
+
+	if (champ->GetCurretState().animaition.GetLastFrame())
+	{
+		BuffState* berrier = new BuffState;
+		berrier->SetType(BuffType::BARRIER);
+		berrier->SetCount(4);
+		berrier->SetValue(25);
+		berrier->SetSide(true);
+		berrier->SetSideType(BuffType::ATTACKSPEED);
+		berrier->SetSideValue(0.2f);
+		champ->GetTarget()->SetBuff(berrier);
+		//std::cout << "배리어 셋팅 : "<<champ->GetTarget()->GetBarrier() << std::endl;
+		champ->SkillChangeIdle();
+		return;
+	}
 }
+// 완료
+
 
 void SkillMgr::PriestUltiSkill(Champion* champ)
 {
 }
 
+
+
 void SkillMgr::PyromancerSkill(Champion* champ)
 {
 }
+
+
 
 void SkillMgr::PyromancerUltiSkill(Champion* champ)
 {
 }
 
+
+
 void SkillMgr::PythonessSkill(Champion* champ)
 {
+	if (champ->GetCurretState().animaition.GetCurrentClipId() != "Skill")
+	{
+		champ->UseSkill();
+		return;
+	}
+
+	if (champ->GetCurretState().animaition.GetCurrFrame() == 2)
+	{
+		if (!champ->GetFrameLimit())
+		{
+			champ->TargetOrderH();
+			champ->HealCalculate(15);
+
+			//std::cout << "mu heal" << std::endl;
+			champ->SetFrameLimit(true);
+		}
+		return;
+	}
+	else if (champ->GetCurretState().animaition.GetCurrFrame() == 3)
+	{
+		champ->SetFrameLimit(false);
+		return;
+	}
+	else if (champ->GetCurretState().animaition.GetCurrFrame() == 4)
+	{
+		if (!champ->GetFrameLimit())
+		{
+		champ->TargetOrderH();
+		champ->TargetRangeDamage(40, 15);
+		champ->SetFrameLimit(true);
+		}
+		return;
+	}
+
+	if (champ->GetCurretState().animaition.GetLastFrame())
+	{
+		//std::cout << "스킬" << std::endl;
+		champ->SetFrameLimit(false);
+		champ->SkillChangeIdle();
+		return;
+	}
 }
+// 완료
+
 
 void SkillMgr::PythonessUltiSkill(Champion* champ)
 {
 }
 
+
+
 void SkillMgr::ShieldbearerUltiSkill(Champion* champ)
 {
 }
 
+
+
 void SkillMgr::SoldierSkill(Champion* champ)
 {
+	if (champ->GetCurretState().animaition.GetCurrentClipId() != "Skill")
+	{
+		champ->UseSkill();
+		return;
+	}
+
+	if ((champ->GetCurretState().animaition.GetCurrFrame() < 4 && champ->GetTarget()->GetHp() == 0))
+	{
+		//std::cout << "이미 죽음" << std::endl;
+		champ->SkillChangeIdle();
+		return;
+	}
+
+	if (champ->GetCurretState().animaition.GetCurrFrame() == 4)
+	{
+		if (!champ->GetFrameLimit())
+		{
+			champ->DamageCalculate(champ->GetCurretState().attack);
+			champ->SetFrameLimit(true);
+		}
+		return;
+	}
+	else if (champ->GetCurretState().animaition.GetCurrFrame() == 5)
+	{
+		champ->SetFrameLimit(false);
+		if (champ->GetTarget() == 0)
+		{
+			//std::cout << "이미 죽음" << std::endl;
+			champ->SkillChangeIdle();
+		}
+		return;
+	}
+	else if (champ->GetCurretState().animaition.GetCurrFrame() == 6)
+	{
+		if (!champ->GetFrameLimit())
+		{
+			champ->DamageCalculate(champ->GetCurretState().attack);
+			champ->SetFrameLimit(true);
+		}
+		return;
+	}
+	else if (champ->GetCurretState().animaition.GetCurrFrame() == 7)
+	{
+		champ->SetFrameLimit(false);
+		if (champ->GetTarget() == 0)
+		{
+			//std::cout << "이미 죽음" << std::endl;
+			champ->SkillChangeIdle();
+		}
+		return;
+	}
+	else if (champ->GetCurretState().animaition.GetCurrFrame() == 8)
+	{
+		if (!champ->GetFrameLimit())
+		{
+			champ->DamageCalculate(champ->GetCurretState().attack);
+			champ->SetFrameLimit(true);
+		}
+		return;
+	}
+	if (champ->GetCurretState().animaition.GetLastFrame())
+	{
+		//std::cout << "스킬" << std::endl;
+		champ->SetFrameLimit(false);
+		champ->SkillChangeIdle();
+		return;
+	}
 }
+// 완료
+
 
 void SkillMgr::SoldierUltiSkill(Champion* champ)
 {
 }
 
+
+
 void SkillMgr::SwordmanSkill(Champion* champ)
 {
+	if (champ->GetCurretState().animaition.GetCurrentClipId() != "Skill")
+	{
+		champ->UseSkill();
+		return;
+	}
+
+	if ((champ->GetCurretState().animaition.GetCurrFrame() < 3 && champ->GetTarget()->GetHp() == 0))
+	{
+		//std::cout << "이미 죽음" << std::endl;
+		champ->SkillChangeIdle();
+		return;
+	}
+
+	if (champ->GetCurretState().animaition.GetCurrFrame() == 3)
+	{
+		if (!champ->GetFrameLimit())
+		{
+			champ->DamageCalculate(champ->GetCurretState().attack/3.f);
+			champ->SetFrameLimit(true);
+		}
+		return;
+	}
+	else if (champ->GetCurretState().animaition.GetCurrFrame() == 4)
+	{
+		champ->SetFrameLimit(false);
+		if (champ->GetTarget() == 0)
+		{
+			//std::cout << "이미 죽음" << std::endl;
+			champ->SkillChangeIdle();
+		}
+		return;
+	}
+	else if (champ->GetCurretState().animaition.GetCurrFrame() == 5)
+	{
+		if (!champ->GetFrameLimit())
+		{
+			champ->DamageCalculate(champ->GetCurretState().attack/3.f);
+			champ->SetFrameLimit(true);
+		}
+		return;
+	}
+	else if (champ->GetCurretState().animaition.GetCurrFrame() == 6)
+	{
+		champ->SetFrameLimit(false);
+		if (champ->GetTarget() == 0)
+		{
+			//std::cout << "이미 죽음" << std::endl;
+			champ->SkillChangeIdle();
+		}
+		return;
+	}
+
+	if (champ->GetCurretState().animaition.GetLastFrame())
+	{
+		champ->DamageCalculate(champ->GetCurretState().attack / 3.f);
+		BuffState* armorbreak = new BuffState;
+		armorbreak->SetType(BuffType::DEFEND);
+		armorbreak->SetCount(3);
+		armorbreak->SetValue(-20);
+		champ->GetTarget()->SetBuff(armorbreak);
+		//std::cout << "방깍" << std::endl;
+		champ->SetFrameLimit(false);
+		champ->SkillChangeIdle();
+		return;
+	}
 }
+// 완료
+
 
 void SkillMgr::SwordmanUltiSkill(Champion* champ)
 {
 }
 
-void SkillMgr::BerserKerUltiSkill(Champion* champ)
+
+
+void SkillMgr::BerserkerUltiSkill(Champion* champ)
 {
 }
 
+
+
 void SkillMgr::ShieldbearerSkill(Champion* champ)
 {
+
+	champ->TargetOrderCIT(3, 100, 0);
+
+	champ->TargetOrderSR();
+
+	if (abs(Utils::Distance(champ->GetPosition(), champ->GetTarget()->GetPosition()) > champ->GetCurretState().attackRange))
+	{
+		champ->ChangeStance(ChampionStance::Move);
+		return;
+	}
+	else if (abs(Utils::Distance(champ->GetPosition(), champ->GetTarget()->GetPosition())<= champ->GetCurretState().attackRange))
+	{
+		champ->ChangeStance(ChampionStance::Action);
+		return;
+	}
 }
+
+
+
