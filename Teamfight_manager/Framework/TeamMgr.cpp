@@ -1,7 +1,12 @@
 #include "stdafx.h"
 #include "TeamMgr.h"
 
-#include <bitset>
+
+
+
+TeamMgr::~TeamMgr()
+{
+}
 
 void TeamMgr::Init()
 {
@@ -66,8 +71,8 @@ void TeamMgr::ShowPlayer()
 		std::cout << "사용캐릭터 갯수: " << player[i].knownChamp << std::endl;
 		for (int j = 0; j < player[i].knownChamp; j++)
 		{
-			std::cout << "사용캐릭터 코드: "<< player[i].proficiency[j].first << " ";
-			std::cout << "   숙련도: " << player[i].proficiency[j].second << std::endl;
+			std::cout << "사용캐릭터 코드: "<< player[i].proficiencyCode[j] << " ";
+			std::cout << "   숙련도: " << player[i].proficiencyLevel[j] << std::endl;
 		}
 		std::cout << "특성 갯수: " << player[i].knownCharacter << std::endl;
 		for (int j = 0; j < player[i].knownCharacter; j++)
@@ -93,7 +98,8 @@ void TeamMgr::Employ(int index)
 	playerNum++;
 	money -= recruiting_players[index].second.contract_cost;
 	player.push_back(recruiting_players[index].second);
-	recruiting_players[index] = { false,PlayerInfo() };
+	recruiting_players[index].first = false;
+	recruiting_players[index].second = PlayerInfo();
 	playerTraining.push_back(TrainingInfo());
 }
 
@@ -172,7 +178,7 @@ void TeamMgr::DayPass()
 		LevelUpdate(playerTraining[i].xpDef, player[i].defence);
 		for (int j = 0; j < player[i].knownChamp; j++)
 		{
-			LevelUpdate(playerTraining[i].xpChamp[j], player[i].proficiency[j].second);
+			LevelUpdate(playerTraining[i].xpChamp[j], player[i].proficiencyLevel[j]);
 		}
 	}
 }
@@ -328,12 +334,14 @@ void TeamMgr::ContractSponsor(Sponsor sponsor)
 void TeamMgr::SaveLoad(int saveSlot)
 {
 	std::stringstream ss;
-	ss << "TFMSave" << saveSlotNum << ".dat";
+	ss << "TFMSave" << saveSlot << ".dat";
 	std::ifstream is{ ss.str(), std::ofstream::binary};
+
 	if (is.fail()) {
 		std::cout << "세이브 파일이 없습니다" << std::endl;
 		return;
 	}
+
 	is.read((char*)&saveSlotNum, sizeof(int));
 	is.read((char*)&ableChamp, sizeof(int));
 	is.read((char*)&ableCharacteristic, sizeof(int));
@@ -341,23 +349,29 @@ void TeamMgr::SaveLoad(int saveSlot)
 	is.read((char*)&money, sizeof(int));
 	is.read((char*)&playerNum, sizeof(int));
 	is.read((char*)&MaxPlayer, sizeof(int));
+
+	player.resize(playerNum);
+	playerTraining.resize(playerNum);
 	for (int i = 0; i < playerNum; i++)
 	{
-		is.read((char*)&player[i], sizeof(player[i]));
-		is.read((char*)&playerTraining[i], sizeof(playerTraining[i]));
+		player[i].readF(is);
+		playerTraining[i].readF(is);
 	}
-	is.read((char*)&recruiting_players[0].second, sizeof(recruiting_players[0].second));
+	
+	for (int i = 0; i < 4; i++)
 	{
 		std::bitset<1> bitset;
 		is.read(reinterpret_cast<char*>(&bitset), sizeof(bitset));
-		recruiting_players[0].first = bitset[0];
+		recruiting_players[i].first = bitset[0];
+		recruiting_players[i].second.readF(is);
 	}
+	is.read((char*)&recruit_able, sizeof(int));
 	
-
 	for (int i = 0; i < 7; i++)
 	{
-		is.read((char*)&aiTeams[i], sizeof(aiTeams[i]));
+		aiTeams[i].readF(is);
 	}
+
 	for (int i = 0; i < 4; i++)
 	{
 		for (int j = 0; j < gearNum; j++)
@@ -366,10 +380,15 @@ void TeamMgr::SaveLoad(int saveSlot)
 			is.read(reinterpret_cast<char*>(&bitset), sizeof(bitset));
 			gear[i][j] = bitset[0];
 		}
-		is.read((char*)&equipedGear[i], sizeof(int));
-		is.read((char*)&gearParts[i], sizeof(int));
 	}
-	is.read((char*)&craftSlot[0], sizeof(craftSlot[0]));
+	is.read((char*)equipedGear.data(), sizeof(int) * 4);
+	is.read((char*)gearParts.data(), sizeof(int) * 4);
+
+	for (int i = 0; i < 3; i++)
+	{
+		craftSlot[i].readF(is);
+		sponsors[i].readF(is);
+	}
 
 	is.read((char*)&curGrade, sizeof(int));
 	is.read((char*)&curRank, sizeof(int));
@@ -381,7 +400,6 @@ void TeamMgr::SaveLoad(int saveSlot)
 	is.read((char*)&winContinuity, sizeof(int));
 	is.read((char*)&lose, sizeof(int));
 
-	is.read((char*)&sponsors[0], sizeof(sponsors[0]));
 	is.read((char*)&contractedSponsor, sizeof(int));
 
 	is.close();
@@ -407,21 +425,26 @@ void TeamMgr::Save()
 	os.write((char*)&money, sizeof(int));
 	os.write((char*)&playerNum, sizeof(int));
 	os.write((char*)&MaxPlayer, sizeof(int));
+
 	for (int i = 0; i < playerNum; i++)
 	{
-		os.write((char*)&player[i], sizeof(player[i]));
-		os.write((char*)&playerTraining[i], sizeof(playerTraining[i]));
+		player[i].writeF(os);
+		playerTraining[i].writeF(os);
 	}
-	os.write((char*)&recruiting_players[0].second, sizeof(recruiting_players[0].second));
+
+	for (int i = 0; i < 4; i++)
 	{
-		std::bitset<1> bitset(recruiting_players[0].first);
-		os.write(reinterpret_cast<const char*>(&bitset), sizeof(bitset));
+		std::bitset<1> bitset(recruiting_players[i].first);
+		os.write(reinterpret_cast<char*>(&bitset), sizeof(bitset));
+		recruiting_players[i].second.writeF(os);
 	}
+	os.write((char*)&recruit_able, sizeof(int));
 
 	for (int i = 0; i < 7; i++)
 	{
-		os.write((char*)&aiTeams[i], sizeof(aiTeams[i]));
+		aiTeams[i].writeF(os);
 	}
+
 	for (int i = 0; i < 4; i++)
 	{
 		for (int j = 0; j < gearNum; j++)
@@ -429,10 +452,15 @@ void TeamMgr::Save()
 			std::bitset<1> bitset(gear[i][j]);
 			os.write(reinterpret_cast<const char*>(&bitset), sizeof(bitset));
 		}
-		os.write((char*)&equipedGear[i], sizeof(int));
-		os.write((char*)&gearParts[i], sizeof(int));
 	}
-	os.write((char*)&craftSlot[0], sizeof(craftSlot[0]));
+	os.write((char*)equipedGear.data(), sizeof(int) * 4);
+	os.write((char*)gearParts.data(), sizeof(int) * 4);
+
+	for (int i = 0; i < 3; i++)
+	{
+		craftSlot[i].writeF(os);
+		sponsors[i].writeF(os);
+	}
 
 	os.write((char*)&curGrade, sizeof(int));
 	os.write((char*)&curRank, sizeof(int));
@@ -444,8 +472,8 @@ void TeamMgr::Save()
 	os.write((char*)&winContinuity, sizeof(int));
 	os.write((char*)&lose, sizeof(int));
 
-	os.write((char*)&sponsors[0], sizeof(sponsors[0]));
 	os.write((char*)&contractedSponsor, sizeof(int));
 
 	os.close();
+	return;
 }

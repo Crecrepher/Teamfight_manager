@@ -25,6 +25,7 @@ protected:
 	bool backClick = true;
 	bool isMenuOn = false;
 	bool isPopupOn = false;
+	bool isInnerPopOn = false;
 	float popTextFade = 3.f;
 	float maxPopTextFade = 3.f;
 
@@ -37,7 +38,7 @@ protected:
 	int craftCost = 0;
 	int craftTime = 0;
 
-	int sky = 0;
+	int sky = 2;
 	std::vector<float> cloudSpeed;
 public:
 	SceneHome();

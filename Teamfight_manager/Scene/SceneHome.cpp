@@ -43,6 +43,8 @@ void SceneHome::Init()
 	AddGoUiButton();
 	AddGoText();
 
+
+
 	AddGo(new RectGo("UiShade"));
 	AddGo(new RectGo("PopupUiShade"));
 	AddGo(new RectGo("PopupTextShade"));
@@ -70,8 +72,9 @@ void SceneHome::Enter()
 	backClick = true;
 	isMenuOn = false;
 	isPopupOn = false;
+	isInnerPopOn = false;
 	popTextFade = maxPopTextFade;
-
+	gainTrainingInfo = TEAM_MGR.GetTrainingInfo();
 
 	if (TEAM_MGR.GetTodayDate() == 0 && TEAM_MGR.GetPlayerNum() == 0)
 	{
@@ -82,6 +85,7 @@ void SceneHome::Enter()
 			{
 				Recruit(-1, 0);
 				TEAM_MGR.Employ(0);
+				gainTrainingInfo = TEAM_MGR.GetTrainingInfo();
 			}
 		}
 	}
@@ -92,6 +96,7 @@ void SceneHome::Enter()
 
 	MakeMainUi();
 	MakeSubUi();
+	ResetSky();
 	SetClouds();
 }
 
@@ -753,12 +758,20 @@ void SceneHome::MakeMainUi()
 			if (i != selectedMenu)
 			{
 				bt->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/Origin/Sprite/main_menu_button_1.png"));
+				std::stringstream bName;
+				bName << "MainB" << i << "Text";
+				TextGo* tx = (TextGo*)FindGo(bName.str());
+				tx->text.setFillColor(sf::Color(204,255,58));
 			}
 		};
 		bt->OnExit = [this, i, bt]() {
 			if (i != selectedMenu)
 			{
 				bt->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/Origin/Sprite/main_menu_button_0.png"));
+				std::stringstream bName;
+				bName << "MainB" << i << "Text";
+				TextGo* tx = (TextGo*)FindGo(bName.str());
+				tx->text.setFillColor(sf::Color::White);
 			}
 		};
 		int startNum = 0;
@@ -782,11 +795,19 @@ void SceneHome::MakeMainUi()
 			};
 			bt2->SetActive(false);
 
-			bt2->OnEnter = [bt2]() {
+			bt2->OnEnter = [bt2,j,this]() {
 				bt2->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/Origin/Sprite/main_menu_button_1.png"));
+				std::stringstream bName;
+				bName << "MainB" << j << "Text";
+				TextGo* tx = (TextGo*)FindGo(bName.str());
+				tx->text.setFillColor(sf::Color(204, 255, 58));
 			};
-			bt2->OnExit = [bt2]() {
+			bt2->OnExit = [bt2,j,this]() {
 				bt2->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/Origin/Sprite/main_menu_button_0.png"));
+				std::stringstream bName;
+				bName << "MainB" << j << "Text";
+				TextGo* tx = (TextGo*)FindGo(bName.str());
+				tx->text.setFillColor(sf::Color::White);
 			};
 
 			ss2 << "Text";
@@ -852,6 +873,38 @@ void SceneHome::MakeMainUi()
 		UpdatePopDate();
 		popTextFade = maxPopTextFade;
 		ResetSky();
+	};
+	bt->OnStay = [bt,this]() {
+		if (INPUT_MGR.GetMouseButtonDown(sf::Mouse::Left))
+		{
+			bt->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/Origin/Sprite/proceed_button_3.png"));
+			TextGo* tx = (TextGo*)FindGo("ProgressPlayText");
+			tx->text.setFillColor(sf::Color::Black);
+			tx = (TextGo*)FindGo("DoProgressPlayText");
+			tx->text.setFillColor(sf::Color::Black);
+		}
+		else if (INPUT_MGR.GetMouseButtonUp(sf::Mouse::Left))
+		{
+			bt->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/Origin/Sprite/proceed_button_1.png"));
+			TextGo* tx = (TextGo*)FindGo("ProgressPlayText");
+			tx->text.setFillColor(sf::Color::White);
+			tx = (TextGo*)FindGo("DoProgressPlayText");
+			tx->text.setFillColor(sf::Color::White);
+		}
+	};
+	bt->OnEnter = [bt,this]() {
+		bt->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/Origin/Sprite/proceed_button_1.png"));
+		TextGo* tx = (TextGo*)FindGo("ProgressPlayText");
+		tx->text.setFillColor(sf::Color::White);
+		tx = (TextGo*)FindGo("DoProgressPlayText");
+		tx->text.setFillColor(sf::Color::White);
+	};
+	bt->OnExit = [bt,this]() {
+		bt->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/Origin/Sprite/proceed_button_0.png"));
+		TextGo* tx = (TextGo*)FindGo("ProgressPlayText");
+		tx->text.setFillColor(sf::Color::Black);
+		tx = (TextGo*)FindGo("DoProgressPlayText");
+		tx->text.setFillColor(sf::Color::Black);
 	};
 
 	TextGo* text = (TextGo*)FindGo("ProgressPlayText");
@@ -954,6 +1007,22 @@ void SceneHome::MakeSubUi()
 		UiTrainingOpen(false);
 		UiSponsorContractOpen(true, false);
 		UiSponsorContractOpen(false, false);
+	};
+	bt->OnStay = [bt, this]() {
+		if (INPUT_MGR.GetMouseButtonDown(sf::Mouse::Left))
+		{
+			bt->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/Origin/Sprite/default_button_2.png"));
+		}
+		else if (INPUT_MGR.GetMouseButtonUp(sf::Mouse::Left))
+		{
+			bt->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/Origin/Sprite/default_button_1.png"));
+		}
+	};
+	bt->OnEnter = [bt, this]() {
+		bt->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/Origin/Sprite/default_button_1.png"));
+	};
+	bt->OnExit = [bt, this]() {
+		bt->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/Origin/Sprite/default_button_0.png"));
 	};
 
 	TextGo* text = (TextGo*)FindGo("UiMenuTitleText");
@@ -2028,7 +2097,7 @@ void SceneHome::MakeSubUiEquip()
 		bt->SetSize(2, 2);
 		bt->sortLayer = 111;
 		bt->OnClick = [this,i]() {
-			if (isPopupOn)
+			if (isInnerPopOn)
 			{
 				return;
 			}
@@ -2647,6 +2716,7 @@ void SceneHome::MainUiFunc(int index)
 		break;
 	case 9:
 		UiEquipOpen();
+		break;
 	case 13:
 		UpdatePopDate();
 		popTextFade = maxPopTextFade;
@@ -2749,7 +2819,7 @@ void SceneHome::UiRecruitOpen(bool on)
 	if (recruitAble)
 	{
 		std::stringstream ss;
-		ss << "graphics/UiFix/character_icons_" << player.proficiency[0].first << ".png";
+		ss << "graphics/UiFix/character_icons_" << player.proficiencyCode[0] << ".png";
 		spr->sprite.setTexture(*RESOURCE_MGR.GetTexture(ss.str()));
 	}
 	
@@ -2757,7 +2827,7 @@ void SceneHome::UiRecruitOpen(bool on)
 	text->SetActive(recruitAble);
 	if (recruitAble)
 	{
-		text->text.setString(std::to_string(player.proficiency[0].second));
+		text->text.setString(std::to_string(player.proficiencyLevel[0]));
 		text->SetOrigin(Origins::MC);
 	}
 
@@ -2770,7 +2840,7 @@ void SceneHome::UiRecruitOpen(bool on)
 		if (recruitAble && i < player.knownChamp)
 		{
 			std::stringstream ss;
-			ss << "graphics/UiFix/character_icons_" << player.proficiency[i].first << ".png";
+			ss << "graphics/UiFix/character_icons_" << player.proficiencyCode[i] << ".png";
 			spr->sprite.setTexture(*RESOURCE_MGR.GetTexture(ss.str()));
 		}
 		else
@@ -2784,7 +2854,7 @@ void SceneHome::UiRecruitOpen(bool on)
 		text->SetActive(recruitAble);
 		if (recruitAble && i < player.knownChamp)
 		{
-			text->text.setString(std::to_string(player.proficiency[i].second));
+			text->text.setString(std::to_string(player.proficiencyLevel[i]));
 			text->SetOrigin(Origins::MC);
 		}
 		else
@@ -2958,7 +3028,7 @@ void SceneHome::UiPlayerInfoOpen(bool on)
 			icon->SetActive(on);
 			std::stringstream champ;
 			champ << "graphics/UiFix/character_icons_" <<
-				playerInfo[i].proficiency[j].first << ".png";
+				playerInfo[i].proficiencyCode[j] << ".png";
 			icon->sprite.setTexture((*RESOURCE_MGR.GetTexture(champ.str())));
 			sf::Vector2u texSize = icon->sprite.getTexture()->getSize();
 			icon->sprite.setTextureRect({ std::max(0,(int)texSize.x / 2 - 12), 0,25,25 });
@@ -2974,7 +3044,7 @@ void SceneHome::UiPlayerInfoOpen(bool on)
 			text = (TextGo*)FindGo("PlayerInfoT" + std::to_string(i)
 				+ "ChampLV" + std::to_string(j));
 			text->SetActive(on);
-			text->text.setString(std::to_string(playerInfo[i].proficiency[j].second));
+			text->text.setString(std::to_string(playerInfo[i].proficiencyLevel[j]));
 			text->SetOrigin(Origins::MC);
 		}
 		for (int j = playerInfo[i].knownChamp; j < 4; j++)
@@ -3327,7 +3397,7 @@ void SceneHome::UiTrainingPlayerSelect(int index)
 		default:
 		{
 			std::stringstream champName;
-			champName << "ChampName" << selectedPlayer.proficiency[i - 2].first;
+			champName << "ChampName" << selectedPlayer.proficiencyCode[i - 2];
 			text->text.setString(stringtable->GetW(champName.str()));
 		}
 			break;
@@ -3359,7 +3429,7 @@ void SceneHome::UiTrainingPlayerSelect(int index)
 			break;
 		default:
 			xpBar->SetSize(tInfo->xpChamp[i-2] * 2.f
-				/ (1300 + (selectedPlayer.proficiency[i - 2].second * 10)), 2.f);
+				/ (1300 + (selectedPlayer.proficiencyLevel[i - 2] * 10)), 2.f);
 			break;
 		}
 
@@ -3381,7 +3451,7 @@ void SceneHome::UiTrainingPlayerSelect(int index)
 			break;
 		default:
 			xpBar->SetSize(std::min(futureTrainingInfo.xpChamp[i - 2] * 2.f
-				/ (1300 + (selectedPlayer.proficiency[i - 2].second * 10)), 2.f)
+				/ (1300 + (selectedPlayer.proficiencyLevel[i - 2] * 10)), 2.f)
 				, 2.f);
 			break;
 		}
@@ -3482,7 +3552,7 @@ void SceneHome::UiTrainingPlayerSelect(int index)
 			charIcon->SetActive(true);
 			std::stringstream champ;
 			champ << "graphics/UiFix/character_icons_"<< 
-				selectedPlayer.proficiency[i - 2].first << ".png";
+				selectedPlayer.proficiencyCode[i - 2]<< ".png";
 			charIcon->sprite.setTexture((*RESOURCE_MGR.GetTexture(champ.str())));
 			sf::Vector2u texSize = charIcon->sprite.getTexture()->getSize();
 			charIcon->sprite.setTextureRect({ std::max(0,(int)texSize.x / 2 - 12), 0,25,25 });
@@ -3573,7 +3643,7 @@ void SceneHome::UiTrainingPlayerSelect(int index)
 			characterIcons->SetActive(true);
 			std::stringstream champ;
 			champ << "graphics/UiFix/character_icons_" <<
-				selectedPlayer.proficiency[i].first << ".png";
+				selectedPlayer.proficiencyCode[i] << ".png";
 			characterIcons->sprite.setTexture((*RESOURCE_MGR.GetTexture(champ.str())));
 			sf::Vector2u texSize = characterIcons->sprite.getTexture()->getSize();
 			characterIcons->sprite.setTextureRect({ std::max(0,(int)texSize.x / 2 - 12), 0,25,25 });
@@ -3587,7 +3657,7 @@ void SceneHome::UiTrainingPlayerSelect(int index)
 			ss.str("");
 			ss << "CharacterStatLevel" << i;
 			text = (TextGo*)FindGo(ss.str());
-			text->text.setString(std::to_string(selectedPlayer.proficiency[i].second));
+			text->text.setString(std::to_string(selectedPlayer.proficiencyLevel[i]));
 			text->SetActive(true);
 		}
 		else
@@ -3833,7 +3903,7 @@ void SceneHome::UiSponsorContractOpen(bool contract, bool on)
 			newSponsor[i].sponsorType = sponsorType;
 			std::stringstream ss;
 			ss << "SponsorName" << sponsorType;
-			newSponsor[i].sponsorName = stringtable->GetW(ss.str());
+			newSponsor[i].sponsorName = stringtable->Get(ss.str());
 			ss.str("");
 			ss << "graphics/Origin/Sprite/sponser_logo_" << sponsorType << ".png";
 			newSponsor[i].sponsorTextureId = ss.str();
@@ -3866,7 +3936,11 @@ void SceneHome::UiSponsorContractOpen(bool contract, bool on)
 			ss << "SponsorName" << i;
 			TextGo* text = (TextGo*)FindGo(ss.str());
 			text->SetActive(on);
-			text->text.setString(newSponsor[i].sponsorName);
+			{
+				std::stringstream ss2;
+				ss2 << "SponsorName" << newSponsor[i].sponsorType;
+				text->text.setString(stringtable->GetW(ss2.str()));
+			}
 		}
 		bt = (UiButton*)FindGo("SponsorContract");
 		bt->SetOrigin(Origins::MC);
@@ -3965,7 +4039,11 @@ void SceneHome::UiSponsorContractOpen(bool contract, bool on)
 				ss << "SponsorSlotText" << i;
 				TextGo* text = (TextGo*)FindGo(ss.str());
 				text->SetActive(on);
-				text->text.setString(TEAM_MGR.GetSponsor(i).sponsorName);
+				{
+					std::stringstream ss;
+					ss << "SponsorName" << TEAM_MGR.GetSponsor(i).sponsorType;
+					text->text.setString(stringtable->GetW(ss.str()));
+				}
 
 				ss << "State";
 				text = (TextGo*)FindGo(ss.str());
@@ -4013,7 +4091,11 @@ void SceneHome::UiSponsorContractSelect(Sponsor sponsor,int index)
 
 	TextGo* text = (TextGo*)FindGo("SelectedSponsorName");
 	text->SetActive(true);
-	text->text.setString(sponsor.sponsorName);
+	{
+		std::stringstream ss;
+		ss << "SponsorName" << sponsor.sponsorType;
+		text->text.setString(stringtable->GetW(ss.str()));
+	}
 
 	text = (TextGo*)FindGo("SponsorQuest");
 	text->SetActive(true);
@@ -4146,7 +4228,7 @@ PlayerInfo SceneHome::MakeDefaultPlayer()
 		std::stringstream ss;
 		ss << "PlayerName" << Utils::RandomRange(0, 9);
 		auto stringtable = DATATABLE_MGR.Get<StringTable>(DataTable::Ids::String);
-		player.name = stringtable->GetW(ss.str());
+		player.name = stringtable->Get(ss.str());
 	}
 	player.age = Utils::RandomRange(19, 22);
 	player.attack = Utils::RandomRange(6, 9);
@@ -4160,14 +4242,15 @@ PlayerInfo SceneHome::MakeDefaultPlayer()
 			bool checker = true;
 			for (int j = 0; j < i; j++)
 			{
-				if (player.proficiency[j].first == champCode)
+				if (player.proficiencyCode[j]== champCode)
 				{
 					checker = false;
 				}
 			}
 			if (checker)
 			{
-				player.proficiency.push_back({ champCode,Utils::RandomRange(2, 4) });
+				player.proficiencyCode.push_back(champCode);
+				player.proficiencyLevel.push_back(Utils::RandomRange(2, 4));
 				break;
 			}
 		}
@@ -4228,7 +4311,11 @@ void SceneHome::UiSponsorSelect(int index)
 
 	TextGo* text = (TextGo*)FindGo("SelectedSponsorName");
 	text->SetActive(true);
-	text->text.setString(sponsor.sponsorName);
+	{
+		std::stringstream ss;
+		ss << "SponsorName" << sponsor.sponsorType;
+		text->text.setString(stringtable->GetW(ss.str()));
+	}
 
 	text = (TextGo*)FindGo("SponsorQuest");
 	text->SetActive(true);
@@ -4314,7 +4401,7 @@ PlayerInfo SceneHome::MakeLocalPlayer()
 		std::stringstream ss;
 		ss << "PlayerName" << Utils::RandomRange(0, 9);
 		auto stringtable = DATATABLE_MGR.Get<StringTable>(DataTable::Ids::String);
-		player.name = stringtable->GetW(ss.str());
+		player.name = stringtable->Get(ss.str());
 	}
 	player.age = Utils::RandomRange(18, 21);
 	player.attack = Utils::RandomRange(9, 16);
@@ -4328,14 +4415,15 @@ PlayerInfo SceneHome::MakeLocalPlayer()
 			bool checker = true;
 			for (int j = 0; j < i; j++)
 			{
-				if (player.proficiency[j].first == champCode)
+				if (player.proficiencyCode[j] == champCode)
 				{
 					checker = false;
 				}
 			}
 			if (checker)
 			{
-				player.proficiency.push_back({champCode,Utils::RandomRange(5, 7) });
+				player.proficiencyCode.push_back(champCode);
+				player.proficiencyLevel.push_back(Utils::RandomRange(5, 7));
 				break;
 			}
 		}
@@ -4555,14 +4643,14 @@ void SceneHome::UiEquipOpen(bool on)
 		bt->SetActive(on);
 		bt->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/UiFix/equipment_slot_bg_0.png"));
 		bt->OnEnter = [bt,this]() {
-			if (isPopupOn)
+			if (isInnerPopOn)
 			{
 				return;
 			}
 			bt->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/UiFix/equipment_slot_bg_1.png"));
 		};
 		bt->OnExit = [bt,this]() {
-			if (isPopupOn)
+			if (isInnerPopOn)
 			{
 				return;
 			}
@@ -4918,7 +5006,7 @@ void SceneHome::UiEquipOpen(bool on)
 
 void SceneHome::UiEquipChangeOpen(int type, bool on)
 {
-	isPopupOn = true;
+	isInnerPopOn = on;
 	auto stringtable = DATATABLE_MGR.Get<StringTable>(DataTable::Ids::String);
 	auto itemTable = DATATABLE_MGR.Get<ItemTable>(DataTable::Ids::Item);
 	std::vector<int> equipedGear = TEAM_MGR.GetEquipedGear();
@@ -5089,7 +5177,7 @@ void SceneHome::UiEquipChangeOpen(int type, bool on)
 
 void SceneHome::UiEquipMakeOpen(int index, bool on)
 {
-	isPopupOn = true;
+	isInnerPopOn = on;
 	auto stringtable = DATATABLE_MGR.Get<StringTable>(DataTable::Ids::String);
 	SpriteGo* spr;
 	UiButton* bt;
@@ -5367,7 +5455,7 @@ int SceneHome::CraftRoll(int type)
 
 void SceneHome::UiCraftFinish(int index, bool on)
 {
-	isPopupOn = on;
+	isInnerPopOn = on;
 	auto stringtable = DATATABLE_MGR.Get<StringTable>(DataTable::Ids::String);
 	auto itemTable = DATATABLE_MGR.Get<ItemTable>(DataTable::Ids::Item);
 	ItemMakeSlot slotInfo;

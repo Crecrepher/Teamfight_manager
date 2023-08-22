@@ -1,11 +1,12 @@
 #pragma once
 #include "Singleton.h"
+#include <bitset>
 
 class Scene;
 
 struct PlayerInfo
 {
-	std::wstring name =L"";
+	std::string name ="";
 	int age = 19;
 	int condition = 2;
 
@@ -14,7 +15,8 @@ struct PlayerInfo
 	int contract_cost = 96; //재계약비용
 	int experience = 1;//활동시즌
 
-	std::vector<std::pair<int, int>> proficiency; 
+	std::vector<int> proficiencyCode; 
+	std::vector<int> proficiencyLevel;
 	//캐릭터 숙련도 <캐릭터 코드 / 숙련도>
 	int knownChamp = 0; //숙련도 갯수
 
@@ -29,6 +31,67 @@ struct PlayerInfo
 	int totalKill = 0;
 	int totalAssist = 0;
 	int death = 0;
+
+	void readF(std::ifstream& ifs)
+	{
+		std::size_t size;
+		ifs.read(reinterpret_cast<char*>(&size), sizeof(size));
+		name.resize(size);
+		ifs.read(&name[0], size);
+
+		ifs.read((char*)&age, sizeof(int));
+		ifs.read((char*)&condition, sizeof(int));
+		ifs.read((char*)&attack, sizeof(int));
+		ifs.read((char*)&defence, sizeof(int));
+		ifs.read((char*)&contract_cost, sizeof(int));
+		ifs.read((char*)&experience, sizeof(int));
+
+		ifs.read((char*)&knownChamp, sizeof(int));
+		proficiencyCode.resize(knownChamp);
+		proficiencyLevel.resize(knownChamp);
+
+		ifs.read((char*)proficiencyCode.data(), sizeof(int) * knownChamp);
+		ifs.read((char*)proficiencyLevel.data(), sizeof(int) * knownChamp);
+
+		ifs.read((char*)&knownCharacter, sizeof(int));
+		characteristic.resize(knownCharacter);
+		ifs.read((char*)characteristic.data(), sizeof(int) * knownCharacter);
+
+		ifs.read((char*)&potential, sizeof(int));
+		ifs.read((char*)&kill, sizeof(int));
+		ifs.read((char*)&assist, sizeof(int));
+		ifs.read((char*)&totalKill, sizeof(int));
+		ifs.read((char*)&totalAssist, sizeof(int));
+		ifs.read((char*)&death, sizeof(int));
+	}
+
+	void writeF(std::ofstream& ofs)
+	{
+		std::size_t size = name.size();
+		ofs.write(reinterpret_cast<const char*>(&size), sizeof(size));
+		ofs.write(name.data(), size);
+
+		ofs.write((char*)&age, sizeof(int));
+		ofs.write((char*)&condition, sizeof(int));
+		ofs.write((char*)&attack, sizeof(int));
+		ofs.write((char*)&defence, sizeof(int));
+		ofs.write((char*)&contract_cost, sizeof(int));
+		ofs.write((char*)&experience, sizeof(int));
+
+		ofs.write((char*)&knownChamp, sizeof(int));
+		ofs.write((char*)proficiencyCode.data(), sizeof(int) * knownChamp);
+		ofs.write((char*)proficiencyLevel.data(), sizeof(int) * knownChamp);
+
+		ofs.write((char*)&knownCharacter, sizeof(int));
+		ofs.write((char*)characteristic.data(), sizeof(int) * knownCharacter);
+
+		ofs.write((char*)&potential, sizeof(int));
+		ofs.write((char*)&kill, sizeof(int));
+		ofs.write((char*)&assist, sizeof(int));
+		ofs.write((char*)&totalKill, sizeof(int));
+		ofs.write((char*)&totalAssist, sizeof(int));
+		ofs.write((char*)&death, sizeof(int));
+	}
 };
 
 struct TrainingInfo
@@ -43,27 +106,127 @@ struct TrainingInfo
 
 	std::vector<int> xpChamp = std::vector<int>(4);
 	std::vector<int> trainingChamp = std::vector<int>(4);
+
+	void readF(std::ifstream& ifs)
+	{
+		ifs.read((char*)&usedTrainingPoint, sizeof(int));
+		ifs.read((char*)&xpAtk, sizeof(int));
+		ifs.read((char*)&trainingAtk, sizeof(int));
+		ifs.read((char*)&xpDef, sizeof(int));
+		ifs.read((char*)&trainingDef, sizeof(int));
+
+		xpChamp.resize(4);
+		trainingChamp.resize(4);
+		ifs.read((char*)xpChamp.data(), sizeof(int) * 4);
+		ifs.read((char*)trainingChamp.data(), sizeof(int) * 4);
+	}
+
+	void writeF(std::ofstream& ofs)
+	{
+		ofs.write((char*)&usedTrainingPoint, sizeof(int));
+		ofs.write((char*)&xpAtk, sizeof(int));
+		ofs.write((char*)&trainingAtk, sizeof(int));
+		ofs.write((char*)&xpDef, sizeof(int));
+		ofs.write((char*)&trainingDef, sizeof(int));
+
+		ofs.write((char*)xpChamp.data(), sizeof(int) * 4);
+		ofs.write((char*)trainingChamp.data(), sizeof(int) * 4);
+	}
 };
 
 struct AiTeam
 {
-	std::wstring name = L"";
+	std::string name = "";
 	std::vector<PlayerInfo> player = std::vector<PlayerInfo>(4);
 	int win = 0;
 	int lose = 0;
+
+	void readF(std::ifstream& ifs)
+	{
+		std::size_t size;
+		ifs.read(reinterpret_cast<char*>(&size), sizeof(size));
+		name.resize(size);
+		ifs.read(&name[0], size);
+
+		ifs.read((char*)&win, sizeof(int));
+		ifs.read((char*)&lose, sizeof(int));
+
+		for (int i = 0; i < 4; i++)
+		{
+			player[i].readF(ifs);
+		}
+	}
+
+	void writeF(std::ofstream& ofs)
+	{
+		std::size_t size = name.size();
+		ofs.write(reinterpret_cast<const char*>(&size), sizeof(size));
+		ofs.write(name.data(), size);
+
+		ofs.write((char*)&win, sizeof(int));
+		ofs.write((char*)&lose, sizeof(int));
+		
+		for (int i = 0; i < 4; i++)
+		{
+			player[i].writeF(ofs);
+		}
+	}
 };
 
 struct Sponsor
 {
 	int sponsorType = -1;
 	std::string sponsorTextureId = "";
-	std::wstring sponsorName = L"";
+	std::string sponsorName = "";
 	int questCode = 0;
 	int questDifficulty = 0;
 	int rewardMoney = 1000;
 	std::vector<int> rewardParts = std::vector<int>(4);
 	bool success = false;
 	int currentProcess = 0;
+
+	void readF(std::ifstream& ifs)
+	{
+		ifs.read((char*)&sponsorType, sizeof(int));
+
+		std::size_t size;
+		ifs.read(reinterpret_cast<char*>(&size), sizeof(size));
+		sponsorTextureId.resize(size);
+		ifs.read(&sponsorTextureId[0], size);
+
+		ifs.read(reinterpret_cast<char*>(&size), sizeof(size));
+		sponsorName.resize(size);
+		ifs.read(&sponsorName[0], size);
+
+		ifs.read((char*)&questCode, sizeof(int));
+		ifs.read((char*)&questDifficulty, sizeof(int));
+		ifs.read((char*)&rewardMoney, sizeof(int));
+		ifs.read((char*)&success, sizeof(int));
+		ifs.read((char*)&currentProcess, sizeof(int));
+
+		rewardParts.resize(4);
+		ifs.read((char*)rewardParts.data(), sizeof(int) * 4);
+	}
+
+	void writeF(std::ofstream& ofs)
+	{
+		ofs.write((char*)&sponsorType, sizeof(int));
+
+		std::size_t size = sponsorTextureId.size();
+		ofs.write(reinterpret_cast<const char*>(&size), sizeof(size));
+		ofs.write(sponsorTextureId.data(), size);
+		size = sponsorName.size();
+		ofs.write(reinterpret_cast<const char*>(&size), sizeof(size));
+		ofs.write(sponsorName.data(), size);
+
+		ofs.write((char*)&questCode, sizeof(int));
+		ofs.write((char*)&questDifficulty, sizeof(int));
+		ofs.write((char*)&rewardMoney, sizeof(int));
+		ofs.write((char*)&success, sizeof(int));
+		ofs.write((char*)&currentProcess, sizeof(int));
+
+		ofs.write((char*)rewardParts.data(), sizeof(int) * 4);
+	}
 };
 
 struct ItemMakeSlot
@@ -73,6 +236,32 @@ struct ItemMakeSlot
 	int itemCode = 0;
 	int leftDate = -1;
 	std::vector<int> usedParts = std::vector<int>(4);
+
+	void readF(std::ifstream& ifs)
+	{
+		std::bitset<1> bitset;
+		ifs.read(reinterpret_cast<char*>(&bitset), sizeof(bitset));
+		inCrafting = bitset[0];
+
+		ifs.read((char*)&itemType, sizeof(int));
+		ifs.read((char*)&itemCode, sizeof(int));
+		ifs.read((char*)&leftDate, sizeof(int));
+
+		usedParts.resize(4);
+		ifs.read((char*)usedParts.data(), sizeof(int) * 4);
+	}
+
+	void writeF(std::ofstream& ofs)
+	{
+		std::bitset<1> bitset2(inCrafting);
+		ofs.write(reinterpret_cast<const char*>(&bitset2), sizeof(bitset2));
+
+		ofs.write((char*)&itemType, sizeof(int));
+		ofs.write((char*)&itemCode, sizeof(int));
+		ofs.write((char*)&leftDate, sizeof(int));
+
+		ofs.write((char*)usedParts.data(), sizeof(int) * 4);
+	}
 };
 
 class TeamMgr : public Singleton<TeamMgr>
@@ -117,7 +306,7 @@ public:
 	};
 protected:
 	TeamMgr() = default;
-	virtual	~TeamMgr() = default;
+	virtual	~TeamMgr() override;
 
 	int saveSlotNum = 0;
 
