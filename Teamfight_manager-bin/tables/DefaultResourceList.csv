@@ -151,3 +151,5 @@ RESOURCE_TYPES 0.TEX 1.FONT 2.SOUND 3.ANI,RESOURCE_PATH
 0,graphics/Origin/Sprite/archer_effect_7.png
 0,graphics/Origin/Sprite/archer_effect_8.png
 0,graphics/Origin/Sprite/archer_effect_9.png
+3,animations/select_indicator_left.csv
+3,animations/select_indicator_right.csv

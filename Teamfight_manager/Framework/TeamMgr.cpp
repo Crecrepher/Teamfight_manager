@@ -367,6 +367,7 @@ void TeamMgr::SaveLoad(int saveSlot)
 	}
 	is.read((char*)&recruit_able, sizeof(int));
 	
+	aiTeams.resize(7);
 	for (int i = 0; i < 7; i++)
 	{
 		aiTeams[i].readF(is);

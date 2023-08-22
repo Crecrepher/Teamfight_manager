@@ -286,3 +286,8 @@ HavePlayers,보유선수:
 AmatureLeague,아마추어 리그
 Win,승
 Lose,패
+IsSaved,저장되었습니다
+NewGame,새 게임
+Continue,이어하기
+EditorOpen,에디터 열기
+DoExit,종료하기

@@ -98,6 +98,8 @@ void SceneHome::Enter()
 	MakeSubUi();
 	ResetSky();
 	SetClouds();
+
+	TEAM_MGR.Save();
 }
 
 void SceneHome::Exit()
@@ -2755,6 +2757,18 @@ void SceneHome::MainUiFunc(int index)
 
 	}
 		break;
+	case 19:
+		SCENE_MGR.ChangeScene(SceneId::Title);
+		break;
+	case 20:
+	{
+		auto stringtable = DATATABLE_MGR.Get<StringTable>(DataTable::Ids::String);
+		TEAM_MGR.Save();
+		popTextFade = maxPopTextFade;
+		TextGo* text = (TextGo*)FindGo("PopupText");
+		text->text.setString(stringtable->GetW("IsSaved"));
+	}
+	break;
 	default:
 		break;
 	}
