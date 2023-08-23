@@ -391,31 +391,6 @@ void SceneGame::ChangeTeam()
 
 void SceneGame::LeaguePhase(float dt)
 {
-<<<<<<< HEAD
-	
-=======
-
-
-<<<<<<< HEAD
-=======
-	UiButton* nextbutton = (UiButton*)FindGo("Next Button");
-
-	nextbutton->OnClick = [this, nextbutton]()
-	{
-		for (int i = 0; i < pickSlotCount; i++)
-		{
-			pickSlot[i]->SetActive(true);
-		}
-
-		FindGo("Draft_Slot_Blue_Clicked")->SetActive(false);
-		std::cout << "벤 페이즈!" << std::endl;
-		LineUpFalse();
-		SwapSlotFalse();
-		ChangePhase(Phase::Ban);
-	};
->>>>>>> feature/Ai
->>>>>>> 65693eadcea40822694b74b5ba345b6e48e9bf25
-
 }
 
 void SceneGame::ChampionPick(int id, Team team)
