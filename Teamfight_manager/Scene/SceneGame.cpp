@@ -53,6 +53,7 @@ void SceneGame::Init()
 	//벡터 임시위치
 	championSlot = std::vector<UiButton*>(champCount);
 	swapSlot = std::vector<UiButton*>(swapChampCount);
+	pickSlot = std::vector<UiButton*>(pickSlotCount);
 
 	UiInit();
 	ButtonInit();
@@ -90,9 +91,7 @@ void SceneGame::Init()
 	banAnimation3.SetTarget(&banSheetRedTeam->sprite);
 	banAnimation3.AddClip(*RESOURCE_MGR.GetAnimationClip("animations/banSlotRedTeam.csv"));
 
-	banSheet->SetActive(false);
-	banSheetBlueTeam->SetActive(false);
-	banSheetRedTeam->SetActive(false);
+	
 
 	//FindGo("BanSheet")->SetActive(false);
 	//FindGo("BanSheet_BlueTeam")->SetActive(false);
@@ -140,6 +139,13 @@ void SceneGame::Enter()
 	banSheet->SetOrigin(Origins::MC);
 	currentPhase = Phase::None;
 	banChamps = std::vector<int>(14,-1);
+
+	banSheet->SetActive(false);
+	banSheetBlueTeam->SetActive(false);
+	banSheetRedTeam->SetActive(false);
+
+	pickCount = 0;
+	pickEnemyCount = 0;
 
 	redScore = 0;
 	blueScore = 0;
@@ -198,11 +204,13 @@ void SceneGame::Exit()
 
 void SceneGame::Update(float dt)
 {
+	// 마우스 좌표 테스트
 	if (INPUT_MGR.GetMouseButtonDown(sf::Mouse::Left))
 	{
 		std::cout << INPUT_MGR.GetMousePos().x << "\t"
 			<< INPUT_MGR.GetMousePos().y << std::endl;
 	}
+
 	banAnimation.Update(dt);
 
 	Scene::Update(dt);
@@ -318,6 +326,10 @@ void SceneGame::ChangePhase(Phase cPhase)
 	}
 	case Phase::Pick:
 	{
+		// 픽페이즈 넘어가기전 타이머 초기화
+		textDuration = 1.2f;
+		textSpeed = 1000.f;
+
 		currentPhase = Phase::Pick;
 		break;
 	}
@@ -379,8 +391,7 @@ void SceneGame::ChangeTeam()
 
 void SceneGame::LeaguePhase(float dt)
 {
-
-
+	
 
 }
 
@@ -434,7 +445,32 @@ void SceneGame::ChampionPick(int id, Team team)
 
 void SceneGame::BanPhase(float dt)
 {
-	if (currentTurn == Turn::Enemy)
+	sf::FloatRect textBounds = banText->text.getLocalBounds();
+	sf::Vector2f newPosition = banText->GetPosition() + sf::Vector2f(textSpeed * dt, 0);
+
+	grayScreen->SetActive(true);
+	banText->SetActive(true);
+	banText->SetPosition(newPosition);
+
+	if (newPosition.x >= 640.f && textDuration >= 0.f)
+	{
+		banText->SetPosition(FRAMEWORK.GetWindowSize() / 2.f);
+		textDuration -= dt;
+	}
+	else if (textDuration <= 0.f)
+	{
+		banText->SetPosition(newPosition);
+	}
+	if (banText->GetPosition().x >= 1350.f)
+	{
+		grayScreen->SetActive(false);
+		banText->SetActive(false);
+	}
+
+	/*aiBanTimer -= dt;
+	std::cout << "aiBanTimer: " << aiBanTimer << std::endl;*/
+
+	if (currentTurn == Turn::Enemy/* && aiBanTimer >= 0.f*/)
 	{
 		AiSelect();
 	}
@@ -488,11 +524,32 @@ void SceneGame::BanPhase(float dt)
 
 void SceneGame::PickPhase(float dt)
 {
+	sf::FloatRect textBounds = pickText->text.getLocalBounds();
+	sf::Vector2f newPosition = pickText->GetPosition() + sf::Vector2f(textSpeed * dt, 0);
+
+	grayScreen->SetActive(true);
+	pickText->SetActive(true);
+	pickText->SetPosition(newPosition);
+
+	if (newPosition.x >= 640.f && textDuration >= 0.f)
+	{
+		pickText->SetPosition(FRAMEWORK.GetWindowSize() / 2.f);
+		textDuration -= dt;
+	}
+	else if (textDuration <= 0.f)
+	{
+		pickText->SetPosition(newPosition);
+	}
+	if (pickText->GetPosition().x >= 1350.f)
+	{
+		grayScreen->SetActive(false);
+		pickText->SetActive(false);
+	}
+
 	if (currentTurn == Turn::Enemy)
 	{
 		AiSelect();
 	}
-
 	if (step == fullStep)
 	{
 		readyTimer = 1.f;
@@ -527,6 +584,14 @@ void SceneGame::ReadyPhase(float dt)
 
 void SceneGame::BattlePhase(float dt)
 {
+	for (int i = 0; i < champCount ; i++)
+	{
+		std::stringstream ss;
+		ss << "PickImage" << i + 1;
+		FindGo(ss.str())->SetActive(false);
+	}
+
+
 	TextGo* text = (TextGo*)FindGo("GameTimeCounter");
 	text->text.setString(std::to_string((int)floor(battleTimer)));
 	text->SetOrigin(Origins::MC);
@@ -836,6 +901,38 @@ void SceneGame::UiInit()
 		lineupText16->SetPosition(1038, 414);
 		lineupText16->SetOrigin(Origins::MC);
 		lineupText16->SetActive(false);
+
+		// 금지단계 밴픽단계 텍스트 추가
+		banText = (TextGo*)AddGo(new TextGo("BanText"));
+		banText->sortLayer = 106;
+		banText->sortOrder = 1;
+		banText->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
+		banText->text.setCharacterSize(45);
+		banText->text.setFillColor(sf::Color::White);
+		banText->text.setString(L"금지 단계");
+		banText->SetPosition(0, FRAMEWORK.GetWindowSize().y / 2);
+		banText->SetOrigin(Origins::MC);
+		banText->SetActive(false);
+
+		pickText = (TextGo*)AddGo(new TextGo("PickText"));
+		pickText->sortLayer = 106;
+		pickText->sortOrder = 1;
+		pickText->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
+		pickText->text.setCharacterSize(45);
+		pickText->text.setFillColor(sf::Color::White);
+		pickText->text.setString(L"밴픽 단계");
+		pickText->SetPosition(0, FRAMEWORK.GetWindowSize().y / 2);
+		pickText->SetOrigin(Origins::MC);
+		pickText->SetActive(false);
+
+		grayScreen = (RectGo*)AddGo(new RectGo("GrayScreen"));
+		grayScreen->sortLayer = 106;
+		grayScreen->sortOrder = 1;
+		grayScreen->rectangle.setFillColor(sf::Color(0, 0, 0, 128));
+		grayScreen->SetSize(FRAMEWORK.GetWindowSize());
+		grayScreen->SetPosition(FRAMEWORK.GetWindowSize() / 2.f);
+		grayScreen->SetOrigin(Origins::MC);
+		grayScreen->SetActive(false);
 	}
 	// 리그시스템 선발명단 - 라인업
 	{
@@ -1465,9 +1562,23 @@ void SceneGame::UiInit()
 
 void SceneGame::ButtonInit()
 {
+	//// 밴픽단계 픽 슬롯 3개
+	for (int i = 0; i < pickSlotCount; i++)
+	{
+		std::stringstream ssPickSlot;
+		ssPickSlot << "Pick Slot" << i + 1;
+		pickSlot[i] = (UiButton*)AddGo(new UiButton("graphics/LeagueSystem/Banpick/pickSlot.png", ssPickSlot.str()));
+		pickSlot[i]->sprite.setScale(2, 2);
+		pickSlot[i]->SetOrigin(Origins::MC);
+		pickSlot[i]->sortLayer = 103;
+		pickSlot[i]->sortOrder = 1;
+		pickSlot[i]->SetPosition(80, 157 + (i * 158));
+		pickSlot[i]->SetActive(false);
+	}
 	//// 밴픽단계 챔피언 슬롯 18개
 	for (int i = 0; i < champCount; i++)
 	{
+
 		std::stringstream ss;
 		ss << "Champion Slot" << i + 1;
 		championSlot[i] = (UiButton*)AddGo(new UiButton("graphics/LeagueSystem/Banpick/championSlot1.png", ss.str()));
@@ -1480,6 +1591,35 @@ void SceneGame::ButtonInit()
 
 		std::stringstream iconTextureRoute;
 		iconTextureRoute << "graphics/UiFix/character_icons_" << i << ".png";
+
+		// 작업중
+		std::stringstream pickTexture;
+		pickTexture << "graphics/UiFix/character_icons_" << i << ".png";
+
+		ss << "Image";
+
+		AddGo(new UiButton(iconTextureRoute.str(), ss.str()));
+		UiButton* spr = (UiButton*)FindGo(ss.str());
+		spr->SetOrigin(Origins::MC);
+		spr->SetPosition(championSlot[i]->GetPosition().x,
+			championSlot[i]->GetPosition().y - 12.f);
+		spr->sortLayer = 103;
+		spr->sortOrder = 1;
+		spr->SetSize(1.5, 1.5);
+		spr->sprite.setColor(sf::Color::White);
+		spr->SetActive(false);
+
+		// 작업중
+		ss.str("");
+		ss << "PickImage" << i + 1;
+		AddGo(new SpriteGo(pickTexture.str(), ss.str()));
+		SpriteGo* pick = (SpriteGo*)FindGo(ss.str());
+		pick->SetOrigin(Origins::MC);
+		pick->sortLayer = 104;
+		pick->sortOrder = 1;
+		pick->SetSize(1.4, 1.4);
+		pick->sprite.setColor(sf::Color::White);
+		pick->SetActive(false);
 
 		championSlot[i]->OnEnter = [this, i]() {
 			FindGo("BanSheet")->SetActive(true);
@@ -1508,8 +1648,33 @@ void SceneGame::ButtonInit()
 					}
 				}
 
+				// 작업중
+				// 밴픽 슬롯에서 이미지 들어가게 추가
+				// 밴했을때 슬롯 레드, 블루 처리
+
+				SpriteGo* enemyPickIcon;
+
+				sf::Vector2f size = (sf::Vector2f)enemyPickIcon->sprite.getTexture()->getSize();
+				enemyPickIcon->sprite.setTexture(*RESOURCE_MGR.GetTexture(""));
+				enemyPickIcon->sprite.setTextureRect({ 0,0,size.x,size.y });
+
+				std::stringstream ss;
+				for (int i = 0; i < champCount; i++)
+				{
+					ss.str("");
+					ss << "PickImage" << i + 1;
+					SpriteGo* enemyPickIcon = (SpriteGo*)FindGo(ss.str());
+					enemyPickIcon->SetPosition(916, 649);
+					enemyPickIcon->SetActive(true);
+
+					sf::Vector2f size = (sf::Vector2f)enemyPickIcon->sprite.getTexture()->getSize();
+					enemyPickIcon->sprite.setTexture(*RESOURCE_MGR.GetTexture(""));
+					enemyPickIcon->sprite.setTextureRect({ 0,0,size.x,size.y });
+				}
+
+				////
 				SpriteGo* spr = (SpriteGo*)FindGo(ss.str());
-				spr->sprite.setColor(sf::Color(50, 50, 50));
+				spr->sprite.setColor(sf::Color(250, 0, 0));
 				banChamps[step] = i;
 				step++;
 				ChangeTeam();
@@ -1527,10 +1692,37 @@ void SceneGame::ButtonInit()
 				if (team == Team::Red)
 				{
 					championSlot[i]->sprite.setColor(sf::Color(250, 0, 0));
+
+					/// 작업중
+					ss.str("");
+					ss << "PickImage" << i + 1;
+					SpriteGo* enemyPickIcon = (SpriteGo*)FindGo(ss.str());
+					if (pickEnemyCount < 3)
+					{
+						enemyPickIcon->SetPosition(1150, 137 + (pickEnemyCount * 158));
+						pickEnemyCount++;
+						std::cout << "적의 픽카운트: " << pickEnemyCount << std::endl;
+						// pickIcon->SetPosition(29, 137 + (i * 158));
+					}
+					enemyPickIcon->SetActive(true);
 				}
 				else
 				{
+					
 					championSlot[i]->sprite.setColor(sf::Color(0, 0, 250));
+
+					/// 작업중
+					ss.str("");
+					ss << "PickImage" << i + 1;
+					SpriteGo* pickIcon = (SpriteGo*)FindGo(ss.str());
+					if (pickCount < 3)
+					{
+						pickIcon->SetPosition(29, 137 + (pickCount * 158));
+						pickCount++;
+						std::cout << "나의 픽카운트: " << pickCount << std::endl;
+						// pickIcon->SetPosition(29, 137 + (i * 158));
+					}
+					pickIcon->SetActive(true);
 				}
 				banChamps[step] = i;
 				ChampionPick(i,team);
@@ -1538,18 +1730,9 @@ void SceneGame::ButtonInit()
 				ChangeTurn();	
 			}
 		};
-		ss << "Image";
+		
+		
 
-		AddGo(new UiButton(iconTextureRoute.str(), ss.str()));
-		UiButton* spr = (UiButton*)FindGo(ss.str());
-		spr->SetOrigin(Origins::MC);
-		spr->SetPosition(championSlot[i]->GetPosition().x,
-			championSlot[i]->GetPosition().y - 12.f);
-		spr->sortLayer = 103;
-		spr->sortOrder = 1;
-		spr->SetSize(1.5, 1.5);
-		spr->sprite.setColor(sf::Color::White);
-		spr->SetActive(false);
 	}
 }
 
@@ -1570,7 +1753,7 @@ void SceneGame::LineUpTrue()
 {
 	FindGo("Line Up")->SetActive(true);
 	FindGo("Next Button")->SetActive(true);
-	FindGo("keyboard Buttons_D")->SetActive(true);
+	//FindGo("keyboard Buttons_D")->SetActive(true);
 	FindGo("keyboard Buttons_F")->SetActive(true);
 
 	FindGo("Line Up Text1")->SetActive(true);
@@ -1583,8 +1766,28 @@ void SceneGame::LineUpTrue()
 	FindGo("Player Member Text1")->SetActive(true);
 	FindGo("Player Member Text2")->SetActive(true);
 	FindGo("Player Member Text3")->SetActive(true);
-	FindGo("Player Member Text5")->SetActive(true);
-	FindGo("Player Member Text6")->SetActive(true);
+
+	if (swapChampCount >= 5)
+	{
+		FindGo("Player Member Text5")->SetActive(true);
+		FindGo("Player Member Text6")->SetActive(true);
+	}
+	else if (swapChampCount >= 4)
+	{
+		FindGo("Player Member Text5")->SetActive(true);
+	}
+	else
+	{
+		FindGo("Player Member Text5")->SetActive(false);
+		FindGo("Player Member Text6")->SetActive(false);
+	}
+
+	for (int i = 0; i < swapChampCount; i++)
+	{
+		std::stringstream ss;
+		ss << "Swap Slot" << i + 1;
+		FindGo(ss.str())->SetActive(true);
+	}
 
 	FindGo("Enemy Member Text1")->SetActive(true);
 	FindGo("Enemy Member Text2")->SetActive(true);
@@ -1593,7 +1796,6 @@ void SceneGame::LineUpTrue()
 	FindGo("Pleyer Team Title1")->SetActive(true);
 	FindGo("Enemy Team Title1")->SetActive(true);
 	FindGo("Sub_Title")->SetActive(true);
-
 
 	FindGo("Enemy Draft Slot1")->SetActive(true);
 	FindGo("Enemy Draft Slot2")->SetActive(true);
@@ -1662,6 +1864,11 @@ void SceneGame::BanPickFalse()
 	ButtonTrue(false);
 	spr = (SpriteGo*)FindGo("1");
 	spr->SetActive(true);
+
+	for (int i = 0; i < pickSlotCount; i++)
+	{
+		pickSlot[i]->SetActive(false);
+	}
 }
 
 void SceneGame::AiSelect()
@@ -1700,12 +1907,12 @@ void SceneGame::SwapSlot()
 		swapSlot[i]->OnExit = [this]() {
 			FindGo("Draft_Slot_White")->SetActive(false);
 		};
-		swapSlot[i]->OnClick = [this, i]() {
-			std::cout << "챔피언 슬롯 클릭" << i << std::endl;
-
+		swapSlot[i]->OnClick = [this, i]() {		
 			SpriteGo* draftSlotBlueClicked = (SpriteGo*)FindGo("Draft_Slot_Blue_Clicked");
 
-			if (isSwapCheck && !isSwapCheck2)
+			// 스왑단계 클릭 중복
+			
+			if (!isSwapCheck1 && isSwapComplete)
 			{
 				FindGo("Line Up Swap")->SetActive(true);
 				FindGo("Draft Arrow2")->SetActive(true);
@@ -1713,24 +1920,33 @@ void SceneGame::SwapSlot()
 				draftSlotBlueClicked->SetPosition(swapSlot[i]->GetPosition());
 
 				selectedButton = swapSlot[i];
-				tempPosition = selectedButton->GetPosition();
+				isSwapCheck1 = !isSwapCheck1;
+				isSwapComplete = !isSwapComplete;
 
-				isSwapCheck = !isSwapCheck;
-				isSwapCheck2 = !isSwapCheck2;
+				std::cout << "챔피언 슬롯 클릭" << i << std::endl;
+				return;
 			}
-			else if (!isSwapCheck && isSwapCheck2)
-			{	
+			else if (isSwapCheck1 && !isSwapComplete && selectedButton != nullptr)
+			{
 				FindGo("Line Up Swap")->SetActive(false);
 				FindGo("Draft Arrow2")->SetActive(false);
 				draftSlotBlueClicked->SetActive(false);
 
+				firstPosition = selectedButton->GetPosition();
 				selectedButton->SetPosition(swapSlot[i]->GetPosition());
-				swapSlot[i]->SetPosition(tempPosition);
+				swapSlot[i]->SetPosition(firstPosition);
 
-				isSwapCheck = !isSwapCheck;
-				isSwapCheck2 = !isSwapCheck2;
+				isSwapCheck1 = !isSwapCheck1;
+				isSwapComplete = !isSwapComplete;
+				selectedButton = nullptr;
 				std::cout << "스왑 완료" << std::endl;
 			}
+
+			// 스왑체크1이 처음에 트루라 작동, 컴플릿이 처음에 트루라 작동
+			// 처음 클릭시 스왑컴플릿이 펄스로 바뀜
+
+			
+
 		};
 	}
 }
