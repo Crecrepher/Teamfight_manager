@@ -4,6 +4,7 @@
 #include "Champion.h"
 #include "GameState.h"
 #include "AnimatioControler.h"
+#include "TextGo.h"
 
 class UiButton;
 
@@ -18,6 +19,9 @@ protected:
 
 	float battleTimer;
 	float readyTimer;
+	float aiBanTimer = 5.f;
+	float textSpeed = 1000.f;
+	float textDuration = 1.2f;
 
 	int redScore;
 	int blueScore;
@@ -44,19 +48,35 @@ protected:
 	std::vector<UiButton*> championSlot;
 	int champCount = 14; // 챔피언 최대수를 결정
 	std::vector<UiButton*> swapSlot;
-	int swapChampCount = 4; // 3~5 팀원수 결정
+	int swapChampCount = 5; // 3~5 팀원수 결정
+	std::vector<UiButton*> pickSlot;
+
+	int pickSlotCount = 3; // 우리 팀원의 수
+	int pickSlotEnemyCount = 3; // 적 팀원의 수
+
+	int pickCount = 0;
+	int pickEnemyCount = 0;
 
 	int swapChampCountCheck = 3;
-	int selectedButtonIndex = -1;
+	// int selectedButtonIndex = -1;
 	UiButton* selectedButton = nullptr;
-	sf::Vector2f tempPosition = { 0, 0 };
+	sf::Vector2f firstPosition = { 0, 0 };
 	bool selectCheck = true;
-	bool isSwapCheck = true;
-	bool isSwapCheck2 = false;
 
+	// 스왑단계 클릭 중복
+	bool isSwapCheck1 = false;
+	bool isSwapCheck2 = true;
+	bool isSwapComplete = true;
+
+
+	bool canClick = true;
 
 	sf::Vector2f BanSlotPosition1 = { 363, 661 };
 	sf::Vector2f BanSlotPosition2 = { 919, 661 };
+
+	TextGo* banText;
+	TextGo* pickText;
+	RectGo* grayScreen;
 
 public:
 	SceneGame();

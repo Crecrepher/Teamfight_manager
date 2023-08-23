@@ -116,3 +116,5 @@ RESOURCE_TYPES 1.TEX 2.FONT 3.SOUND 4.ANI,RESOURCE_PATH
 0,graphics/LeagueSystem/Lineup/draft_slot_1_white.png
 0,graphics/LeagueSystem/Lineup/draft_slot_0_clicked.png
 0,graphics/LeagueSystem/Lineup/draft_slot_1_clicked.png
+0,graphics/LeagueSystem/Banpick/pickSlot.png
+0,
