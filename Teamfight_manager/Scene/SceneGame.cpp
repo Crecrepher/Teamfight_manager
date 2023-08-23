@@ -402,7 +402,7 @@ void SceneGame::ChampionPick(int id, Team team)
 	champ->ChangeStance(ChampionStance::None);
 	champ->SetOrigin(Origins::MC);
 	champ->SetSacleX(1);
-	champ->SetUltiTimer(Utils::RandomRange(20.f, 40.f));
+	champ->SetUltiTimer(Utils::RandomRange(10.f, 30.f));
 	
 
 	switch (team)
@@ -607,6 +607,10 @@ void SceneGame::BattlePhase(float dt)
 		speedUp = 2.f;
 	}
 	if (INPUT_MGR.GetKeyDown(sf::Keyboard::Numpad2))
+	{
+		speedUp =0.5f;
+	}
+	if (INPUT_MGR.GetKeyDown(sf::Keyboard::Numpad3))
 	{
 		speedUp = 60.f;
 	}
@@ -1650,7 +1654,7 @@ void SceneGame::ButtonInit()
 				// 밴픽 슬롯에서 이미지 들어가게 추가
 				// 밴했을때 슬롯 레드, 블루 처리
 
-				SpriteGo* enemyPickIcon;
+				/*SpriteGo* enemyPickIcon;
 
 				sf::Vector2f size = (sf::Vector2f)enemyPickIcon->sprite.getTexture()->getSize();
 				enemyPickIcon->sprite.setTexture(*RESOURCE_MGR.GetTexture(""));
@@ -1668,7 +1672,7 @@ void SceneGame::ButtonInit()
 					sf::Vector2f size = (sf::Vector2f)enemyPickIcon->sprite.getTexture()->getSize();
 					enemyPickIcon->sprite.setTexture(*RESOURCE_MGR.GetTexture(""));
 					enemyPickIcon->sprite.setTextureRect({ 0,0,size.x,size.y });
-				}
+				}*/
 
 				////
 				SpriteGo* spr = (SpriteGo*)FindGo(ss.str());

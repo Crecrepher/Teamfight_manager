@@ -20,7 +20,6 @@ public:
 	ChampionSkill* GetSkill(const int code);
 
 	void ActiveSkill(int code, Champion* champ);
-	void passiveSkill(int code, Champion* champ);
 
 	void ArcherSkill(Champion* champ);
 	void ArcherUltiSkill(Champion* champ);
