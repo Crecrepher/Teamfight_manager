@@ -6,6 +6,7 @@
 #include "GameState.h"
 #include "AnimatioControler.h"
 #include "TextGo.h"
+#include "TeamMgr.h"
 
 class UiButton;
 
@@ -51,8 +52,9 @@ protected:
 	std::vector<UiButton*> championSlot;
 	int champCount = 14; // 챔피언 최대수를 결정
 	std::vector<UiButton*> swapSlot;
-	int swapChampCount = 5; // 3~5 팀원수 결정
+	int swapChampCount = 3; // 3~5 팀원수 결정
 	std::vector<UiButton*> pickSlot;
+	std::vector<UiButton*> enemySlot;
 
 	int pickSlotCount = 3; // 우리 팀원의 수
 	int pickSlotEnemyCount = 3; // 적 팀원의 수
@@ -81,6 +83,11 @@ protected:
 	TextGo* pickText;
 	RectGo* grayScreen;
 
+	std::vector<PlayerInfo> playerInfo;
+	AiTeam enemyInfo;
+	bool isPlayerEnough = true;
+	bool isClickBlocker = false;
+	int swapIndex = -1;
 public:
 	SceneGame();
 	virtual ~SceneGame() override;
@@ -111,19 +118,22 @@ public:
 	void ClearObjectPool(ObjectPool<T>& pool);
 
 	void UiInit();
+	void UiEnter();
 
-	void ButtonInit();
-	void ButtonTrue(bool on = true);
-
+	void LineUpInit();
 	void LineUpTrue();
 	void LineUpFalse();
-	
-	void BanPickFalse();
+	void SetLineUp();
+
+	void BanPickInit();
+	void BanPickTrue(bool on = true);
+	void BanPickToBattleFalse();
+	void SetBanPick();
 	
 	void AiSelect();
 
-	void SwapSlot();
 	void SwapSlotFalse();
+	void GetPlayers();
 };
 
 template<typename T>

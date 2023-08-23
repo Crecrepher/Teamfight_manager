@@ -124,3 +124,4 @@ RESOURCE_TYPES 1.TEX 2.FONT 3.SOUND 4.ANI,RESOURCE_PATH
 0,graphics/CustomSprite/player_ingame_guage_4.png
 0,graphics/CustomSprite/player_ingame_guage_5.png
 0,graphics/LeagueSystem/Banpick/pickSlot.png
+0,graphics/LeagueSystem/Banpick/banpick_bg.png

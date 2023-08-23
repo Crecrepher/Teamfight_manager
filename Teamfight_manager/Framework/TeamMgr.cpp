@@ -54,6 +54,28 @@ void TeamMgr::InitGrowTable()
 	trainingGrowTable[9] = { 2,4,8,16 };
 }
 
+void TeamMgr::DoWin()
+{
+	aiTeams[(win + lose) % 7].lose++;
+	win++;
+	winContinuity++;
+}
+
+void TeamMgr::DoPerfectWin()
+{
+	aiTeams[(win + lose) % 7].lose++;
+	win++;
+	winPerfect++;
+	winContinuity++;
+}
+
+void TeamMgr::DoLose()
+{
+	aiTeams[(win + lose) % 7].win++;
+	lose++;
+	winContinuity = 0;
+}
+
 
 void TeamMgr::ShowPlayer()
 {
@@ -168,6 +190,11 @@ void TeamMgr::DayPass()
 			player[i].kill = 0;
 			player[i].death = 0;
 		}
+
+		win = 0;
+		winPerfect = 0;
+		winContinuity = 0;
+		lose = 0;
 	}
 
 	playerTraining = GetGrowStats(playerTraining);

@@ -360,8 +360,15 @@ public:
 	void Init();
 	void InitGrowTable();
 
-	int GetWin() { return win; };
-	int GetLose() { return lose; };
+	int GetWin() { return win; }
+	int GetLose() { return lose; }
+
+	void DoWin();
+	void DoPerfectWin();
+	void DoLose();
+
+	int GetAiTeamFightNum() { return (win + lose) % 7; }
+	AiTeam GetAiTeam(int index) { return aiTeams[index]; }
 
 	void ShowPlayer();
 	void Recruit(int index, PlayerInfo player);

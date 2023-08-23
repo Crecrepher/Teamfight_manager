@@ -81,7 +81,8 @@ void SceneHome::Enter()
 		NewYear();
 		if (TEAM_MGR.GetTodayYear() == 2021)
 		{
-			for (int i = 0; i < 4; i++)
+			//나중에 4로 바꾸기
+			for (int i = 0; i < 5; i++)
 			{
 				Recruit(-1, 0);
 				TEAM_MGR.Employ(0);

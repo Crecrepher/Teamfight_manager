@@ -107,21 +107,13 @@ void SceneTitile::Update(float dt)
 	{
 		SCENE_MGR.ChangeScene(SceneId::Home);
 	}
+
 	else if (INPUT_MGR.GetKeyUp(sf::Keyboard::Num1))
 	{
 		TEAM_MGR.SaveLoad(0);
 		SCENE_MGR.ChangeScene(SceneId::Home);
 	}
-	else if (INPUT_MGR.GetKeyUp(sf::Keyboard::Num2))
-	{
-		TEAM_MGR.SaveLoad(1);
-		SCENE_MGR.ChangeScene(SceneId::Home);
-	}
-	else if (INPUT_MGR.GetKeyUp(sf::Keyboard::Num3))
-	{
-		TEAM_MGR.SaveLoad(2);
-		SCENE_MGR.ChangeScene(SceneId::Home);
-	}
+	
 }
 
 void SceneTitile::Draw(sf::RenderWindow& window)
