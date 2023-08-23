@@ -7,6 +7,9 @@
 #include "AnimatioControler.h"
 #include "TextGo.h"
 
+#include "AiBanPick.h"
+#include "vector"
+
 class UiButton;
 
 class SceneGame : public Scene
@@ -37,12 +40,13 @@ protected:
 	std::vector<Champion*> redTeam;
 	std::vector<Champion*> blueTeam;
 	std::vector<Champion*> cemetery;
-
 	std::vector<int> banChamps;
-	SpriteGo* banSheet;
 
+	SpriteGo* banSheet;
 	SpriteGo* banSheetBlueTeam; // 블루
 	SpriteGo* banSheetRedTeam; // 레드
+
+	AiBanPick aiBanPick;
 
 	AnimatioControler banAnimation;
 	AnimatioControler banAnimation2;
@@ -61,7 +65,6 @@ protected:
 	int pickEnemyCount = 0;
 
 	int swapChampCountCheck = 3;
-	// int selectedButtonIndex = -1;
 	UiButton* selectedButton = nullptr;
 	sf::Vector2f firstPosition = { 0, 0 };
 	bool selectCheck = true;
@@ -70,7 +73,6 @@ protected:
 	bool isSwapCheck1 = false;
 	bool isSwapCheck2 = true;
 	bool isSwapComplete = true;
-
 
 	bool canClick = true;
 

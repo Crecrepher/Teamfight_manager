@@ -166,6 +166,38 @@ void SceneGame::Enter()
 
 	LineUpTrue();
 
+	// 금지단계 밴픽단계 텍스트 추가
+	banText = (TextGo*)AddGo(new TextGo("BanText"));
+	banText->sortLayer = 107;
+	banText->sortOrder = 1;
+	banText->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
+	banText->text.setCharacterSize(45);
+	banText->text.setFillColor(sf::Color::White);
+	banText->text.setString(L"금지 단계");
+	banText->SetPosition(0, FRAMEWORK.GetWindowSize().y / 2);
+	banText->SetOrigin(Origins::MC);
+	banText->SetActive(false);
+
+	pickText = (TextGo*)AddGo(new TextGo("PickText"));
+	pickText->sortLayer = 107;
+	pickText->sortOrder = 1;
+	pickText->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
+	pickText->text.setCharacterSize(45);
+	pickText->text.setFillColor(sf::Color::White);
+	pickText->text.setString(L"밴픽 단계");
+	pickText->SetPosition(0, FRAMEWORK.GetWindowSize().y / 2);
+	pickText->SetOrigin(Origins::MC);
+	pickText->SetActive(false);
+
+	grayScreen = (RectGo*)AddGo(new RectGo("GrayScreen"));
+	grayScreen->sortLayer = 106;
+	grayScreen->sortOrder = 1;
+	grayScreen->rectangle.setFillColor(sf::Color(0, 0, 0, 128));
+	grayScreen->SetSize(FRAMEWORK.GetWindowSize());
+	grayScreen->SetPosition(FRAMEWORK.GetWindowSize() / 2.f);
+	grayScreen->SetOrigin(Origins::MC);
+	grayScreen->SetActive(false);
+
 	UiButton* ui = (UiButton*)FindGo("Next Button");
 
 	ui->OnClick = [this, ui]()
@@ -177,6 +209,8 @@ void SceneGame::Enter()
 		SwapSlotFalse();
 		ChangePhase(Phase::Ban);
 	};
+
+	aiBanPick.Init();
 }
 
 void SceneGame::Exit()
@@ -205,14 +239,12 @@ void SceneGame::Exit()
 void SceneGame::Update(float dt)
 {
 	// 마우스 좌표 테스트
-	if (INPUT_MGR.GetMouseButtonDown(sf::Mouse::Left))
+	/*if (INPUT_MGR.GetMouseButtonDown(sf::Mouse::Left))
 	{
 		std::cout << INPUT_MGR.GetMousePos().x << "\t"
 			<< INPUT_MGR.GetMousePos().y << std::endl;
-	}
-
+	}*/
 	banAnimation.Update(dt);
-
 	Scene::Update(dt);
 
 	selectCheck = true;
@@ -321,6 +353,7 @@ void SceneGame::ChangePhase(Phase cPhase)
 	}
 	case Phase::Ban:
 	{
+
 		currentPhase = Phase::Ban;
 		break;
 	}
@@ -403,7 +436,7 @@ void SceneGame::ChampionPick(int id, Team team)
 	champ->SetOrigin(Origins::MC);
 	champ->SetSacleX(1);
 	champ->SetUltiTimer(Utils::RandomRange(20.f, 40.f));
-	
+
 
 	switch (team)
 	{
@@ -465,16 +498,13 @@ void SceneGame::BanPhase(float dt)
 		banText->SetActive(false);
 	}
 
-	/*aiBanTimer -= dt;
-	std::cout << "aiBanTimer: " << aiBanTimer << std::endl;*/
-
 	if (currentTurn == Turn::Enemy/* && aiBanTimer >= 0.f*/)
 	{
 		AiSelect();
 	}
 
 	FindGo("Ban Bg 2:2")->SetActive(true);
-	banAnimation.Update(dt);
+	//banAnimation.Update(dt);
 
 	ButtonTrue();
 
@@ -900,37 +930,6 @@ void SceneGame::UiInit()
 		lineupText16->SetOrigin(Origins::MC);
 		lineupText16->SetActive(false);
 
-		// 금지단계 밴픽단계 텍스트 추가
-		banText = (TextGo*)AddGo(new TextGo("BanText"));
-		banText->sortLayer = 106;
-		banText->sortOrder = 1;
-		banText->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
-		banText->text.setCharacterSize(45);
-		banText->text.setFillColor(sf::Color::White);
-		banText->text.setString(L"금지 단계");
-		banText->SetPosition(0, FRAMEWORK.GetWindowSize().y / 2);
-		banText->SetOrigin(Origins::MC);
-		banText->SetActive(false);
-
-		pickText = (TextGo*)AddGo(new TextGo("PickText"));
-		pickText->sortLayer = 106;
-		pickText->sortOrder = 1;
-		pickText->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
-		pickText->text.setCharacterSize(45);
-		pickText->text.setFillColor(sf::Color::White);
-		pickText->text.setString(L"밴픽 단계");
-		pickText->SetPosition(0, FRAMEWORK.GetWindowSize().y / 2);
-		pickText->SetOrigin(Origins::MC);
-		pickText->SetActive(false);
-
-		grayScreen = (RectGo*)AddGo(new RectGo("GrayScreen"));
-		grayScreen->sortLayer = 106;
-		grayScreen->sortOrder = 1;
-		grayScreen->rectangle.setFillColor(sf::Color(0, 0, 0, 128));
-		grayScreen->SetSize(FRAMEWORK.GetWindowSize());
-		grayScreen->SetPosition(FRAMEWORK.GetWindowSize() / 2.f);
-		grayScreen->SetOrigin(Origins::MC);
-		grayScreen->SetActive(false);
 	}
 	// 리그시스템 선발명단 - 라인업
 	{
@@ -1065,6 +1064,8 @@ void SceneGame::UiInit()
 			Draft_Slot_Red_White->SetActive(false);
 		};
 	}
+
+
 
 	SpriteGo* lineup = (SpriteGo*)AddGo(new SpriteGo("graphics/LeagueSystem/Lineup/lineup_ui_bg #43820.png", "Line Up"));
 	lineup->sprite.setScale(2, 2);
@@ -1590,7 +1591,6 @@ void SceneGame::ButtonInit()
 		std::stringstream iconTextureRoute;
 		iconTextureRoute << "graphics/UiFix/character_icons_" << i << ".png";
 
-		// 작업중
 		std::stringstream pickTexture;
 		pickTexture << "graphics/UiFix/character_icons_" << i << ".png";
 
@@ -1625,15 +1625,21 @@ void SceneGame::ButtonInit()
 			selectCheck = true;
 		};
 		championSlot[i]->OnExit = [this]() {
+			// if문 앞에 있으면
+			FindGo("BanSheet")->SetActive(false);
 			if (selectCheck)
 			{
 				return;
 			}
-			FindGo("BanSheet")->SetActive(false);
 			selectCheck = false;
 		};
 		championSlot[i]->OnClick = [this,i]() {
 			
+			if (grayScreen->GetActive())
+			{
+				return;
+			}
+
 			std::stringstream ss;
 			ss << "Champion Slot" << i + 1 << "Image";
 			if (currentPhase == Phase::Ban)
@@ -1650,7 +1656,7 @@ void SceneGame::ButtonInit()
 				// 밴픽 슬롯에서 이미지 들어가게 추가
 				// 밴했을때 슬롯 레드, 블루 처리
 
-				SpriteGo* enemyPickIcon;
+				/*SpriteGo* enemyPickIcon;
 
 				sf::Vector2f size = (sf::Vector2f)enemyPickIcon->sprite.getTexture()->getSize();
 				enemyPickIcon->sprite.setTexture(*RESOURCE_MGR.GetTexture(""));
@@ -1662,17 +1668,18 @@ void SceneGame::ButtonInit()
 					ss.str("");
 					ss << "PickImage" << i + 1;
 					SpriteGo* enemyPickIcon = (SpriteGo*)FindGo(ss.str());
-					enemyPickIcon->SetPosition(916, 649);
+					enemyPickIcon->SetPosition(BanSlotPosition2);
 					enemyPickIcon->SetActive(true);
 
 					sf::Vector2f size = (sf::Vector2f)enemyPickIcon->sprite.getTexture()->getSize();
 					enemyPickIcon->sprite.setTexture(*RESOURCE_MGR.GetTexture(""));
 					enemyPickIcon->sprite.setTextureRect({ 0,0,size.x,size.y });
-				}
+				}*/
 
 				////
 				SpriteGo* spr = (SpriteGo*)FindGo(ss.str());
 				spr->sprite.setColor(sf::Color(250, 0, 0));
+				
 				banChamps[step] = i;
 				step++;
 				ChangeTeam();
@@ -1690,8 +1697,6 @@ void SceneGame::ButtonInit()
 				if (team == Team::Red)
 				{
 					championSlot[i]->sprite.setColor(sf::Color(250, 0, 0));
-
-					/// 작업중
 					ss.str("");
 					ss << "PickImage" << i + 1;
 					SpriteGo* enemyPickIcon = (SpriteGo*)FindGo(ss.str());
@@ -1700,16 +1705,13 @@ void SceneGame::ButtonInit()
 						enemyPickIcon->SetPosition(1150, 137 + (pickEnemyCount * 158));
 						pickEnemyCount++;
 						std::cout << "적의 픽카운트: " << pickEnemyCount << std::endl;
-						// pickIcon->SetPosition(29, 137 + (i * 158));
 					}
 					enemyPickIcon->SetActive(true);
 				}
 				else
 				{
-					
 					championSlot[i]->sprite.setColor(sf::Color(0, 0, 250));
 
-					/// 작업중
 					ss.str("");
 					ss << "PickImage" << i + 1;
 					SpriteGo* pickIcon = (SpriteGo*)FindGo(ss.str());
@@ -1718,7 +1720,6 @@ void SceneGame::ButtonInit()
 						pickIcon->SetPosition(29, 137 + (pickCount * 158));
 						pickCount++;
 						std::cout << "나의 픽카운트: " << pickCount << std::endl;
-						// pickIcon->SetPosition(29, 137 + (i * 158));
 					}
 					pickIcon->SetActive(true);
 				}
@@ -1728,14 +1729,17 @@ void SceneGame::ButtonInit()
 				ChangeTurn();	
 			}
 		};
-		
-		
 
 	}
 }
 
 void SceneGame::ButtonTrue(bool on)
 {
+	for (int i = 0; i < pickSlotCount; i++)
+	{
+		pickSlot[i]->SetActive(true);
+	}
+
 	for (int i = 0; i < champCount; i++)
 	{
 		championSlot[i]->SetActive(on);
@@ -1743,7 +1747,7 @@ void SceneGame::ButtonTrue(bool on)
 		ss  << "Champion Slot" << i + 1 << "Image";
 		UiButton* spr = (UiButton*)FindGo(ss.str());
 		spr->SetActive(on);
-		FindGo("BanSheet")->SetActive(on);
+		// FindGo("BanSheet")->SetActive(on); // 수정
 	}
 }
 
@@ -1871,12 +1875,36 @@ void SceneGame::BanPickFalse()
 
 void SceneGame::AiSelect()
 {
-	championSlot[Utils::RandomRange(0, champCount - 1)]->OnClick();
+	aiBanPick.SetChampions();
+
+	int highStatIndex = aiBanPick.CompareHighStatChampionIndex();
+
+	if (highStatIndex >= 0 && highStatIndex < 14)
+	{
+		std::cout << "제일 높은 스탯의 챔피언 슬롯 번호 " << highStatIndex + 1 << std::endl;
+		championSlot[highStatIndex]->OnClick();
+	}
+
+	/*aiBanPick.SetChampions();
+	const std::vector<State>& championStates = aiBanPick.GetChampions();
+
+	State highStatChampion = aiBanPick.CompareHighStatChampion(championStates[0], championStates[13]);
+
+	int championIndex = -1;
+	for (int i = 0; i < 14; i++)
+	{
+		if (championStates[i] == highStatChampion)
+		{
+			championIndex = i;
+		}
+	}
+	championSlot[highStatChampion]->OnClick();
+	std::cout << "제일 높은 스탯의 챔피언 번호 " << highStatChampion.charId << std::endl;*/
+	
 }
 
 void SceneGame::SwapSlot()
 {
-
 	for (int i = 0; i < swapChampCount; i++)
 	{
 		std::stringstream ss;

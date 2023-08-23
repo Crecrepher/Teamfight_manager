@@ -1,5 +1,5 @@
 ID,FPS,LOOPTYPE,,
-Idle,75,1,,
+Idle,60,1,,
 ,,,,
 TEXTUREID,LEFT,TOP,WIDTH,HEIGHT
 graphics/LeagueSystem/Banpick/banpick_sheet.png,0,0,82,100

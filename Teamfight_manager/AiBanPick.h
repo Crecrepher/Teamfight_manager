@@ -3,26 +3,21 @@
 #include <vector>
 #include <algorithm>
 #include <random>
-
-struct Champion
-{
-    int Id;
-    int Attack;
-    int Defense;
-    int Hp;
-    float WinRate;
-};
+#include "GameState.h"
+#include "ChampionMgr.h"
 
 class AiBanPick
 {
 private:
 
-    Champion highStatChampion;
-    Champion secondStatChampion;
+    State highStatChampion;
+    State secondStatChampion;
 
-    std::vector<Champion> highStatChampions;
-    std::vector<Champion> champions;
+    std::vector<State> highStatChampions;
+    std::vector<State> champions;
+    std::vector<std::string> champIndex;
 
+    int champCount = 14;
     int weight = 5;
     int winRateweight = 0.2;
 
@@ -32,17 +27,41 @@ public:
     AiBanPick();
     ~AiBanPick();
 
-    int AddStat(const Champion& champion);
-    void printStats(const std::vector<Champion>& champions);
-    Champion CompareHighStatChampion(const Champion& a, const Champion& b);
-    Champion CompareSecondStatChampion(const Champion& a, const Champion& b);
+    void Init();
+    int AddStat(const State& champion);
+    void printStats(const std::vector<State>& champions);
+    State CompareHighStatChampion(const State& a, const State& b);
+    State CompareSecondStatChampion(const State& a, const State& b);
 
-    void isBan(const Champion& highStatChampion, bool isAiMistake);
-    void isPick(const Champion& highStatChampion, bool isAiMistake);
+    int CompareHighStatChampionIndex();
+    void CompareNextStatChampion();
 
-    const std::vector<Champion>& getChampions() const
+    void isBan(const State& highStatChampion, bool isAiMistake);
+    void isPick(const State& highStatChampion, bool isAiMistake);
+
+    void SetChampions()
+    {
+        for (int i = 0; i < champCount; i++)
+        {
+            champions.push_back(*CHAMPION_MGR.GetChampion(i));
+        }
+    }
+
+    void SetChampionIndex()
+    {
+        for (int i = 0; i < champCount; i++)
+        {
+            champIndex.push_back(CHAMPION_MGR.GetChampion(i)->charId);
+        }
+    }
+
+    void PickChamp(State state);
+    void PickChamp(int i);
+
+    const std::vector<State>& GetChampions() const
     {
         return champions;
     }
+
 };
 
