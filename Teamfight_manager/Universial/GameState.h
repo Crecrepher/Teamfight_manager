@@ -105,4 +105,5 @@ enum class BuffType
 	COOLTIME,
 	AGGRO,
 	BARRIER,
+	ULTIMATE,
 };

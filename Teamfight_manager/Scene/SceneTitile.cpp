@@ -48,8 +48,6 @@ void SceneTitile::Init()
 	AddGo(new SpriteGo("graphics/Origin/Sprite/stadium_sky_bg.png", "BackSky"));
 	AddGo(new SpriteGo("graphics/Origin/Sprite/teamfight_manager_title_bg.png", "Monitor"));
 
-	std::stringstream ss;
-	ss << "³»¸¾ÀÌ¾ß" << std::endl;
 	for (auto go : gameObjects)
 	{
 		go->Init();

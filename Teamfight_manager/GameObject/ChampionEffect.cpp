@@ -91,7 +91,14 @@ void ChampionEffect::BaseUpdate(float dt)
 	}
 	if (this->champ != nullptr)
 	{
-		this->SetPosition(this->champ->GetPosition().x + this->plusWidth, this->champ->GetPosition().y + this->plusHight);
+		if (this->champ->GetCurretState().charId == "berserker" && this->champ->GetUseBuff(BuffType::ULTIMATE))
+		{
+			this->SetPosition(this->champ->GetPosition().x + this->plusWidth, this->champ->GetPosition().y + this->plusHight + 5.f);
+		}
+		else
+		{
+			this->SetPosition(this->champ->GetPosition().x + this->plusWidth, this->champ->GetPosition().y + this->plusHight);
+		}
 	}
 }
 

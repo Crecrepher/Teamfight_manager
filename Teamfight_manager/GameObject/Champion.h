@@ -106,6 +106,7 @@ public:
 	void SetSkill(ChampionSkill code);
 	void ReleaseSkill();
 	void SetOrder(TargetingOrder order) { this->currentOrder = order; }
+	TargetingOrder GetOrder() { return this->currentOrder; }
 	void SetSacleX(float x);
 	float GetSacleX() { return this->sprite.getScale().x; }
 	void SetTeamColor(Team color) { team = color; }
@@ -132,6 +133,7 @@ public:
 	void TargetOrderCIE(int code, float range, float value);
 	void TargetOrderCIT(int code, float range, float value);
 	void TargetOrderCITB(int code, float range, BuffState* state);
+	void TargetOrderCIEB(int code, float range, BuffState* state);
 	void TargetAggro();
 
 	float GetRowHealth();
@@ -154,6 +156,7 @@ public:
 	void UseSkill();
 	void UseUltiSkill();
 	void SkillChangeIdle();
+	void SkillAniChange();
 	Champion* GetTarget();
 	void SetTarget(Champion* champ);
 	void SetBind(float t) { this->bind = t; }
@@ -172,6 +175,7 @@ public:
 	sf::Vector2f GetStartPos() { return this->startPos; }
 	sf::Vector2f GetEndPos() { return this->endPos; }
 	void SetBuff(BuffState* state);
+	bool GetUseBuff(BuffType type);
 	void SetMyTeamBuff(BuffState* state);
 	float GetBarrier();
 	void TargetRangeDamage(float range, float value);

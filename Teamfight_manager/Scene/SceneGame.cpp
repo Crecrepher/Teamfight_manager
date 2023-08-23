@@ -426,7 +426,7 @@ void SceneGame::ChampionPick(int id, Team team)
 	champ->ChangeStance(ChampionStance::None);
 	champ->SetOrigin(Origins::MC);
 	champ->SetSacleX(1);
-	champ->SetUltiTimer(Utils::RandomRange(20.f, 40.f));
+	champ->SetUltiTimer(Utils::RandomRange(10.f, 30.f));
 	
 
 	switch (team)
@@ -621,6 +621,10 @@ void SceneGame::BattlePhase(float dt)
 		speedUp = 2.f;
 	}
 	if (INPUT_MGR.GetKeyDown(sf::Keyboard::Numpad2))
+	{
+		speedUp =0.5f;
+	}
+	if (INPUT_MGR.GetKeyDown(sf::Keyboard::Numpad3))
 	{
 		speedUp = 60.f;
 	}
@@ -1778,7 +1782,7 @@ void SceneGame::BanPickInit()
 			FindGo("BanSheet")->SetActive(true);
 			banSheet->SetPosition(championSlot[i]->GetPosition());
 			selectCheck = true;
-		};
+			};
 		championSlot[i]->OnExit = [this]() {
 			if (selectCheck)
 			{
@@ -1786,9 +1790,9 @@ void SceneGame::BanPickInit()
 			}
 			FindGo("BanSheet")->SetActive(false);
 			selectCheck = false;
-		};
-		championSlot[i]->OnClick = [this,i]() {
-			
+			};
+		championSlot[i]->OnClick = [this, i]() {
+
 			std::stringstream ss;
 			ss << "Champion Slot" << i + 1 << "Image";
 			if (currentPhase == Phase::Ban)
@@ -1801,25 +1805,6 @@ void SceneGame::BanPickInit()
 					}
 				}
 
-				// 작업중
-				// 밴픽 슬롯에서 이미지 들어가게 추가
-				// 밴했을때 슬롯 레드, 블루 처리
-
-				std::stringstream ss;
-				for (int i = 0; i < champCount; i++)
-				{
-					ss.str("");
-					ss << "PickImage" << i + 1;
-					SpriteGo* enemyPickIcon = (SpriteGo*)FindGo(ss.str());
-					enemyPickIcon->SetPosition(916, 649);
-					enemyPickIcon->SetActive(true);
-
-				/*	sf::Vector2f size = (sf::Vector2f)enemyPickIcon->sprite.getTexture()->getSize();
-					enemyPickIcon->sprite.setTexture(*RESOURCE_MGR.GetTexture(""));
-					enemyPickIcon->sprite.setTextureRect({ 0,0,size.x,size.y });*/
-				}
-
-				////
 				SpriteGo* spr = (SpriteGo*)FindGo(ss.str());
 				spr->sprite.setColor(sf::Color(250, 0, 0));
 				banChamps[step] = i;
@@ -1827,7 +1812,7 @@ void SceneGame::BanPickInit()
 				ChangeTeam();
 				ChangeTurn();
 			}
-			else if(currentPhase == Phase::Pick)
+			else if (currentPhase == Phase::Pick)
 			{
 				for (int j = 0; j < banChamps.size(); j++)
 				{
@@ -1855,7 +1840,7 @@ void SceneGame::BanPickInit()
 				}
 				else
 				{
-					
+
 					championSlot[i]->sprite.setColor(sf::Color(0, 0, 250));
 
 					/// 작업중
@@ -1872,15 +1857,13 @@ void SceneGame::BanPickInit()
 					pickIcon->SetActive(true);
 				}
 				banChamps[step] = i;
-				ChampionPick(i,team);
+				ChampionPick(i, team);
 				ChangeTeam();
-				ChangeTurn();	
+				ChangeTurn();
 			}
 		};
-		
-		
-
 	}
+
 }
 
 void SceneGame::BanPickTrue(bool on)
