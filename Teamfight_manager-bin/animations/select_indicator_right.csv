@@ -1,12 +1,8 @@
 ID,FPS,LOOPTYPE,,
-Idle,10,1,,
+Idle,5,1,,
 ,,,,
 TEXTUREID,LEFT,TOP,WIDTH,HEIGHT
 graphics/UiFix/select_indicator_sheet.png,0,7,18,7
-graphics/UiFix/select_indicator_sheet.png,18,7,82,100
-graphics/UiFix/select_indicator_sheet.png,36,7,82,100
-graphics/UiFix/select_indicator_sheet.png,54,7,82,100
-graphics/UiFix/select_indicator_sheet.png,0,7,82,100
-graphics/UiFix/select_indicator_sheet.png,0,7,82,100
-graphics/UiFix/select_indicator_sheet.png,0,7,82,100
-graphics/UiFix/select_indicator_sheet.png,0,7,82,100
+graphics/UiFix/select_indicator_sheet.png,18,7,18,7
+graphics/UiFix/select_indicator_sheet.png,36,7,18,7
+graphics/UiFix/select_indicator_sheet.png,54,7,18,7

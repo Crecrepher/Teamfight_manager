@@ -38,8 +38,8 @@ void SceneGame::Init()
 	sf::Vector2f windowSize = FRAMEWORK.GetWindowSize();
 	sf::Vector2f centerPos = windowSize * 0.5f;
 
-	worldView.setSize(windowSize*0.7f);
-	worldView.setCenter(centerPos.x,centerPos.y-50.f);
+	worldView.setSize(windowSize * 0.7f);
+	worldView.setCenter(centerPos.x, centerPos.y - 50.f);
 	uiView.setSize(windowSize);
 	uiView.setCenter(centerPos);
 
@@ -91,7 +91,37 @@ void SceneGame::Init()
 	banAnimation3.SetTarget(&banSheetRedTeam->sprite);
 	banAnimation3.AddClip(*RESOURCE_MGR.GetAnimationClip("animations/banSlotRedTeam.csv"));
 
-	
+	// 금지단계 밴픽단계 텍스트 추가
+	banText = (TextGo*)AddGo(new TextGo("BanText"));
+	banText->sortLayer = 107;
+	banText->sortOrder = 1;
+	banText->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
+	banText->text.setCharacterSize(45);
+	banText->text.setFillColor(sf::Color::White);
+	banText->text.setString(L"금지 단계");
+	banText->SetPosition(0, FRAMEWORK.GetWindowSize().y / 2);
+	banText->SetOrigin(Origins::MC);
+	banText->SetActive(false);
+
+	pickText = (TextGo*)AddGo(new TextGo("PickText"));
+	pickText->sortLayer = 107;
+	pickText->sortOrder = 1;
+	pickText->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
+	pickText->text.setCharacterSize(45);
+	pickText->text.setFillColor(sf::Color::White);
+	pickText->text.setString(L"밴픽 단계");
+	pickText->SetPosition(0, FRAMEWORK.GetWindowSize().y / 2);
+	pickText->SetOrigin(Origins::MC);
+	pickText->SetActive(false);
+
+	grayScreen = (RectGo*)AddGo(new RectGo("GrayScreen"));
+	grayScreen->sortLayer = 106;
+	grayScreen->sortOrder = 1;
+	grayScreen->rectangle.setFillColor(sf::Color(0, 0, 0, 128));
+	grayScreen->SetSize(FRAMEWORK.GetWindowSize());
+	grayScreen->SetPosition(FRAMEWORK.GetWindowSize() / 2.f);
+	grayScreen->SetOrigin(Origins::MC);
+	grayScreen->SetActive(false);
 
 	//FindGo("BanSheet")->SetActive(false);
 	//FindGo("BanSheet_BlueTeam")->SetActive(false);
@@ -100,7 +130,7 @@ void SceneGame::Init()
 	effectPool.OnCreate = [this](ChampionEffect* effect) {
 		effect->SetEffectType(0);
 		effect->SetPool(&effectPool);
-	};
+		};
 	effectPool.Init(100);
 
 	championPool.OnCreate = [this, field](Champion* champion) {
@@ -108,7 +138,7 @@ void SceneGame::Init()
 		champion->SetField(field);
 		champion->SetEffectPool(&effectPool);
 		champion->sortLayer = 3;
-	};
+		};
 
 	championPool.Init();
 
@@ -138,7 +168,7 @@ void SceneGame::Enter()
 	banAnimation.Play("Idle"); // 무조건 한번만 호출되게
 	banSheet->SetOrigin(Origins::MC);
 	currentPhase = Phase::None;
-	banChamps = std::vector<int>(14,-1);
+	banChamps = std::vector<int>(14, -1);
 
 	banSheet->SetActive(false);
 	banSheetBlueTeam->SetActive(false);
@@ -168,14 +198,16 @@ void SceneGame::Enter()
 
 	UiButton* ui = (UiButton*)FindGo("Next Button");
 	ui->OnClick = [this, ui]()
-	{
-		FindGo("Draft_Slot_Blue_Clicked")->SetActive(false);
-		std::cout << "벤 페이즈!" << std::endl;
-		LineUpFalse();
-		SwapSlotFalse();
-		ChangePhase(Phase::Ban);
-	};
+		{
+			FindGo("Draft_Slot_Blue_Clicked")->SetActive(false);
+			std::cout << "벤 페이즈!" << std::endl;
+			LineUpFalse();
+			SwapSlotFalse();
+			ChangePhase(Phase::Ban);
+		};
+
 	isPlayerEnough = TEAM_MGR.GetPlayerNum() > 0;
+	BanPickTrue(false);
 	GetPlayers();
 	LineUpFalse();
 	UiEnter();
@@ -183,6 +215,9 @@ void SceneGame::Enter()
 	{
 		LineUpTrue();
 	}
+
+
+	aiBanPick.Init();
 }
 
 void SceneGame::Exit()
@@ -205,21 +240,18 @@ void SceneGame::Exit()
 	}
 	ClearObjectPool(championPool);
 	ClearObjectPool(effectPool);
-	BanPickTrue(false);
 	Scene::Exit();
 }
 
 void SceneGame::Update(float dt)
 {
 	// 마우스 좌표 테스트
-	if (INPUT_MGR.GetMouseButtonDown(sf::Mouse::Left))
+	/*if (INPUT_MGR.GetMouseButtonDown(sf::Mouse::Left))
 	{
 		std::cout << INPUT_MGR.GetMousePos().x << "\t"
 			<< INPUT_MGR.GetMousePos().y << std::endl;
-	}
-
+	}*/
 	banAnimation.Update(dt);
-
 	Scene::Update(dt);
 
 	selectCheck = true;
@@ -364,7 +396,7 @@ void SceneGame::ChangePhase(Phase cPhase)
 		BanPickToBattleFalse();
 		currentPhase = Phase::Battle;
 		battleTimer = 60.f;
-		SpriteGo * spr = (SpriteGo*)FindGo("1");
+		SpriteGo* spr = (SpriteGo*)FindGo("1");
 		spr->SetActive(true);
 		break;
 	}
@@ -427,7 +459,6 @@ void SceneGame::ChampionPick(int id, Team team)
 	champ->SetOrigin(Origins::MC);
 	champ->SetSacleX(1);
 	champ->SetUltiTimer(Utils::RandomRange(10.f, 30.f));
-	
 
 	switch (team)
 	{
@@ -489,16 +520,13 @@ void SceneGame::BanPhase(float dt)
 		banText->SetActive(false);
 	}
 
-	/*aiBanTimer -= dt;
-	std::cout << "aiBanTimer: " << aiBanTimer << std::endl;*/
-
 	if (currentTurn == Turn::Enemy/* && aiBanTimer >= 0.f*/)
 	{
 		AiSelect();
 	}
 
 	FindGo("Ban Bg 2:2")->SetActive(true);
-	banAnimation.Update(dt);
+	//banAnimation.Update(dt);
 
 	sf::Vector2f mousePos = INPUT_MGR.GetMousePos();
 	sf::Vector2f uiMousePos = ScreenToUiPos(mousePos);
@@ -622,7 +650,7 @@ void SceneGame::BattlePhase(float dt)
 	}
 	if (INPUT_MGR.GetKeyDown(sf::Keyboard::Numpad2))
 	{
-		speedUp =0.5f;
+		speedUp = 0.5f;
 	}
 	if (INPUT_MGR.GetKeyDown(sf::Keyboard::Numpad3))
 	{
@@ -636,12 +664,12 @@ void SceneGame::BattlePhase(float dt)
 			unit->sortOrder = unit->GetPosition().y;
 		}
 	}
-	battleTimer -= dt*speedUp;
+	battleTimer -= dt * speedUp;
 	if (battleTimer > 0.f)
 	{
 		for (auto champ : championPool.GetUseList())
 		{
-			champ->BattleUpdate(dt*1.5f*speedUp);
+			champ->BattleUpdate(dt * 1.5f * speedUp);
 		}
 	}
 	if (battleTimer <= 0)
@@ -672,7 +700,7 @@ void SceneGame::BattlePhase(float dt)
 
 void SceneGame::ResultPhase(float dt)
 {
-	if (INPUT_MGR.GetKeyDown(sf::Keyboard::Enter)||
+	if (INPUT_MGR.GetKeyDown(sf::Keyboard::Enter) ||
 		INPUT_MGR.GetMouseButtonDown(sf::Mouse::Left))
 	{
 		if (!redTeam.empty())
@@ -925,37 +953,6 @@ void SceneGame::UiInit()
 		lineupText16->SetOrigin(Origins::MC);
 		lineupText16->SetActive(false);
 
-		// 금지단계 밴픽단계 텍스트 추가
-		banText = (TextGo*)AddGo(new TextGo("BanText"));
-		banText->sortLayer = 106;
-		banText->sortOrder = 1;
-		banText->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
-		banText->text.setCharacterSize(45);
-		banText->text.setFillColor(sf::Color::White);
-		banText->text.setString(L"금지 단계");
-		banText->SetPosition(0, FRAMEWORK.GetWindowSize().y / 2);
-		banText->SetOrigin(Origins::MC);
-		banText->SetActive(false);
-
-		pickText = (TextGo*)AddGo(new TextGo("PickText"));
-		pickText->sortLayer = 106;
-		pickText->sortOrder = 1;
-		pickText->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
-		pickText->text.setCharacterSize(45);
-		pickText->text.setFillColor(sf::Color::White);
-		pickText->text.setString(L"밴픽 단계");
-		pickText->SetPosition(0, FRAMEWORK.GetWindowSize().y / 2);
-		pickText->SetOrigin(Origins::MC);
-		pickText->SetActive(false);
-
-		grayScreen = (RectGo*)AddGo(new RectGo("GrayScreen"));
-		grayScreen->sortLayer = 106;
-		grayScreen->sortOrder = 1;
-		grayScreen->rectangle.setFillColor(sf::Color(0, 0, 0, 128));
-		grayScreen->SetSize(FRAMEWORK.GetWindowSize());
-		grayScreen->SetPosition(FRAMEWORK.GetWindowSize() / 2.f);
-		grayScreen->SetOrigin(Origins::MC);
-		grayScreen->SetActive(false);
 	}
 	// 리그시스템 선발명단 - 라인업
 	{
@@ -1071,25 +1068,27 @@ void SceneGame::UiInit()
 		draftSlot7->OnEnter = [this, draftSlot7, Draft_Slot_Red_White]() {
 			Draft_Slot_Red_White->SetActive(true);
 			Draft_Slot_Red_White->SetPosition(draftSlot7->GetPosition());
-		};
+			};
 		draftSlot7->OnExit = [this, Draft_Slot_Red_White]() {
 			Draft_Slot_Red_White->SetActive(false);
-		};
+			};
 		draftSlot8->OnEnter = [this, draftSlot8, Draft_Slot_Red_White]() {
 			Draft_Slot_Red_White->SetActive(true);
 			Draft_Slot_Red_White->SetPosition(draftSlot8->GetPosition());
-		};
+			};
 		draftSlot8->OnExit = [this, Draft_Slot_Red_White]() {
 			Draft_Slot_Red_White->SetActive(false);
-		};
+			};
 		draftSlot9->OnEnter = [this, draftSlot9, Draft_Slot_Red_White]() {
 			Draft_Slot_Red_White->SetActive(true);
 			Draft_Slot_Red_White->SetPosition(draftSlot9->GetPosition());
-		};
+			};
 		draftSlot9->OnExit = [this, Draft_Slot_Red_White]() {
 			Draft_Slot_Red_White->SetActive(false);
-		};
+			};
 	}
+
+
 
 	SpriteGo* lineup = (SpriteGo*)AddGo(new SpriteGo("graphics/LeagueSystem/Lineup/lineup_ui_bg #43820.png", "Line Up"));
 	lineup->sprite.setScale(2, 2);
@@ -1560,7 +1559,7 @@ void SceneGame::UiInit()
 		text->text.setString("60");
 		text->text.setCharacterSize(20);
 		text->SetOrigin(Origins::MC);
-		text->SetPosition(FRAMEWORK.GetWindowSize().x/2.f,65.f);
+		text->SetPosition(FRAMEWORK.GetWindowSize().x / 2.f, 65.f);
 		text->sortLayer = 110;
 
 		AddGo(new TextGo("RedScoreCounter"));
@@ -1589,6 +1588,10 @@ void SceneGame::UiEnter()
 	text = (TextGo*)FindGo("BanText");
 	text->SetPosition(0, FRAMEWORK.GetWindowSize().y / 2);
 	text->SetActive(false);
+	text = (TextGo*)FindGo("PickText");
+	text->SetPosition(0, FRAMEWORK.GetWindowSize().y / 2);
+	text->SetActive(false);
+
 	grayScreen->SetActive(false);
 	textDuration = 1.2f;
 	BanPickTrue(false);
@@ -1598,7 +1601,7 @@ void SceneGame::UiEnter()
 	{
 		swapSlot[i]->SetActive(true);
 	}
-	for (int i = 0; i < 2-(int)mode; i++)
+	for (int i = 0; i < 2 - (int)mode; i++)
 	{
 		swapSlot[3 - i]->SetActive(false);
 	}
@@ -1750,7 +1753,6 @@ void SceneGame::BanPickInit()
 		std::stringstream iconTextureRoute;
 		iconTextureRoute << "graphics/UiFix/character_icons_" << i << ".png";
 
-		// 작업중
 		std::stringstream pickTexture;
 		pickTexture << "graphics/UiFix/character_icons_" << i << ".png";
 
@@ -1784,14 +1786,20 @@ void SceneGame::BanPickInit()
 			selectCheck = true;
 			};
 		championSlot[i]->OnExit = [this]() {
+			// if문 앞에 있으면
+			FindGo("BanSheet")->SetActive(false);
 			if (selectCheck)
 			{
 				return;
 			}
-			FindGo("BanSheet")->SetActive(false);
 			selectCheck = false;
+
 			};
 		championSlot[i]->OnClick = [this, i]() {
+			if (grayScreen->GetActive())
+			{
+				return;
+			}
 
 			std::stringstream ss;
 			ss << "Champion Slot" << i + 1 << "Image";
@@ -1805,8 +1813,34 @@ void SceneGame::BanPickInit()
 					}
 				}
 
+				// 작업중
+				// 밴픽 슬롯에서 이미지 들어가게 추가
+				// 밴했을때 슬롯 레드, 블루 처리
+
+				/*SpriteGo* enemyPickIcon;
+
+				sf::Vector2f size = (sf::Vector2f)enemyPickIcon->sprite.getTexture()->getSize();
+				enemyPickIcon->sprite.setTexture(*RESOURCE_MGR.GetTexture(""));
+				enemyPickIcon->sprite.setTextureRect({ 0,0,size.x,size.y });
+
+				std::stringstream ss;
+				for (int i = 0; i < champCount; i++)
+				{
+					ss.str("");
+					ss << "PickImage" << i + 1;
+					SpriteGo* enemyPickIcon = (SpriteGo*)FindGo(ss.str());
+					enemyPickIcon->SetPosition(BanSlotPosition2);
+					enemyPickIcon->SetActive(true);
+
+					sf::Vector2f size = (sf::Vector2f)enemyPickIcon->sprite.getTexture()->getSize();
+					enemyPickIcon->sprite.setTexture(*RESOURCE_MGR.GetTexture(""));
+					enemyPickIcon->sprite.setTextureRect({ 0,0,size.x,size.y });
+				}*/
+
+				////
 				SpriteGo* spr = (SpriteGo*)FindGo(ss.str());
 				spr->sprite.setColor(sf::Color(250, 0, 0));
+
 				banChamps[step] = i;
 				step++;
 				ChangeTeam();
@@ -1824,8 +1858,6 @@ void SceneGame::BanPickInit()
 				if (team == Team::Red)
 				{
 					championSlot[i]->sprite.setColor(sf::Color(250, 0, 0));
-
-					/// 작업중
 					ss.str("");
 					ss << "PickImage" << i + 1;
 					SpriteGo* enemyPickIcon = (SpriteGo*)FindGo(ss.str());
@@ -1834,16 +1866,13 @@ void SceneGame::BanPickInit()
 						enemyPickIcon->SetPosition(1150, 137 + (pickEnemyCount * 158));
 						pickEnemyCount++;
 						std::cout << "적의 픽카운트: " << pickEnemyCount << std::endl;
-						// pickIcon->SetPosition(29, 137 + (i * 158));
 					}
 					enemyPickIcon->SetActive(true);
 				}
 				else
 				{
-
 					championSlot[i]->sprite.setColor(sf::Color(0, 0, 250));
 
-					/// 작업중
 					ss.str("");
 					ss << "PickImage" << i + 1;
 					SpriteGo* pickIcon = (SpriteGo*)FindGo(ss.str());
@@ -1852,7 +1881,6 @@ void SceneGame::BanPickInit()
 						pickIcon->SetPosition(29, 137 + (pickCount * 158));
 						pickCount++;
 						std::cout << "나의 픽카운트: " << pickCount << std::endl;
-						// pickIcon->SetPosition(29, 137 + (i * 158));
 					}
 					pickIcon->SetActive(true);
 				}
@@ -1861,9 +1889,8 @@ void SceneGame::BanPickInit()
 				ChangeTeam();
 				ChangeTurn();
 			}
-		};
+			};
 	}
-
 }
 
 void SceneGame::BanPickTrue(bool on)
@@ -1881,70 +1908,32 @@ void SceneGame::BanPickTrue(bool on)
 		std::stringstream ss;
 		championSlot[i]->SetActive(on);
 		FindGo("BanSheet")->SetActive(on);
-		
+
 		ss << "Champion Slot" << i + 1 << "Image";
+		FindGo(ss.str())->SetActive(on);
+
+		ss.str("");
+		ss << "PickImage" << i + 1;
 		FindGo(ss.str())->SetActive(on);
 	}
 
 	for (int i = 0; i < pickSlotCount; i++)
 	{
-		pickSlot[i]->SetActive(on);
-		enemySlot[i]->SetActive(on);
-
-		std::stringstream ss;
-		ss << "BanPickPlayerName" << i;
-		FindGo(ss.str())->SetActive(on);
-		ss.str("");
-		ss << "BanPickPlayerAtk" << i;
-		FindGo(ss.str())->SetActive(on);
-		ss.str("");
-		ss << "BanPickPlayerDef" << i;
-		FindGo(ss.str())->SetActive(on);
-		for (int j = 0; j < 4; j++)
-		{
-			ss.str("");
-			ss << "BanPickPlayer" << i << "Champ" << j;
-			FindGo(ss.str())->SetActive(on);
-			ss << "Line";
-			FindGo(ss.str())->SetActive(on);
-			ss << "Back";
-			FindGo(ss.str())->SetActive(on);
-			ss << "Level";
-			FindGo(ss.str())->SetActive(on);
-		}
-		ss.str("");
-		ss << "BanPickEnemyName" << i;
-		FindGo(ss.str())->SetActive(on);
-		ss.str("");
-		ss << "BanPickEnemyAtk" << i;
-		FindGo(ss.str())->SetActive(on);
-		ss.str("");
-		ss << "BanPickEnemyDef" << i;
-		FindGo(ss.str())->SetActive(on);
-		for (int j = 0; j < 4; j++)
-		{
-			ss.str("");
-			ss << "BanPickEnemy" << i << "Champ" << j;
-			FindGo(ss.str())->SetActive(on);
-			ss << "Line";
-			FindGo(ss.str())->SetActive(on);
-			ss << "Back";
-			FindGo(ss.str())->SetActive(on);
-			ss << "Level";
-			FindGo(ss.str())->SetActive(on);
-		}
+		BanPickPlayersOn(i, on);
 	}
-
-	for (int i = 0; i < champCount; i++)
+	for (int i = pickSlotCount; i < 4; i++)
 	{
-		std::stringstream ss;
-		ss << "PickImage" << i + 1;
-		FindGo(ss.str())->SetActive(on);
+		BanPickPlayersOn(i, false);
 	}
 }
 
 void SceneGame::LineUpInit()
 {
+
+	for (int i = 0; i < 4; i++)
+	{
+		pickSlot[i]->SetActive(true);
+	}
 	for (int i = 0; i < 6; i++)
 	{
 		std::stringstream ss;
@@ -1962,17 +1951,17 @@ void SceneGame::LineUpInit()
 		}
 		else
 		{
-			swapSlot[i]->SetPosition(684, 309 + ((i-4) * 168));
+			swapSlot[i]->SetPosition(684, 309 + ((i - 4) * 168));
 		}
 
 		swapSlot[i]->OnEnter = [this, i]() {
 			SpriteGo* draftSlotBlueWhite = (SpriteGo*)FindGo("Draft_Slot_White");
 			draftSlotBlueWhite->SetActive(true);
 			draftSlotBlueWhite->SetPosition(swapSlot[i]->GetPosition());
-		};
+			};
 		swapSlot[i]->OnExit = [this]() {
 			FindGo("Draft_Slot_White")->SetActive(false);
-		};
+			};
 		swapSlot[i]->OnClick = [this, i]() {
 			SpriteGo* draftSlotBlueClicked = (SpriteGo*)FindGo("Draft_Slot_Blue_Clicked");
 
@@ -1995,7 +1984,7 @@ void SceneGame::LineUpInit()
 				{
 					swapIndex = i;
 				}
-				
+
 
 				std::cout << "챔피언 슬롯 클릭" << i << std::endl;
 				return;
@@ -2028,7 +2017,7 @@ void SceneGame::LineUpInit()
 
 			// 스왑체크1이 처음에 트루라 작동, 컴플릿이 처음에 트루라 작동
 			// 처음 클릭시 스왑컴플릿이 펄스로 바뀜
-		};
+			};
 	}
 
 	SpriteGo* spr;
@@ -2048,7 +2037,7 @@ void SceneGame::LineUpInit()
 		text->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
 		text->text.setCharacterSize(19);
 		text->sortLayer = 106;
-		
+
 		for (int j = 0; j < 4; j++)
 		{
 			ss.str("");
@@ -2253,7 +2242,7 @@ void SceneGame::LineUpFalse()
 		ss << "PlayerDef" << i;
 		FindGo(ss.str())->SetActive(false);
 
-		for (int j = 0;  j < 4;  j++)
+		for (int j = 0; j < 4; j++)
 		{
 			ss.str("");
 			ss << "Player" << i << "Champ" << j;
@@ -2303,6 +2292,57 @@ void SceneGame::BanPickToBattleFalse()
 	spr->SetActive(false);
 	spr = (SpriteGo*)FindGo("1");
 	spr->SetActive(true);
+}
+
+void SceneGame::BanPickPlayersOn(int index, bool on)
+{
+	int i = index;
+	pickSlot[i]->SetActive(on);
+	enemySlot[i]->SetActive(on);
+
+	std::stringstream ss;
+	ss << "BanPickPlayerName" << i;
+	FindGo(ss.str())->SetActive(on);
+	ss.str("");
+	ss << "BanPickPlayerAtk" << i;
+	FindGo(ss.str())->SetActive(on);
+	ss.str("");
+	ss << "BanPickPlayerDef" << i;
+	FindGo(ss.str())->SetActive(on);
+	for (int j = 0; j < 4; j++)
+	{
+		ss.str("");
+		ss << "BanPickPlayer" << i << "Champ" << j;
+		FindGo(ss.str())->SetActive(on);
+		ss << "Line";
+		FindGo(ss.str())->SetActive(on);
+		ss << "Back";
+		FindGo(ss.str())->SetActive(on);
+		ss << "Level";
+		FindGo(ss.str())->SetActive(on);
+	}
+	ss.str("");
+	ss << "BanPickEnemyName" << i;
+	FindGo(ss.str())->SetActive(on);
+	ss.str("");
+	ss << "BanPickEnemyAtk" << i;
+	FindGo(ss.str())->SetActive(on);
+	ss.str("");
+	ss << "BanPickEnemyDef" << i;
+	FindGo(ss.str())->SetActive(on);
+	for (int j = 0; j < 4; j++)
+	{
+		ss.str("");
+		ss << "BanPickEnemy" << i << "Champ" << j;
+		FindGo(ss.str())->SetActive(on);
+		ss << "Line";
+		FindGo(ss.str())->SetActive(on);
+		ss << "Back";
+		FindGo(ss.str())->SetActive(on);
+		ss << "Level";
+		FindGo(ss.str())->SetActive(on);
+	}
+
 }
 
 void SceneGame::SetBanPick()
@@ -2444,7 +2484,32 @@ void SceneGame::SetBanPick()
 
 void SceneGame::AiSelect()
 {
-	championSlot[Utils::RandomRange(0, champCount - 1)]->OnClick();
+	aiBanPick.SetChampions();
+
+	int highStatIndex = aiBanPick.CompareHighStatChampionIndex();
+
+	if (highStatIndex >= 0 && highStatIndex < 14)
+	{
+		std::cout << "제일 높은 스탯의 챔피언 슬롯 번호 " << highStatIndex + 1 << std::endl;
+		championSlot[highStatIndex]->OnClick();
+	}
+
+	/*aiBanPick.SetChampions();
+	const std::vector<State>& championStates = aiBanPick.GetChampions();
+
+	State highStatChampion = aiBanPick.CompareHighStatChampion(championStates[0], championStates[13]);
+
+	int championIndex = -1;
+	for (int i = 0; i < 14; i++)
+	{
+		if (championStates[i] == highStatChampion)
+		{
+			championIndex = i;
+		}
+	}
+	championSlot[highStatChampion]->OnClick();
+	std::cout << "제일 높은 스탯의 챔피언 번호 " << highStatChampion.charId << std::endl;*/
+
 }
 
 void SceneGame::SwapSlotFalse()
@@ -2483,7 +2548,7 @@ void SceneGame::SetLineUp()
 		int index = i;
 		if (i > (int)mode + 1)
 		{
-			index +=(2 - (int)mode);
+			index += (2 - (int)mode);
 		}
 
 		std::stringstream ss;
@@ -2571,7 +2636,7 @@ void SceneGame::SetLineUp()
 		}
 	}
 
-	for (int i = 0; i < (int)mode+2; i++)
+	for (int i = 0; i < (int)mode + 2; i++)
 	{
 		SpriteGo* enemySlot = (SpriteGo*)FindGo("Enemy Draft Slot" + std::to_string(i + 1));
 		std::stringstream ss;

@@ -2744,17 +2744,19 @@ void SceneHome::MainUiFunc(int index)
 		break;
 	case 16:
 	{
-		AiBanPick banPick;
+		// 작업중 AiBanPick바꿔서 많은 오류
+		
+		//AiBanPick banPick;
 
-		banPick.printStats(banPick.getChampions());
+		//banPick.printStats(banPick.setChampions());
 
-		Champion highStatChampion = banPick.CompareHighStatChampion(banPick.getChampions()[0], banPick.getChampions()[1]);
+		//Champion highStatChampion = banPick.CompareHighStatChampion(banPick.getChampions()[0], banPick.getChampions()[1]);
 
-		Champion secondStatChampion = banPick.CompareSecondStatChampion(banPick.getChampions()[0], banPick.getChampions()[1]);
+		//Champion secondStatChampion = banPick.CompareSecondStatChampion(banPick.getChampions()[0], banPick.getChampions()[1]);
 
 
-		banPick.isBan(highStatChampion, true);
-		banPick.isPick(secondStatChampion, false);
+		//banPick.isBan(highStatChampion, true);
+		//banPick.isPick(secondStatChampion, false);
 
 	}
 		break;
@@ -2799,7 +2801,7 @@ void SceneHome::SubUiBaseOpen(int index, bool on)
 		UiPlayerInfoOpen(false);
 	};
 	bt->SetActive(on);
-
+	
 	TextGo* text = (TextGo*)FindGo("UiMenuTitleText");
 	text->SetActive(on);
 	std::stringstream ss;

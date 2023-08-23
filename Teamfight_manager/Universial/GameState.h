@@ -84,6 +84,12 @@ struct State
 	AnimatioControler animaition;
 };
 
+struct BanPick
+{
+	State state;
+	float winRate;
+};
+
 struct ChampionSkill
 {
 	std::string skillId;

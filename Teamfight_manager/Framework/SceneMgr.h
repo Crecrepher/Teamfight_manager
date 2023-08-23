@@ -17,7 +17,7 @@ protected:
 	SceneId currentSceneId = SceneId::None;
 	Scene* currentScene = nullptr;
 
-	SceneId startSceneId = SceneId::Home;
+	SceneId startSceneId = SceneId::Title;
 public:
 	int hiScore = 0;
 

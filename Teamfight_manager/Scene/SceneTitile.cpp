@@ -10,9 +10,7 @@
 #include "Framework.h"
 
 #include "SpriteGo.h"
-#include "TextGo.h"
 #include "SoundGo.h"
-#include "UiButton.h"
 
 SceneTitile::SceneTitile() : Scene(SceneId::Title)
 {
@@ -34,19 +32,26 @@ void SceneTitile::Init()
 	uiView.setSize(windowSize);
 	uiView.setCenter(centerPos);
 
-	for (int i = 0; i < 4; i++)
-	{
-		std::stringstream ss;
-		ss << "Logo" << i;
-		AddGo(new UiButton("graphics/UiFix/menuBindBox.png", ss.str()));
-		ss << "Text";
-		AddGo(new TextGo(ss.str()));
-	}
 
-	AddGo(new SpriteGo("graphics/Origin/Sprite/logo_tp.png", "Logo"));
-	AddGo(new SpriteGo("graphics/Origin/Sprite/stadium.png", "Back"));
-	AddGo(new SpriteGo("graphics/Origin/Sprite/stadium_sky_bg.png", "BackSky"));
-	AddGo(new SpriteGo("graphics/Origin/Sprite/teamfight_manager_title_bg.png", "Monitor"));
+	//애니메이션 및 벡터 추가위치
+	textSlot = std::vector<TextGo*>(titleTextCount);
+	menuSlot = std::vector<UiButton*>(menuSlotCount);
+
+	indicatorLeft = new SpriteGo("", "IndicatorLeft");
+	AddGo(indicatorLeft);
+	indicatorLeft->sortLayer = 105;
+	indicatorLeft->SetSize(2, 2);
+	indicatorLeftAnimation.SetTarget(&indicatorLeft->sprite);
+	indicatorLeftAnimation.AddClip(*RESOURCE_MGR.GetAnimationClip("animations/select_indicator_left.csv"));
+
+	indicatorRight = new SpriteGo("", "IndicatorRight");
+	AddGo(indicatorRight);
+	indicatorRight->sortLayer = 105;
+	indicatorRight->SetSize(2, 2);
+	indicatorRightAnimation.SetTarget(&indicatorRight->sprite);
+	indicatorRightAnimation.AddClip(*RESOURCE_MGR.GetAnimationClip("animations/select_indicator_right.csv"));
+
+	TitleUiInit();
 
 	for (auto go : gameObjects)
 	{
@@ -66,6 +71,15 @@ void SceneTitile::Enter()
 {
 	Scene::Enter();
 	RESOURCE_MGR.LoadFromCsv("tables/TitleResourceList.csv");
+
+	// 애니메이션 한번만 호출되게
+	indicatorLeftAnimation.Play("Idle");
+	indicatorRightAnimation.Play("Idle");
+	indicatorLeft->SetOrigin(Origins::MC);
+	indicatorRight->SetOrigin(Origins::MC);
+	indicatorLeft->SetActive(false);
+	indicatorRight->SetActive(false);
+
 
 	SpriteGo* spr = (SpriteGo*)FindGo("Back");
 	spr->SetPosition(FRAMEWORK.GetWindowSize().x / 2.f, FRAMEWORK.GetWindowSize().y * 0.55f);
@@ -98,20 +112,133 @@ void SceneTitile::Exit()
 	Scene::Exit();
 }
 
+void SceneTitile::TitleUiInit()
+{
+	// 나머지는 정규화해서 작성하기
+
+	for (int i = 0; i < 4; i++)
+	{
+		std::stringstream ss;
+		ss << "Logo" << i;
+		AddGo(new UiButton("graphics/UiFix/menuBindBox.png", ss.str()));
+		ss << "Text";
+		AddGo(new TextGo(ss.str()));
+	}
+
+	for (int i = 0; i < titleTextCount; i++)
+	{
+		std::stringstream ssMenuSlot;
+		ssMenuSlot << "MenuSlot" << i + 1;
+		menuSlot[i] = (UiButton*)AddGo(new UiButton("graphics/UiFix/menuBindBox.png", ssMenuSlot.str()));
+		menuSlot[i]->sprite.setScale(0.5, 1);
+		menuSlot[i]->SetOrigin(Origins::MC);
+		menuSlot[i]->sortLayer = 105;
+		menuSlot[i]->sortOrder = 1;
+		menuSlot[i]->SetPosition(FRAMEWORK.GetWindowSize().x / 2.f, 313 + (i * 60));
+		menuSlot[i]->SetActive(true);
+
+		std::stringstream ss;
+		ss << "TextSlot" << i + 1;
+		textSlot[i] = (TextGo*)AddGo(new TextGo(ss.str()));
+		textSlot[i]->sortLayer = 105;
+		textSlot[i]->sortOrder = 1;
+		textSlot[i]->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri9.ttf"));
+		textSlot[i]->text.setCharacterSize(30);
+		textSlot[i]->text.setFillColor(sf::Color(128, 128, 128));
+		auto stringTable = DATATABLE_MGR.Get<StringTable>(DataTable::Ids::String);
+		if (i == 0)
+		{
+			textSlot[i]->text.setString(stringTable->GetW("NewGame"));
+		}
+		else if (i == 1)
+		{
+			textSlot[i]->text.setString(stringTable->GetW("Continue"));
+		}
+		else if (i == 2)
+		{
+			textSlot[i]->text.setString(stringTable->GetW("EditorOpen"));
+		}
+		if (i == 3)
+		{
+			textSlot[i]->text.setString(stringTable->GetW("DoExit"));
+		}
+		textSlot[i]->SetPosition(FRAMEWORK.GetWindowSize().x / 2.f, 300 + (i * 60));
+		textSlot[i]->SetOrigin(Origins::MC);
+		textSlot[i]->text.setOutlineColor(sf::Color::Black);
+		textSlot[i]->text.setOutlineThickness(2);
+		textSlot[i]->SetActive(true);
+
+		sf::Vector2f firstPosition = textSlot[i]->GetPosition();
+		sf::Vector2f tempPosition = firstPosition * 0.99f;
+		int widthChangePosition = 88;
+
+		menuSlot[i]->OnEnter = [this, i, tempPosition, widthChangePosition]() {
+			indicatorLeft->SetActive(true);
+			indicatorRight->SetActive(true);
+			indicatorLeft->SetPosition(menuSlot[i]->GetPosition().x - widthChangePosition, menuSlot[i]->GetPosition().y);
+			indicatorRight->SetPosition(menuSlot[i]->GetPosition().x + widthChangePosition, menuSlot[i]->GetPosition().y);
+
+			textSlot[i]->SetPosition(tempPosition);
+			textSlot[i]->text.setCharacterSize(35);
+			textSlot[i]->text.setFillColor(sf::Color::White);
+			};
+		menuSlot[i]->OnExit = [this, i, firstPosition]() {
+			indicatorLeft->SetActive(false);
+			indicatorRight->SetActive(false);
+
+			textSlot[i]->SetPosition(firstPosition);
+			textSlot[i]->text.setCharacterSize(30);
+			textSlot[i]->text.setFillColor(sf::Color(128, 128, 128));
+
+			slotCheck = false;
+			};
+		menuSlot[i]->OnClick = [this, i]() {
+			if (i == 0)
+			{
+				SCENE_MGR.ChangeScene(SceneId::Home);
+			}
+			else if (i == 1)
+			{
+				TEAM_MGR.SaveLoad(0);
+				SCENE_MGR.ChangeScene(SceneId::Home);
+			}
+			else if (i == 2)
+			{
+				std::cout << "에디터 열기!" << std::endl;
+				// 에디터 열기
+			}
+			if (i == 3)
+			{
+				std::cout << "종료처리" << std::endl;
+				// 종료처리
+			}
+			};
+	}
+
+	AddGo(new SpriteGo("graphics/Origin/Sprite/logo_tp.png", "Logo"));
+	AddGo(new SpriteGo("graphics/Origin/Sprite/stadium.png", "Back"));
+	AddGo(new SpriteGo("graphics/Origin/Sprite/stadium_sky_bg.png", "BackSky"));
+	AddGo(new SpriteGo("graphics/Origin/Sprite/teamfight_manager_title_bg.png", "Monitor"));
+
+}
+
 void SceneTitile::Update(float dt)
 {
+	indicatorLeftAnimation.Update(dt);
+	indicatorRightAnimation.Update(dt);
 	Scene::Update(dt);
+
 	if (INPUT_MGR.GetKeyUp(sf::Keyboard::Enter))
-	{
+
+	{// 새게임
 		SCENE_MGR.ChangeScene(SceneId::Home);
 	}
 
 	else if (INPUT_MGR.GetKeyUp(sf::Keyboard::Num1))
-	{
+	{// 이어하기
 		TEAM_MGR.SaveLoad(0);
 		SCENE_MGR.ChangeScene(SceneId::Home);
 	}
-	
 }
 
 void SceneTitile::Draw(sf::RenderWindow& window)
