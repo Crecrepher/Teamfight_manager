@@ -51,6 +51,8 @@ void SceneTitile::Init()
 	indicatorRightAnimation.SetTarget(&indicatorRight->sprite);
 	indicatorRightAnimation.AddClip(*RESOURCE_MGR.GetAnimationClip("animations/select_indicator_right.csv"));
 
+
+	AddGo(new SoundGo("sound/StreetLove.wav","TitleBgm"));
 	TitleUiInit();
 
 	for (auto go : gameObjects)
@@ -80,6 +82,9 @@ void SceneTitile::Enter()
 	indicatorLeft->SetActive(false);
 	indicatorRight->SetActive(false);
 
+	SoundGo* sound = (SoundGo*)FindGo("TitleBgm");
+	sound->sound.setLoop(true);
+	sound->Play();
 
 	SpriteGo* spr = (SpriteGo*)FindGo("Back");
 	spr->SetPosition(FRAMEWORK.GetWindowSize().x / 2.f, FRAMEWORK.GetWindowSize().y * 0.55f);
@@ -109,6 +114,8 @@ void SceneTitile::Enter()
 
 void SceneTitile::Exit()
 {
+	SoundGo* sound = (SoundGo*)FindGo("TitleBgm");
+	sound->sound.stop();
 	Scene::Exit();
 }
 
@@ -204,13 +211,11 @@ void SceneTitile::TitleUiInit()
 			}
 			else if (i == 2)
 			{
-				std::cout << "에디터 열기!" << std::endl;
-				// 에디터 열기
+				SCENE_MGR.ChangeScene(SceneId::ChampEdit);
 			}
 			if (i == 3)
 			{
-				std::cout << "종료처리" << std::endl;
-				// 종료처리
+				FRAMEWORK.GetWindow().close();
 			}
 			};
 	}

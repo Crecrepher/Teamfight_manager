@@ -48,6 +48,9 @@ void SceneHome::Init()
 	AddGo(new RectGo("UiShade"));
 	AddGo(new RectGo("PopupUiShade"));
 	AddGo(new RectGo("PopupTextShade"));
+	AddGo(new SoundGo("sound/InfiniteDoors.wav", "HomeBgm"));
+	AddGo(new SoundGo("sound/Cash register 5.wav", "CashSound"));
+	AddGo(new SoundGo("sound/Revive heal 5.wav", "CraftSound"));
 
 	for (auto go : gameObjects)
 	{
@@ -66,6 +69,11 @@ void SceneHome::Release()
 void SceneHome::Enter()
 {
 	Scene::Enter();
+
+	SoundGo* sound = (SoundGo*)FindGo("HomeBgm");
+	sound->sound.setLoop(true);
+	sound->Play();
+
 	RESOURCE_MGR.LoadFromCsv("tables/HomeResourceList.csv");
 	equipCraftParts = std::vector<int>(4);
 	selectedSponsorIndex = -1;
@@ -104,6 +112,8 @@ void SceneHome::Enter()
 
 void SceneHome::Exit()
 {
+	SoundGo* sound = (SoundGo*)FindGo("HomeBgm");
+	sound->sound.stop();
 	Scene::Exit();
 }
 
@@ -1330,6 +1340,8 @@ void SceneHome::MakeSubUiPlayerInfo()
 	bt->OnClick = [this]() {
 		if (selectedSponsorIndex >= 0 && TEAM_MGR.GetPlayerNum() > 4)
 		{
+			SoundGo* so = (SoundGo*)FindGo("CashSound");
+			so->Play();
 			TEAM_MGR.FirePlayer(selectedSponsorIndex);
 			UiPlayerInfoOpen(true);
 		}	
@@ -2890,6 +2902,8 @@ void SceneHome::UiRecruitOpen(bool on)
 			}
 			else
 			{
+				SoundGo* so = (SoundGo*)FindGo("CashSound");
+				so->Play();
 				Recruit(0, 0);
 				UpdateMoney();
 				UiRecruitOpen();
@@ -2911,6 +2925,8 @@ void SceneHome::UiRecruitOpen(bool on)
 			}
 			else
 			{
+				SoundGo* so = (SoundGo*)FindGo("CashSound");
+				so->Play();
 				TEAM_MGR.Employ(0);
 				UpdateMoney();
 				UiRecruitOpen();
@@ -4778,6 +4794,8 @@ void SceneHome::UiEquipOpen(bool on)
 			}
 			else if (TEAM_MGR.GetCraftSlot()[i].leftDate == 0)
 			{
+				SoundGo* so = (SoundGo*)FindGo("CraftSound");
+				so->Play();
 				UiCraftFinish(i);
 			}
 		};

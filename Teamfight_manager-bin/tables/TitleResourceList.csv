@@ -6,3 +6,4 @@ RESOURCE_TYPES 0.TEX 1.FONT 2.SOUND 3.ANI,RESOURCE_PATH
 0,graphics/Origin/Sprite/stadium_sky_bg.png
 0,graphics/UiFix/select_indicator_sheet.png
 0,graphics/UiFix/menuBindBox.png
+2,sound/StreetLove.wav

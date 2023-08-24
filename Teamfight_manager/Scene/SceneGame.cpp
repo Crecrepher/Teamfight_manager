@@ -35,6 +35,13 @@ void SceneGame::Init()
 	Release();
 	isClickBlocker = false;
 
+	SoundGo* sound = (SoundGo*)AddGo(new SoundGo("sound/Stupid_Dancer.wav", "BanPickBgm"));
+	sound->sound.setLoop(true);
+	sound = (SoundGo*)AddGo(new SoundGo("sound/Loop Electronic001.wav", "BattleBgm"));
+	sound->sound.setLoop(true);
+	AddGo(new SoundGo("sound/Sword Stab (Flesh) 1 #41315.wav", "BanSound"));
+	AddGo(new SoundGo("sound/RELOAD_Pump_stereo.wav", "PickSound"));
+
 	// 카메라
 	sf::Vector2f windowSize = FRAMEWORK.GetWindowSize();
 	sf::Vector2f centerPos = windowSize * 0.5f;
@@ -165,6 +172,9 @@ void SceneGame::Release()
 void SceneGame::Enter()
 {
 	Scene::Enter();
+	SoundGo* sound = (SoundGo*)FindGo("BanPickBgm");
+	sound->Play();
+
 	RESOURCE_MGR.LoadFromCsv("tables/GameResourceList.csv");
 	banAnimation.Play("Idle"); // 무조건 한번만 호출되게
 	banSheet->SetOrigin(Origins::MC);
@@ -231,6 +241,11 @@ void SceneGame::Enter()
 
 void SceneGame::Exit()
 {
+	SoundGo* sound = (SoundGo*)FindGo("BanPickBgm");
+	sound->sound.stop();
+	sound = (SoundGo*)FindGo("BattleBgm");
+	sound->sound.stop();
+
 	if (!redTeam.empty())
 	{
 		for (auto team : redTeam)
@@ -402,6 +417,10 @@ void SceneGame::ChangePhase(Phase cPhase)
 	}
 	case Phase::Battle:
 	{
+		SoundGo* sound = (SoundGo*)FindGo("BanPickBgm");
+		sound->sound.stop();
+		sound = (SoundGo*)FindGo("BattleBgm");
+		sound->Play();
 		SetChampionStat();
 		BanPickToBattleFalse();
 		currentPhase = Phase::Battle;
@@ -1837,7 +1856,8 @@ void SceneGame::BanPickInit()
 						return;
 					}
 				}
-
+				SoundGo* sound = (SoundGo*)FindGo("BanSound");
+				sound->Play();
 				// 작업중
 				// 밴픽 슬롯에서 이미지 들어가게 추가
 				// 밴했을때 슬롯 레드, 블루 처리
@@ -1880,6 +1900,8 @@ void SceneGame::BanPickInit()
 						return;
 					}
 				}
+				SoundGo* sound = (SoundGo*)FindGo("PickSound");
+				sound->Play();
 				if (team == Team::Red)
 				{
 					enemyPick[pickEnemyCount] = i;
