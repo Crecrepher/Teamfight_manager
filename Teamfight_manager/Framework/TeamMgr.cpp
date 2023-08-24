@@ -24,6 +24,9 @@ void TeamMgr::Init()
 	trainingGrowTable = std::vector<std::vector<int>>(10);
 	sponsors = std::vector<Sponsor>(3);
 	craftSlot = std::vector<ItemMakeSlot>(3);
+
+	champWin = std::vector<int>(totalChamps);
+	champLose = std::vector<int>(totalChamps);
 	InitGrowTable();
 	
 	return;
@@ -59,6 +62,7 @@ void TeamMgr::DoWin()
 	aiTeams[(win + lose) % 7].lose++;
 	win++;
 	winContinuity++;
+	curRank = std::max(curRank - 1, 1);
 }
 
 void TeamMgr::DoPerfectWin()
@@ -67,6 +71,7 @@ void TeamMgr::DoPerfectWin()
 	win++;
 	winPerfect++;
 	winContinuity++;
+	curRank = std::max(curRank - 1, 1);
 }
 
 void TeamMgr::DoLose()
@@ -76,6 +81,38 @@ void TeamMgr::DoLose()
 	winContinuity = 0;
 }
 
+void TeamMgr::SetKillDeath(int index, int kill, int death)
+{
+	player[index].kill += kill;
+	player[index].totalKill += kill;
+	player[index].death += death;
+}
+
+
+std::vector<float> TeamMgr::GetChampWinRates()
+{
+	std::vector<float> champWinRates = std::vector<float>(totalChamps);
+	for (int i = 0; i < totalChamps; i++)
+	{
+		champWinRates[i] = champWin[i] / (champWin[i] + champLose[i]) * 100;
+	}
+	return champWinRates;
+}
+
+std::vector<float> TeamMgr::GetChampPickRates()
+{
+	std::vector<float> champPickRates = std::vector<float>(totalChamps);
+	int maxPick = 0;
+	for (int i = 0; i < totalChamps; i++)
+	{
+		maxPick += champWin[i] + champLose[i];
+	}
+	for (int i = 0; i < totalChamps; i++)
+	{
+		champPickRates[i] = (float)(champWin[i] + champLose[i]) / (float)maxPick * 100.f;
+	}
+	return champPickRates;
+}
 
 void TeamMgr::ShowPlayer()
 {
@@ -197,6 +234,10 @@ void TeamMgr::DayPass()
 		lose = 0;
 	}
 
+	if (date == 24)
+	{
+		curRank = 8;
+	}
 	playerTraining = GetGrowStats(playerTraining);
 
 	for (int i = 0; i < playerNum; i++)
@@ -430,6 +471,10 @@ void TeamMgr::SaveLoad(int saveSlot)
 
 	is.read((char*)&contractedSponsor, sizeof(int));
 
+	is.read((char*)&totalChamps, sizeof(int));
+	is.read((char*)champWin.data(), sizeof(int) * totalChamps);
+	is.read((char*)champLose.data(), sizeof(int) * totalChamps);
+
 	is.close();
 	return;
 }
@@ -501,6 +546,10 @@ void TeamMgr::Save()
 	os.write((char*)&lose, sizeof(int));
 
 	os.write((char*)&contractedSponsor, sizeof(int));
+
+	os.write((char*)&totalChamps, sizeof(int));
+	os.write((char*)champWin.data(), sizeof(int) * totalChamps);
+	os.write((char*)champLose.data(), sizeof(int) * totalChamps);
 
 	os.close();
 	return;

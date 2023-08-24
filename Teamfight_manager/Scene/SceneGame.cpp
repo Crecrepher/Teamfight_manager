@@ -3,6 +3,7 @@
 
 #include "DataTableMgr.h"
 #include "StringTable.h"
+#include "ItemTable.h"
 #include "SceneMgr.h"
 #include "InputMgr.h"
 #include "ResourceMgr.h"
@@ -181,6 +182,14 @@ void SceneGame::Enter()
 
 	redScore = 0;
 	blueScore = 0;
+
+	playerPick = std::vector<int>(4);
+	enemyPick = std::vector<int>(4);
+	playerOriginIndex = std::vector<int>(6);
+	for (int i = 0; i < 6; i++)
+	{
+		playerOriginIndex[i] = i;
+	}
 
 	SpriteGo* spr = (SpriteGo*)FindGo("1");
 	spr->SetActive(false);
@@ -393,6 +402,7 @@ void SceneGame::ChangePhase(Phase cPhase)
 	}
 	case Phase::Battle:
 	{
+		SetChampionStat();
 		BanPickToBattleFalse();
 		currentPhase = Phase::Battle;
 		battleTimer = 60.f;
@@ -723,6 +733,7 @@ void SceneGame::ResultPhase(float dt)
 		{
 			for (auto team : blueTeam)
 			{
+				TEAM_MGR.SetKillDeath(team->GetPlayerIndex(), team->GetKillScore(), team->GetDeathScore());
 				std::cout << team->GetName() << " 킬 : " << team->GetKillScore() << std::endl;
 				std::cout << team->GetName() << " 데스 : " << team->GetDeathScore() << std::endl;
 				std::cout << team->GetName() << " 입힌 피해 : " << team->GetTotalDamage() << std::endl;
@@ -739,6 +750,10 @@ void SceneGame::ResultPhase(float dt)
 		{
 			for (auto team : cemetery)
 			{
+				if (team->GetTeamColor() == Team::Blue)
+				{
+					TEAM_MGR.SetKillDeath(team->GetPlayerIndex(), team->GetKillScore(), team->GetDeathScore());
+				}
 				std::cout << team->GetName() << " 킬 : " << team->GetKillScore() << std::endl;
 				std::cout << team->GetName() << " 데스 : " << team->GetDeathScore() << std::endl;
 				std::cout << team->GetName() << " 입힌 피해 : " << team->GetTotalDamage() << std::endl;
@@ -754,10 +769,20 @@ void SceneGame::ResultPhase(float dt)
 		{
 			TEAM_MGR.DoPerfectWin();
 			TEAM_MGR.EarnMoney(150);
+			for (int i = 0; i < pickSlotCount; i++)
+			{
+				TEAM_MGR.ChampWin(playerPick[i]);
+				TEAM_MGR.ChampLose(enemyPick[i]);
+			}
 		}
 		else if (blueScore < redScore)
 		{
 			TEAM_MGR.DoLose();
+			for (int i = 0; i < pickSlotCount; i++)
+			{
+				TEAM_MGR.ChampWin(enemyPick[i]);
+				TEAM_MGR.ChampLose(playerPick[i]);
+			}
 		}
 		SCENE_MGR.ChangeScene(SceneId::Home);
 	}
@@ -1857,6 +1882,7 @@ void SceneGame::BanPickInit()
 				}
 				if (team == Team::Red)
 				{
+					enemyPick[pickEnemyCount] = i;
 					championSlot[i]->sprite.setColor(sf::Color(250, 0, 0));
 					ss.str("");
 					ss << "PickImage" << i + 1;
@@ -1871,8 +1897,8 @@ void SceneGame::BanPickInit()
 				}
 				else
 				{
+					playerPick[pickCount] = i;
 					championSlot[i]->sprite.setColor(sf::Color(0, 0, 250));
-
 					ss.str("");
 					ss << "PickImage" << i + 1;
 					SpriteGo* pickIcon = (SpriteGo*)FindGo(ss.str());
@@ -2004,10 +2030,12 @@ void SceneGame::LineUpInit()
 				if (i > (int)mode + 1)
 				{
 					std::swap(playerInfo[i - (2 - (int)mode)], playerInfo[swapIndex]);
+					std::swap(playerOriginIndex[i - (2 - (int)mode)], playerOriginIndex[swapIndex]);
 				}
 				else
 				{
 					std::swap(playerInfo[i], playerInfo[swapIndex]);
+					std::swap(playerOriginIndex[i], playerOriginIndex[swapIndex]);
 				}
 				SetLineUp();
 
@@ -2530,6 +2558,84 @@ void SceneGame::GetPlayers()
 		return;
 	}
 	swapChampCount = Utils::Clamp(TEAM_MGR.GetPlayerNum(), (int)mode + 2, (int)mode + 4);
+}
+
+void SceneGame::SetChampionStat()
+{
+	int count = 0;
+	auto itemTable = DATATABLE_MGR.Get<ItemTable>(DataTable::Ids::Item);
+	std::vector<int> gearNum = TEAM_MGR.GetEquipedGear();
+	std::vector<ItemInfo> gear = std::vector<ItemInfo>(4);
+	for (int i = 0; i < 4; i++)
+	{
+		gear[i] = itemTable->Get(i, gearNum[i]);
+	}
+
+	for (auto team : blueTeam)
+	{
+		int Atk = 0;
+		int Def = 0;
+		int AtkSpeed = 0;
+		int CoolDown = 0;
+		int HpDrain = 0;
+
+		Atk += playerInfo[count].attack;
+		Def += playerInfo[count].defence;
+		for (int i = 0; i < playerInfo[count].knownChamp; i++)
+		{
+			if (playerInfo[count].proficiencyCode[i] == playerPick[count])
+			{
+				Atk += playerInfo[count].proficiencyLevel[i];
+				Def += playerInfo[count].proficiencyLevel[i];
+			}
+		}
+
+		for (int i = 0; i < 4; i++)
+		{
+			Atk += gear[i].atk;
+			Def += gear[i].def;
+			AtkSpeed += gear[i].atkSpeed;
+			CoolDown += gear[i].coolDown;
+			HpDrain += gear[i].hpDrain;
+
+			if (gear[i].champProficiency == playerPick[count] + 1)
+			{
+				Atk += gear[i].champProficiencyValue;
+				Def += gear[i].champProficiencyValue;
+			}
+			if (gear[i].proficiencyType == (int)team->GetCurretState().type + 1)
+			{
+				Atk += gear[i].proficiencyValue;
+				Def += gear[i].proficiencyValue;
+			}
+		}
+		team->GetStat(Atk, Def, AtkSpeed, CoolDown, HpDrain, playerOriginIndex[count]);
+		count++;
+	}
+
+	count = 0;
+
+	for (auto team : redTeam)
+	{
+		int Atk = 0;
+		int Def = 0;
+		int AtkSpeed = 0;
+		int CoolDown = 0;
+		int HpDrain = 0;
+		
+		Atk += enemyInfo.player[count].attack;
+		Def += enemyInfo.player[count].defence;
+		for (int i = 0; i < enemyInfo.player[count].knownChamp; i++)
+		{
+			if (enemyInfo.player[count].proficiencyCode[i] == enemyPick[count])
+			{
+				Atk += enemyInfo.player[count].proficiencyLevel[i];
+				Def += enemyInfo.player[count].proficiencyLevel[i];
+			}
+		}
+		team->GetStat(Atk, Def, AtkSpeed, CoolDown, HpDrain, count);
+		count++;
+	}
 }
 
 void SceneGame::SetLineUp()

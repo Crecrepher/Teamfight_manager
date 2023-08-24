@@ -90,6 +90,10 @@ protected:
 	bool isPlayerEnough = true;
 	bool isClickBlocker = false;
 	int swapIndex = -1;
+
+	std::vector<int> playerOriginIndex;
+	std::vector<int> playerPick;
+	std::vector<int> enemyPick;
 public:
 	SceneGame();
 	virtual ~SceneGame() override;
@@ -137,6 +141,8 @@ public:
 
 	void SwapSlotFalse();
 	void GetPlayers();
+
+	void SetChampionStat();
 };
 
 template<typename T>

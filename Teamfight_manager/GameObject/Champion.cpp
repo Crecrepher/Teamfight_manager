@@ -1039,13 +1039,14 @@ void Champion::SetHpGuage()
 	SCENE_MGR.GetCurrScene()->AddGo(coolGuage);
 }
 
-void Champion::GetStat(int atk, int def, int atkSpeed, int coolDown, int drain)
+void Champion::GetStat(int atk, int def, int atkSpeed, int coolDown, int drain, int index)
 {
 	getedAtk = atk;
 	getedDef = def;
 	getedAtkSpeed = atkSpeed;
 	getedCoolDown = coolDown;
 	getedHpDrain = drain;
+	playerIndex = index;
 }
 
 void Champion::SetMyTeam(std::vector<Champion*>* myTeam)

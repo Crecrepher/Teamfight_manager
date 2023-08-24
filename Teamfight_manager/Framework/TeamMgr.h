@@ -310,7 +310,7 @@ protected:
 
 	int saveSlotNum = 0;
 
-	int ableChamp = 9; //Ã¨ÇÇ¾ð°¡´É
+	int ableChamp = 14; //Ã¨ÇÇ¾ð°¡´É
 	int ableCharacteristic = 36; //Æ¯¼º°¹¼ö
 
 	int maxTrainingPoint = 3;
@@ -356,6 +356,10 @@ protected:
 	int MaxSponsor = 1;
 	int contractedSponsor = 0;
 	int sponsorQuestCount = 5;
+
+	int totalChamps = 14;
+	std::vector<int> champWin;
+	std::vector<int> champLose;
 public:
 	void Init();
 	void InitGrowTable();
@@ -366,6 +370,17 @@ public:
 	void DoWin();
 	void DoPerfectWin();
 	void DoLose();
+	void SetKillDeath(int index, int kill, int death);
+
+	void ChampWin(int index) { champWin[index]++; }
+	void ChampLose(int index) { champLose[index]++; }
+
+	int GetChampWin(int index) { return champWin[index]; }
+	int GetChampLose(int index) { return champLose[index]; }
+	
+	// Åë°è¿¡ »ç¿ëµÉ Ã¨ÇÇ¾ð ½Â·ü ¹× ÇÈ·ü
+	std::vector<float>GetChampWinRates();
+	std::vector<float>GetChampPickRates();
 
 	int GetAiTeamFightNum() { return (win + lose) % 7; }
 	AiTeam GetAiTeam(int index) { return aiTeams[index]; }
@@ -413,7 +428,7 @@ public:
 	void DeleteContractedSponsor();
 	void ContractSponsor(Sponsor sponsor);
 
-	std::vector<int>GetEquipedGear() { return equipedGear; }
+	std::vector<int> GetEquipedGear() { return equipedGear; }
 	void SetEquipedGear(int type, int code) { equipedGear[type] = code; }
 	bool GetGearOpen(int type, int code) { return gear[type][code]; }
 	int GetCraftSlotCount() { return gearMakeSlotCount; }
