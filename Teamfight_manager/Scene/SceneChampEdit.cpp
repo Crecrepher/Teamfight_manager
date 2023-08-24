@@ -35,10 +35,9 @@ void SceneChampEdit::Init()
 	uiView.setSize(windowSize);
 	uiView.setCenter(centerPos);
 
-	AddGo(new UiButton("graphics/Origin/Sprite/default_button_1.png","ChampEdit"));
-	champ = SpriteGo("graphics/UiFix/character_icons_0.png","Champ");
-	AddGo(&champ);
-
+	InitUiButton();
+	InitSpriteGo();
+	InitTextGo();
 
 	for (auto go : gameObjects)
 	{
@@ -64,12 +63,6 @@ void SceneChampEdit::Enter()
 	for (const auto& file : std::filesystem::directory_iterator(path))
 		std::cout << file.path() << std::endl;
 
-	UiButton* bt = (UiButton*)FindGo("ChampEdit");
-	bt->SetPosition(1000, 300);
-	bt->SetOrigin(Origins::MC);
-	bt->SetSize(1.5, 1.5);
-	bt->sortLayer = 100;
-
 	champ.SetPosition(FRAMEWORK.GetWindowSize() * 0.5f);
 	champ.SetOrigin(Origins::MC);
 	champ.SetSize(2, 2);
@@ -77,6 +70,18 @@ void SceneChampEdit::Enter()
 	animation = CHAMPION_MGR.GetChampion(0)->animaition;
 	animation.SetTarget(&champ.sprite);
 	animation.Play("Idle");
+	champ.SetOrigin(Origins::MC);
+
+	UiButton* bt;
+	SpriteGo* spr;
+	TextGo* text;
+
+	spr = (SpriteGo*)FindGo("ChampNameBox");
+	spr->SetPosition(FRAMEWORK.GetWindowSize().x * 0.5f, 50);
+	spr->SetOrigin(Origins::MC);
+	spr->SetSize(2, 2);
+	spr->sortLayer = 100;
+
 }
 
 void SceneChampEdit::Exit()
@@ -88,6 +93,7 @@ void SceneChampEdit::Update(float dt)
 {
 	Scene::Update(dt);	
 	animation.Update(dt);
+
 	if (INPUT_MGR.GetKeyDown(sf::Keyboard::Escape))
 	{
 		SCENE_MGR.ChangeScene(SceneId::Title);
@@ -97,4 +103,22 @@ void SceneChampEdit::Update(float dt)
 void SceneChampEdit::Draw(sf::RenderWindow& window)
 {
 	Scene::Draw(window);
+}
+
+void SceneChampEdit::InitUiButton()
+{
+	AddGo(new UiButton("graphics/Origin/Sprite/green_arrow_button_0.png", "ChangeChampL"));
+	AddGo(new UiButton("graphics/Origin/Sprite/green_arrow_button_3.png", "ChangeChampR"));
+}
+
+void SceneChampEdit::InitSpriteGo()
+{
+	champ = SpriteGo("graphics/UiFix/character_icons_0.png", "Champ");
+	AddGo(&champ);
+
+	AddGo(new SpriteGo("graphics/Origin/Sprite/weekly_event_button_3.png", "ChampNameBox"));
+}
+
+void SceneChampEdit::InitTextGo()
+{
 }
