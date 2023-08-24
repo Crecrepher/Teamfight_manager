@@ -35,6 +35,7 @@
     <ClCompile Include="DataTable\ItemTable.cpp" />
     <ClCompile Include="GameObject\ChampionEffect.cpp" />
     <ClCompile Include="GameObject\BuffState.cpp" />
+    <ClCompile Include="SkillObject.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="3rd\rapidcsv.h" />
@@ -76,5 +77,6 @@
     <ClInclude Include="DataTable\ItemTable.h" />
     <ClInclude Include="GameObject\ChampionEffect.h" />
     <ClInclude Include="GameObject\BuffState.h" />
+    <ClInclude Include="SkillObject.h" />
   </ItemGroup>
 </Project>

@@ -2,7 +2,7 @@
 #include "Singleton.h"
 #include "GameState.h"
 #include "Champion.h"
-#include "BuffState.h"
+
 
 class SkillMgr : public Singleton<SkillMgr>
 {

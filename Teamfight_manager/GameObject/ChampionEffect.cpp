@@ -46,21 +46,17 @@ void ChampionEffect::Update(float dt)
 		BaseUpdate(dt);
 		break;
 	}
-	case EffectType::MoveSkill:
-	{
-		break;
-	}
-	case EffectType::DoneMoveSkill:
-	{
-		break;
-	}
 	case EffectType::Hp:
 	{
+
+		this->sortOrder = this->GetPosition().y;
 		HpUpdate(dt);
 		break;
 	}
 	case EffectType::CoolTime:
 	{
+
+		this->sortOrder = this->GetPosition().y;
 		CoolTimeUpdate(dt);
 		break;
 	}

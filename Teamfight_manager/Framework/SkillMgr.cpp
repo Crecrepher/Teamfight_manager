@@ -3,6 +3,7 @@
 #include "ResourceMgr.h"
 #include "SceneMgr.h"
 #include "rapidcsv.h"
+#include "BuffState.h"
 
 
 void SkillMgr::Init()
@@ -442,8 +443,22 @@ void SkillMgr::IcemageSkill(Champion* champ)
 
 void SkillMgr::IcemageUltiSkill(Champion* champ)
 {
-}
+	if (champ->GetCurretState().animaition.GetCurrentClipId() != "UltiSkill")
+	{
+		champ->UseUltiSkill();
+		return;
+	}
 
+	if (champ->GetCurretState().animaition.GetLastFrame())
+	{
+		std::cout << "ice ground" << std::endl;
+		champ->SetSkillObj(1, 8.f, 0.5, 0.f);
+		champ->SetUltiSkill(false);
+		champ->SkillChangeIdle();
+		return;
+	}
+}
+// ¿Ï·á
 
 
 void SkillMgr::KnightSkill(Champion* champ)
@@ -515,8 +530,23 @@ void SkillMgr::MagicknightSkill(Champion* champ)
 
 void SkillMgr::MagicknightUltiSkill(Champion* champ)
 {
-}
+	if (champ->GetCurretState().animaition.GetCurrentClipId() != "UltiSkill")
+	{
+		std::cout << "±Ã±Ø±â : " << champ->GetCurretState().charId << std::endl;
+		champ->UseUltiSkill();
+		return;
+	}
 
+	if (champ->GetCurretState().animaition.GetLastFrame())
+	{
+		std::cout << "blackhole ground" << std::endl;
+		champ->SetSkillObj(3, 15.f, 2.f, 0.f);
+		champ->SetUltiSkill(false);
+		champ->SkillChangeIdle();
+		return;
+	}
+}
+// ¿Ï·á
 
 
 void SkillMgr::MonkSkill(Champion* champ)
@@ -531,7 +561,7 @@ void SkillMgr::MonkSkill(Champion* champ)
 	{
 		if (!champ->GetFrameLimit())
 		{
-			champ->TargetOrderCIT(1, 250.f, 30.f);
+			champ->TargetOrderCIT(1, 200.f, 30.f);
 			champ->SetFrameLimit(true);
 		}
 		return;
@@ -565,7 +595,7 @@ void SkillMgr::MonkUltiSkill(Champion* champ)
 		berrier->SetSide(true);
 		berrier->SetSideType(BuffType::SPEED);
 		berrier->SetSideValue(2.f);
-		champ->TargetOrderCITB(1,300.f, berrier);
+		champ->TargetOrderCITB(1,200.f, berrier);
 		champ->SetUltiSkill(false);
 		champ->SkillChangeIdle();
 		return;
@@ -678,7 +708,23 @@ void SkillMgr::PriestSkill(Champion* champ)
 
 void SkillMgr::PriestUltiSkill(Champion* champ)
 {
+	if (champ->GetCurretState().animaition.GetCurrentClipId() != "UltiSkill")
+	{
+		std::cout << "±Ã±Ø±â : " << champ->GetCurretState().charId << std::endl;
+		champ->UseUltiSkill();
+		return;
+	}
+
+	if (champ->GetCurretState().animaition.GetLastFrame())
+	{
+		std::cout << "heal ground" << std::endl;
+		champ->SetSkillObj(4, 5.f, 0.3, 0.f);
+		champ->SetUltiSkill(false);
+		champ->SkillChangeIdle();
+		return;
+	}
 }
+// ¿Ï·á
 
 
 
@@ -690,6 +736,21 @@ void SkillMgr::PyromancerSkill(Champion* champ)
 
 void SkillMgr::PyromancerUltiSkill(Champion* champ)
 {
+	if (champ->GetCurretState().animaition.GetCurrentClipId() != "UltiSkill")
+	{
+		std::cout << "±Ã±Ø±â : " << champ->GetCurretState().charId << std::endl;
+		champ->UseUltiSkill();
+		return;
+	}
+
+	if (champ->GetCurretState().animaition.GetLastFrame())
+	{
+		std::cout << "blackhole ground" << std::endl;
+		champ->SetSkillObj(2, 8.f, 1.0f, 0.f);
+		champ->SetUltiSkill(false);
+		champ->SkillChangeIdle();
+		return;
+	}
 }
 
 
@@ -769,7 +830,7 @@ void SkillMgr::ShieldbearerUltiSkill(Champion* champ)
 		BuffState* aggro = new BuffState;
 		aggro->SetType(BuffType::AGGRO);
 		aggro->SetCount(10);
-		champ->TargetOrderCIEB(1, 350.f, aggro);
+		champ->TargetOrderCIEB(1, 200.f, aggro);
 		champ->SetUltiSkill(false);
 		champ->SkillChangeIdle();
 		return;
@@ -862,7 +923,7 @@ void SkillMgr::SoldierUltiSkill(Champion* champ)
 	if (champ->GetCurretState().animaition.GetLastFrame())
 	{
 		std::cout << "fire in the holl" << std::endl;
-		champ->TargetRangeDamage(350, 250);
+		champ->TargetRangeDamage(200, 250);
 		champ->SetUltiSkill(false);
 		champ->SkillChangeIdle();
 		return;
@@ -974,11 +1035,11 @@ void SkillMgr::ShieldbearerSkill(Champion* champ)
 {
 	if (champ->GetUseBuff(BuffType::ULTIMATE))
 	{
-		champ->TargetOrderCIT(3, 350, 0);
+		champ->TargetOrderCIT(3, 200, 0);
 	}
 	else
 	{
-		champ->TargetOrderCIT(3, 100, 0);
+		champ->TargetOrderCIT(3, 75, 0);
 	}
 
 	champ->TargetOrderSR();
