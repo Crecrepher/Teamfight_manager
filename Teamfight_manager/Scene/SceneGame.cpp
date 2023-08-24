@@ -833,6 +833,7 @@ void SceneGame::ResultPhase(float dt)
 				TEAM_MGR.ChampLose(playerPick[i]);
 			}
 		}
+		TEAM_MGR.CheckQuest();
 		SCENE_MGR.ChangeScene(SceneId::Home);
 	}
 }
