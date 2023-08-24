@@ -85,6 +85,12 @@ protected:
 
 	ObjectPool<ChampionEffect>* pool = nullptr;
 
+	int getedAtk = 0;
+	int getedDef = 0;
+	int getedAtkSpeed = 0;
+	int getedCoolDown = 0;
+	int getedHpDrain = 0;
+
 public:
 	Champion(const std::string id = "", const std::string n = "");
 	virtual ~Champion();
@@ -197,5 +203,8 @@ public:
 	//effect
 	void SetShadow();
 	void SetHpGuage();
+
+	// 선수 / 장비스텟 적용
+	void GetStat(int atk, int def, int atkSpeed, int coolDown,int drain);
 };
 

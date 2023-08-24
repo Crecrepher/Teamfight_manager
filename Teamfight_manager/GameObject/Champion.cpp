@@ -602,9 +602,9 @@ void Champion::ChampionDie()
 void Champion::UpdateState(float dt)
 {
 	this->currentState.maxHp = this->champMgrState.maxHp;
-	this->currentState.attack = this->champMgrState.attack;
-	this->currentState.defend = this->champMgrState.defend;
-	this->currentState.attackSpeed = this->champMgrState.attackSpeed;
+	this->currentState.attack = this->champMgrState.attack + (getedAtk * 0.1f);
+	this->currentState.defend = this->champMgrState.defend + (getedDef * 0.1f);
+	this->currentState.attackSpeed = this->champMgrState.attackSpeed +(this->champMgrState.attackSpeed/100 * getedAtkSpeed);
 	this->currentState.attackRange = this->champMgrState.attackRange;
 	this->currentState.speed = this->champMgrState.speed;
 
@@ -1037,6 +1037,15 @@ void Champion::SetHpGuage()
 	coolGuage->sortLayer = 4;
 	coolGuage->sortOrder = 1;
 	SCENE_MGR.GetCurrScene()->AddGo(coolGuage);
+}
+
+void Champion::GetStat(int atk, int def, int atkSpeed, int coolDown, int drain)
+{
+	getedAtk = atk;
+	getedDef = def;
+	getedAtkSpeed = atkSpeed;
+	getedCoolDown = coolDown;
+	getedHpDrain = drain;
 }
 
 void Champion::SetMyTeam(std::vector<Champion*>* myTeam)
