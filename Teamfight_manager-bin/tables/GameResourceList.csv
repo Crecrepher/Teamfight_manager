@@ -129,3 +129,5 @@ RESOURCE_TYPES 1.TEX 2.FONT 3.SOUND 4.ANI,RESOURCE_PATH
 2,sound/Stupid_Dancer.wav
 2,sound/Sword Stab (Flesh) 1 #41315.wav
 2,sound/RELOAD_Pump_stereo.wav
+0,graphics/LeagueSystem/Banpick/ban_effect_sheet.png
+0,graphics/LeagueSystem/Banpick/ban_effecttt_Last1.png

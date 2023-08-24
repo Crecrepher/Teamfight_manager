@@ -3,8 +3,6 @@
 
 AiBanPick::AiBanPick()
 {
-
-
     //champions =
     //{
     //    {1, 10, 5, 80, 0.6}, // Champion 1~8
@@ -83,29 +81,35 @@ State AiBanPick::CompareSecondStatChampion(const State& a, const State& b)
     return secondStatChampion; // 두 번째로 높은 스텟 챔피언 반환
 }
 
-int AiBanPick::CompareHighStatChampionIndex()
+int AiBanPick::CompareHighStatChampionIndex(const std::vector<int>& banChamps)
 {
     int highStat = -1;
-    State champ;
+    int highStatIndex = -1;
 
     for (int i = 0; i < champions.size(); ++i)
     {
+        if (std::find(banChamps.begin(), banChamps.end(), i) != banChamps.end())
+        {
+            std::cout << "banChamps 슬롯 번호: " << banChamps[i] + 1 << std::endl;
+            continue; // 건너뛰기
+        }
+
         int currentStat = AddStat(champions[i]);
+
         if (currentStat > highStat)
         {
             highStat = currentStat;
-            champ = champions[i];
+            highStatIndex = i;
         }
-    }
+        //else if () // 이미 선택된 인덱스일경우
+        //{
+        //    CompareNextStatChampion();
+        //    // 컴페어 넥스트 챔피언 인덱스 호출
+        //}
 
-    for (int i = 0; i < champIndex.size(); ++i)
-    {
-        if (champIndex[i] == champ.charId)
-        {
-            PickChamp(champ);
-            return i;
-        }
     }
+    return highStatIndex;
+
 }
 
 
@@ -121,15 +125,20 @@ void AiBanPick::PickChamp(State state)
     }
 }
 
-void AiBanPick::PickChamp(int i)
+int AiBanPick::CompareNextStatChampion(std::vector<int>& banChamps)
 {
+    int nextHighStatIndex = CompareHighStatChampionIndex(banChamps);
 
-}
+    while (std::find(banChamps.begin(), banChamps.end(), nextHighStatIndex) != banChamps.end())
+    {
+        // 이미 선택된 경우
+        nextHighStatIndex = CompareHighStatChampionIndex(banChamps);
+        std::cout << "챔피언 슬롯 번호 " << CompareHighStatChampionIndex(banChamps) + 1 << std::endl;
+        
+    }
+    std::cout << "다음 스탯의 챔피언 슬롯 번호 " << nextHighStatIndex + 2 << std::endl;
 
-
-void AiBanPick::CompareNextStatChampion()
-{
-
+    return nextHighStatIndex;
 }
 
 

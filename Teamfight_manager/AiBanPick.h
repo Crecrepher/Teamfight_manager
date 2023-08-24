@@ -33,19 +33,30 @@ public:
     State CompareHighStatChampion(const State& a, const State& b);
     State CompareSecondStatChampion(const State& a, const State& b);
 
-    int CompareHighStatChampionIndex();
-    void CompareNextStatChampion();
+    int CompareHighStatChampionIndex(const std::vector<int>& banChamps);
+    int CompareNextStatChampion(std::vector<int>& banChamps);
 
     void isBan(const State& highStatChampion, bool isAiMistake);
     void isPick(const State& highStatChampion, bool isAiMistake);
 
     void SetChampions()
     {
+        champions = std::vector<State>(0);
         for (int i = 0; i < champCount; i++)
         {
             champions.push_back(*CHAMPION_MGR.GetChampion(i));
         }
     }
+
+    
+    void PickChamp(State state);
+
+    const std::vector<State>& GetChampions() const
+    {
+        return champions;
+    }
+
+
 
     void SetChampionIndex()
     {
@@ -54,14 +65,5 @@ public:
             champIndex.push_back(CHAMPION_MGR.GetChampion(i)->charId);
         }
     }
-
-    void PickChamp(State state);
-    void PickChamp(int i);
-
-    const std::vector<State>& GetChampions() const
-    {
-        return champions;
-    }
-
 };
 

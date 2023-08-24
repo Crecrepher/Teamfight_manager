@@ -45,15 +45,24 @@ protected:
 	std::vector<Champion*> cemetery;
 	std::vector<int> banChamps;
 
+	std::vector<SpriteGo*> banEffectSheet;
+	std::vector<AnimatioControler> banEffectAnimation;
+	int effectCount = 6;
+	int effectAniCount = 6;
+
+	AiBanPick aiBanPick;
+
 	SpriteGo* banSheet;
 	SpriteGo* banSheetBlueTeam; // 블루
 	SpriteGo* banSheetRedTeam; // 레드
 
-	AiBanPick aiBanPick;
-
 	AnimatioControler banAnimation;
 	AnimatioControler banAnimation2;
 	AnimatioControler banAnimation3;
+
+
+	// csv하나로 됨, sheet.png도 하나로 됨
+	// 
 
 	std::vector<UiButton*> championSlot;
 	int champCount = 14; // 챔피언 최대수를 결정
@@ -65,6 +74,7 @@ protected:
 	int pickSlotCount = 3; // 우리 팀원의 수
 	int pickSlotEnemyCount = 3; // 적 팀원의 수
 
+	int banCount = 0;
 	int pickCount = 0;
 	int pickEnemyCount = 0;
 

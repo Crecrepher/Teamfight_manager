@@ -63,16 +63,37 @@ void SceneGame::Init()
 	championSlot = std::vector<UiButton*>(champCount);
 	swapSlot = std::vector<UiButton*>(6);
 
+	banEffectSheet = std::vector<SpriteGo*>(effectCount);
+	banEffectAnimation = std::vector<AnimatioControler>(effectAniCount);
+
+
 	UiInit();
 	BanPickInit();
 	LineUpInit();
 
-	//애니메이션 추가 임시위치
+	//애니메이션 추가 임시위치, 정규화하기
+	for (int i = 0; i < effectCount; i++)
+	{
+		banEffectSheet[i] = (SpriteGo*)AddGo(new SpriteGo("", "BanEffectSheet"));
+		banEffectSheet[i]->SetOrigin(Origins::MC);
+		banEffectSheet[i]->sortLayer = 103;
+		banEffectSheet[i]->sortOrder = 1;
+		banEffectSheet[i]->SetActive(false);
+	}
+	for (int i = 0; i < effectCount; i++)
+	{
+		banEffectAnimation[i].SetTarget(&banEffectSheet[i]->sprite);
+		banEffectAnimation[i].AddClip(*RESOURCE_MGR.GetAnimationClip("animations/banEffect.csv"));
+
+	}
+
 	banSheet = new SpriteGo("", "BanSheet");
 	AddGo(banSheet);
 	banSheet->sortLayer = 102;
 	banAnimation.SetTarget(&banSheet->sprite);
 	banAnimation.AddClip(*RESOURCE_MGR.GetAnimationClip("animations/banSlotBlue.csv"));
+
+	
 
 
 	RectGo* field = (RectGo*)AddGo(new RectGo("field"));
@@ -130,10 +151,6 @@ void SceneGame::Init()
 	grayScreen->SetPosition(FRAMEWORK.GetWindowSize() / 2.f);
 	grayScreen->SetOrigin(Origins::MC);
 	grayScreen->SetActive(false);
-
-	//FindGo("BanSheet")->SetActive(false);
-	//FindGo("BanSheet_BlueTeam")->SetActive(false);
-	//FindGo("BanSheet_RedTeam")->SetActive(false);
 
 	effectPool.OnCreate = [this](ChampionEffect* effect) {
 		effect->SetEffectType(0);
@@ -196,6 +213,13 @@ void SceneGame::Enter()
 	banSheetBlueTeam->SetActive(false);
 	banSheetRedTeam->SetActive(false);
 
+	for (int i = 0; i < 6; i++)
+	{
+		banEffectSheet[i]->SetOrigin(Origins::MC);
+		banEffectSheet[i]->SetActive(false);
+	}
+	
+	banCount = 0;
 	pickCount = 0;
 	pickEnemyCount = 0;
 
@@ -246,8 +270,8 @@ void SceneGame::Enter()
 		LineUpTrue();
 	}
 
-
 	aiBanPick.Init();
+	aiBanPick.SetChampions();
 }
 
 void SceneGame::Exit()
@@ -288,6 +312,16 @@ void SceneGame::Update(float dt)
 			<< INPUT_MGR.GetMousePos().y << std::endl;
 	}*/
 	banAnimation.Update(dt);
+	for (int i = 0; i < 6; i++)
+	{
+		banEffectAnimation[i].Update(dt);
+		if (banEffectAnimation[i].GetLastFrame())
+		{
+			banEffectAnimation[i].GetTarget()->setScale(76.f / 38.f, 96.f / 52.f);
+			banEffectSheet[i]->SetOrigin(Origins::MC);
+		}
+	}
+	
 	Scene::Update(dt);
 
 	selectCheck = true;
@@ -561,13 +595,12 @@ void SceneGame::BanPhase(float dt)
 		banText->SetActive(false);
 	}
 
-	if (currentTurn == Turn::Enemy/* && aiBanTimer >= 0.f*/)
+	if (currentTurn == Turn::Enemy)
 	{
 		AiSelect();
 	}
 
 	FindGo("Ban Bg 2:2")->SetActive(true);
-	//banAnimation.Update(dt);
 
 	sf::Vector2f mousePos = INPUT_MGR.GetMousePos();
 	sf::Vector2f uiMousePos = ScreenToUiPos(mousePos);
@@ -650,7 +683,6 @@ void SceneGame::PickPhase(float dt)
 		}
 
 		ChangePhase(Phase::Ready);
-
 	}
 	else if (mode == Mode::Sqaud && step == 8)
 	{
@@ -1880,6 +1912,7 @@ void SceneGame::BanPickInit()
 			ss << "Champion Slot" << i + 1 << "Image";
 			if (currentPhase == Phase::Ban)
 			{
+				// 중복벤 방지
 				for (int j = 0; j < banChamps.size(); j++)
 				{
 					if (banChamps[j] == i)
@@ -1889,6 +1922,16 @@ void SceneGame::BanPickInit()
 				}
 				SoundGo* sound = (SoundGo*)FindGo("BanSound");
 				sound->Play();
+				banEffectAnimation[banCount].Play("Idle");
+				banEffectAnimation[banCount].GetTarget()->setScale(1.f, 1.f);
+				banEffectSheet[banCount]->SetOrigin(Origins::MC);
+	
+				// 밴 이펙트 애니메이션 테스트
+				banEffectSheet[banCount]->SetActive(true);
+				banEffectSheet[banCount]->SetPosition(championSlot[i]->GetPosition());
+
+
+				// ai가 중복 벤이나 픽이 되면 계속 실행돼서 선택하게
 				// 작업중
 				// 밴픽 슬롯에서 이미지 들어가게 추가
 				// 밴했을때 슬롯 레드, 블루 처리
@@ -1918,12 +1961,14 @@ void SceneGame::BanPickInit()
 				spr->sprite.setColor(sf::Color(250, 0, 0));
 
 				banChamps[step] = i;
+				banCount++;
 				step++;
 				ChangeTeam();
 				ChangeTurn();
 			}
 			else if (currentPhase == Phase::Pick)
 			{
+				// 중복 방지
 				for (int j = 0; j < banChamps.size(); j++)
 				{
 					if (banChamps[j] == i)
@@ -1933,6 +1978,22 @@ void SceneGame::BanPickInit()
 				}
 				SoundGo* sound = (SoundGo*)FindGo("PickSound");
 				sound->Play();
+				//aiBanPick.SetChampions();
+				//int highStatIndex = aiBanPick.CompareHighStatChampionIndex(banChamps);
+
+				//for (int j = 0; j < banChamps.size(); j++)
+				//{
+				//	if (banChamps[j] == highStatIndex)
+				//	{
+				//		std::cout << "넥스트 스탯 호출!" << std::endl;
+				//		championSlot[aiBanPick.CompareNextStatChampion(banChamps)]->OnClick();
+				//	}
+				//	else if (highStatIndex >= 0 && highStatIndex < 14 && banChamps[j] != highStatIndex)
+				//	{
+				//		std::cout << "제일 높은 스탯의 챔피언 슬롯 번호 " << highStatIndex + 1 << std::endl;
+				//		championSlot[highStatIndex]->OnClick();
+				//	}
+				//}
 				if (team == Team::Red)
 				{
 					enemyPick[pickEnemyCount] = i;
@@ -2565,32 +2626,23 @@ void SceneGame::SetBanPick()
 
 void SceneGame::AiSelect()
 {
-	aiBanPick.SetChampions();
+	int highStatIndex = aiBanPick.CompareHighStatChampionIndex(banChamps);
 
-	int highStatIndex = aiBanPick.CompareHighStatChampionIndex();
-
-	if (highStatIndex >= 0 && highStatIndex < 14)
+	for (int j = 0; j < banChamps.size(); j++)
 	{
-		std::cout << "제일 높은 스탯의 챔피언 슬롯 번호 " << highStatIndex + 1 << std::endl;
-		championSlot[highStatIndex]->OnClick();
-	}
-
-	/*aiBanPick.SetChampions();
-	const std::vector<State>& championStates = aiBanPick.GetChampions();
-
-	State highStatChampion = aiBanPick.CompareHighStatChampion(championStates[0], championStates[13]);
-
-	int championIndex = -1;
-	for (int i = 0; i < 14; i++)
-	{
-		if (championStates[i] == highStatChampion)
+		if (banChamps[j] == highStatIndex)
 		{
-			championIndex = i;
+			std::cout << "넥스트 스탯 호출!"<< std::endl;
+			championSlot[aiBanPick.CompareNextStatChampion(banChamps)]->OnClick();
+			return;
+		}
+		else if (highStatIndex >= 0 && highStatIndex < 14 && banChamps[j] != highStatIndex)
+		{
+			championSlot[highStatIndex]->OnClick();
+			return;
 		}
 	}
-	championSlot[highStatChampion]->OnClick();
-	std::cout << "제일 높은 스탯의 챔피언 번호 " << highStatChampion.charId << std::endl;*/
-
+	std::cout << "제일 높은 스탯의 챔피언 슬롯 번호 " << highStatIndex + 1 << std::endl;
 }
 
 void SceneGame::SwapSlotFalse()
