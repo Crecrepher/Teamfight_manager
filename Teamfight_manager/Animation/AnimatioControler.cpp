@@ -14,7 +14,7 @@ std::string AnimatioControler::GetCurrentClipId()
 {
 	if (currentClip == nullptr)
 	{
-		std::cout << "ERR : GetCurrentClipId is NullPtr" << std::endl;
+		//std::cout << "ERR : GetCurrentClipId is NullPtr" << std::endl;
 		return "";
 	}
 	return currentClip->id;

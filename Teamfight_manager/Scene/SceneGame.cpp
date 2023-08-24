@@ -133,10 +133,21 @@ void SceneGame::Init()
 		};
 	effectPool.Init(100);
 
+	skillObjPool.OnCreate = [this](SkillObject* effect) {
+		effect->SetType(0);
+		effect->SetObjectTimer(0.f);
+		effect->SetEffectTime(0.f);
+		effect->SetEffectTimer(0.f);
+		effect->SetActive(false);
+		effect->SetPool(&skillObjPool);
+	};
+	skillObjPool.Init(1000);
+
 	championPool.OnCreate = [this, field](Champion* champion) {
 		champion->ChangeStance(ChampionStance::None);
 		champion->SetField(field);
 		champion->SetEffectPool(&effectPool);
+		champion->SetSkillObjPool(&skillObjPool);
 		champion->sortLayer = 3;
 		};
 
@@ -240,6 +251,7 @@ void SceneGame::Exit()
 	}
 	ClearObjectPool(championPool);
 	ClearObjectPool(effectPool);
+	ClearObjectPool(skillObjPool);
 	Scene::Exit();
 }
 
@@ -670,6 +682,24 @@ void SceneGame::BattlePhase(float dt)
 		for (auto champ : championPool.GetUseList())
 		{
 			champ->BattleUpdate(dt * 1.5f * speedUp);
+		}
+
+		for (auto it = skillObjPool.GetUseList().begin(); it != skillObjPool.GetUseList().end();)
+		{
+			if ((*it) != nullptr)
+			{
+				(*it)->Update(dt * speedUp);
+			}
+
+			if ((*it)->GetObjectTimer() <= 0.f)
+			{
+				(*it)->Release();
+				return;
+			}
+			else
+			{
+				++it;
+			}
 		}
 	}
 	if (battleTimer <= 0)

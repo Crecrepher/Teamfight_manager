@@ -1,0 +1,11 @@
+ID,FPS,LOOPTYPE,,
+SkillEffect,10,0,,
+,,,,
+TEXTUREID,LEFT,TOP,WIDTH,HEIGHT
+graphics/CustomSprite/icemage_ult_effect_0.png,0,0,81,61
+graphics/CustomSprite/icemage_ult_effect_1.png,0,0,173,129
+graphics/CustomSprite/icemage_ult_effect_2.png,0,0,308,247
+graphics/CustomSprite/icemage_ult_effect_3.png,0,0,308,247
+graphics/CustomSprite/icemage_ult_effect_4.png,0,0,308,247
+graphics/CustomSprite/icemage_ult_effect_5.png,0,0,173,129
+graphics/CustomSprite/icemage_ult_effect_6.png,0,0,81,61

@@ -6,6 +6,7 @@
 #include "BuffState.h"
 
 class ChampionEffect;
+class SkillObject;
 
 class Champion : public SpriteGo
 {
@@ -64,7 +65,7 @@ protected:
 	bool air = false;
 	bool limit = false;
 	bool interaction = false;
-
+	bool blackhole = false;
 	bool ActiveUltiSkill = true;
 	float UesUltiSkillTiming = 0.f;
 
@@ -72,6 +73,7 @@ protected:
 	sf::Vector2f startPos;
 	sf::Vector2f endPos;
 	float sMoveT = 0.f;
+	float blackholeTimer = 0.f;
 	
 
 	std::vector<Champion*>* enemyTeam;
@@ -84,6 +86,7 @@ protected:
 	Champion* dotDamage = nullptr;
 
 	ObjectPool<ChampionEffect>* pool = nullptr;
+	ObjectPool<SkillObject>* sObjPool = nullptr;
 
 public:
 	Champion(const std::string id = "", const std::string n = "");
@@ -101,6 +104,7 @@ public:
 	void SetEnemyTeam(std::vector<Champion*>* enemyTeam);
 	void SetDieChampion(std::vector<Champion*>* cemetery);
 	void SetEffectPool(ObjectPool<ChampionEffect>* effect) { this->pool = effect; }
+	void SetSkillObjPool(ObjectPool<SkillObject>* effect) { this->sObjPool = effect; }
 	void ChangeStance(ChampionStance stance);
 	void SetState(State path);
 	void SetSkill(ChampionSkill code);
@@ -131,8 +135,12 @@ public:
 	void TargetOrderRH();
 	void TargetOrderLR();
 	void TargetOrderCIE(int code, float range, float value);
+	void TargetOrderCIE(int code, float range, float value, sf::Vector2f pos);
 	void TargetOrderCIT(int code, float range, float value);
+	void TargetOrderCIT(int code, float range, float value, sf::Vector2f pos);
+	void TargetOrderCITB(int code, float range, BuffState* state, sf::Vector2f pos);
 	void TargetOrderCITB(int code, float range, BuffState* state);
+	void TargetOrderCIEB(int code, float range, BuffState* state, sf::Vector2f pos);
 	void TargetOrderCIEB(int code, float range, BuffState* state);
 	void TargetAggro();
 
@@ -181,6 +189,8 @@ public:
 	void TargetRangeDamage(float range, float value);
 	bool CurrBuffEmpty();
 	void BuffUpdate(float dt);
+	void SetSkillObj(int type, float oTimer, float eTime, float eTimer);
+	void SetBlackhole(int torgle, sf::Vector2f pos);
 
 
 	// 선수에게 넘길 스테이터스

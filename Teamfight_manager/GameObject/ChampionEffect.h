@@ -11,11 +11,8 @@ enum class EffectType
 	None,
 	Ui,
 	Base,
-	MoveSkill,
-	DoneMoveSkill,
 	Hp,
 	CoolTime,
-	Ani,
 };
 
 class ChampionEffect : public SpriteGo

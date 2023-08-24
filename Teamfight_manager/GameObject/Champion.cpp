@@ -64,8 +64,22 @@ void Champion::BattleUpdate(float dt)
 		bind -= dt;
 	}
 
-	SpriteGo::Update(dt);
+	if (this->blackhole)
+	{
+		if (this->blackholeTimer <= 0.f)
+		{
+			this->blackhole = false;
+			return;
+		}
 
+		this->blackholeTimer -= dt;
+
+		sf::Vector2f dir = Utils::Normalize(this->endPos - this->startPos);
+
+		this->SetPosition(this->position + dir * this->blackholeTimer);
+	}
+
+	SpriteGo::Update(dt);
 
 	if (!field->rectangle.getGlobalBounds().contains(this->GetPosition()))
 	{
@@ -82,6 +96,7 @@ void Champion::BattleUpdate(float dt)
 
 	UpdateState(dt);
 
+
 	this->skillTimer += dt/1.5f;
 	this->UesUltiSkillTiming -= dt / 1.5f;
 
@@ -96,14 +111,15 @@ void Champion::BattleUpdate(float dt)
 	//일시적 평타버그해결용 *******나중에지워야함*******
 	////////////////////////////////////////////////////////
 	///////////////////////지워주세요///////////////////////
-	if (currentState.skillCode1 == 10 &&
-		currentState.skillCode1 == 18)
+	if (currentState.skillCode1 == 10 || currentState.skillCode1 == 18)
 	{
 		skillTimer = 0;
 	}
 
 	if (this->currentState.charId !="knight" && this->currentState.charId != "monk" && this->currentState.charId != "shieldbearer"
-		&& this->currentState.charId != "berserker" && this->currentState.charId != "archer" && this->currentState.charId != "soldier")
+		&& this->currentState.charId != "berserker" && this->currentState.charId != "archer" && this->currentState.charId != "soldier"
+		&& this->currentState.charId != "icemage" && this->currentState.charId != "priest"
+		&& this->currentState.charId != "magicknight")
 	{
 		ActiveUltiSkill = false;
 	}
@@ -551,7 +567,6 @@ void Champion::UltimateSkill(float dt)
 	this->currentState.animaition.Update(dt * this->currentState.attackSpeed);
 	this->SetOrigin(Origins::MC);
 	this->sMoveT += dt * this->currentState.attackSpeed;
-	std::cout << "궁극기 : "<< this->currentState.charId << std::endl;
 	SKILL_MGR.ActiveSkill(this->currentState.skillCode2, this);
 }
 
@@ -964,6 +979,28 @@ void Champion::BuffUpdate(float dt)
 	}
 }
 
+void Champion::SetSkillObj(int type, float oTimer, float eTime, float eTimer)
+{
+	SkillObject*  obj = sObjPool->Get();
+	obj->SetType(type);
+	obj->SetChampion(this);
+	obj->SetObjectTimer(oTimer);
+	obj->SetEffectTime(eTime);
+	obj->SetEffectTimer(eTimer);
+	obj->SetPosition(this->GetPosition());
+	obj->SetActive(true);
+
+	SCENE_MGR.GetCurrScene()->AddGo(obj);
+}
+
+void Champion::SetBlackhole(int torgle, sf::Vector2f pos)
+{
+	this->blackhole = torgle;
+	this->blackholeTimer = 0.3f;
+	this->startPos = this->GetPosition();
+	this->endPos = pos;
+}
+
 void Champion::SetShadow()
 {
 	ChampionEffect* shadow = this->pool->Get();
@@ -989,7 +1026,7 @@ void Champion::SetHpGuage()
 	Guage->SetChampion(this);
 	Guage->SetEffectType(1);
 	Guage->SetHight(23.f);
-	Guage->sortLayer = 4;
+	Guage->sortLayer = 7;
 	Guage->sortOrder = 2;
 	SCENE_MGR.GetCurrScene()->AddGo(Guage);
 
@@ -1018,10 +1055,10 @@ void Champion::SetHpGuage()
 	hpGuage->sprite.setTextureRect(setting);
 	hpGuage->SetOrigin(Origins::ML);
 	hpGuage->SetChampion(this);
-	hpGuage->SetEffectType(5);
+	hpGuage->SetEffectType(3);
 	hpGuage->SetHight(22.f);
 	hpGuage->SetWidth(-14.5f);
-	hpGuage->sortLayer = 4;
+	hpGuage->sortLayer = 6;
 	hpGuage->sortOrder = 1;
 	SCENE_MGR.GetCurrScene()->AddGo(hpGuage);
 
@@ -1031,10 +1068,10 @@ void Champion::SetHpGuage()
 	coolGuage->sprite.setTextureRect(setting);
 	coolGuage->SetOrigin(Origins::ML);
 	coolGuage->SetChampion(this);
-	coolGuage->SetEffectType(6);
+	coolGuage->SetEffectType(4);
 	coolGuage->SetHight(24.f);
 	coolGuage->SetWidth(-14.5f);
-	coolGuage->sortLayer = 4;
+	coolGuage->sortLayer = 6;
 	coolGuage->sortOrder = 1;
 	SCENE_MGR.GetCurrScene()->AddGo(coolGuage);
 }
@@ -1362,6 +1399,38 @@ void Champion::TargetOrderCIE(int code, float range, float value)
 		}
 	}
 
+void Champion::TargetOrderCIE(int code, float range, float value, sf::Vector2f pos)
+{
+	if (this->enemyTeam->empty())
+	{
+		return;
+	}
+	for (auto enemy : *this->enemyTeam)
+	{
+		if (abs(Utils::Distance(pos, enemy->GetPosition())) <= range)
+		{
+			switch (code)
+			{
+			case 0:
+			{
+				//std::cout << "아무 일도 없었다." << std::endl;
+				break;
+			}
+			case 1:
+			{
+				DamageCalculate(value);
+				break;
+			}
+			case 2:
+			{
+				enemy->SetBlackhole(value, pos);
+				break;
+			}
+			}
+		}
+	}
+}
+
 void Champion::TargetOrderCIT(int code, float range, float value)
 {
 	if (this->myTeam->empty())
@@ -1414,6 +1483,94 @@ void Champion::TargetOrderCIT(int code, float range, float value)
 	}
 }
 
+void Champion::TargetOrderCIT(int code, float range, float value, sf::Vector2f pos)
+{
+	if (this->myTeam->empty())
+	{
+		return;
+	}
+
+	for (auto team : *this->myTeam)
+	{
+		if (abs(Utils::Distance(pos, team->GetPosition())) <= range)
+		{
+			this->target = team;
+			switch (code)
+			{
+			case 0:
+			{
+				//std::cout << "아무 일도 없었다." << std::endl;
+				break;;
+			}
+			case 1:
+			{
+				if (this->target->GetHp() < this->target->currentState.maxHp)
+				{
+					std::cout << this->currentState.charId << " 가 " << this->GetTarget()->GetCurretState().charId << " 에게 힐" << std::endl;
+					HealCalculate(value);
+				}
+				break;
+			}
+			case 2:
+			{
+				if (team == this)
+				{
+					break;
+				}
+				HealCalculate(value);
+				break;
+			}
+			case 3:
+			{
+				this->GetTarget()->SetInteraction(true);
+				break;
+			}
+			}
+		}
+
+		if (code == 3 && abs(Utils::Distance(pos, team->GetPosition())) > range)
+		{
+			team->SetInteraction(false);
+		}
+	}
+}
+
+void Champion::TargetOrderCITB(int code, float range, BuffState* state, sf::Vector2f pos)
+{
+	if (this->myTeam->empty())
+	{
+		return;
+	}
+
+	for (auto team : *this->myTeam)
+	{
+		if (abs(Utils::Distance(pos, team->GetPosition())) <= range)
+		{
+			this->target = team;
+			switch (code)
+			{
+			case 0:
+			{
+				//std::cout << "아무 일도 없었다." << std::endl;
+				break;;
+			}
+			case 1:
+			{
+				//std::cout << "monkbarrier" << std::endl;
+				BuffState* cState = new BuffState;
+
+				*cState = *state;
+
+				this->GetTarget()->SetBuff(cState);
+				break;
+			}
+			}
+		}
+
+	}
+	delete state;
+}
+
 void Champion::TargetOrderCITB(int code, float range, BuffState* state)
 {
 	if (this->myTeam->empty())
@@ -1446,6 +1603,41 @@ void Champion::TargetOrderCITB(int code, float range, BuffState* state)
 			}
 		}
 		
+	}
+	delete state;
+}
+
+void Champion::TargetOrderCIEB(int code, float range, BuffState* state, sf::Vector2f pos)
+{
+	if (this->enemyTeam->empty())
+	{
+		return;
+	}
+
+	for (auto team : *this->enemyTeam)
+	{
+		if (abs(Utils::Distance(pos, team->GetPosition())) <= range)
+		{
+			this->target = team;
+			switch (code)
+			{
+			case 0:
+			{
+				//std::cout << "아무 일도 없었다." << std::endl;
+				break;;
+			}
+			case 1:
+			{
+				BuffState* cState = new BuffState;
+
+				*cState = *state;
+
+				this->GetTarget()->SetBuff(cState);
+				break;
+			}
+			}
+		}
+
 	}
 	delete state;
 }

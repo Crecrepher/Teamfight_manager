@@ -157,3 +157,11 @@ RESOURCE_TYPES 0.TEX 1.FONT 2.SOUND 3.ANI,RESOURCE_PATH
 0,graphics/Origin/Sprite/champion&player_slot_0.png
 0,graphics/Origin/Sprite/champion_face_bg_0.png
 0,graphics/Origin/Sprite/champion_face_bg_1.png
+3,animations/Skills/skillcode_7/IcemageUltiSkillEffect.csv
+0,graphics/CustomSprite/icemage_ult_effect_0.png
+0,graphics/CustomSprite/icemage_ult_effect_1.png
+0,graphics/CustomSprite/icemage_ult_effect_2.png
+0,graphics/CustomSprite/icemage_ult_effect_3.png
+0,graphics/CustomSprite/icemage_ult_effect_4.png
+0,graphics/CustomSprite/icemage_ult_effect_5.png
+0,graphics/CustomSprite/icemage_ult_effect_6.png

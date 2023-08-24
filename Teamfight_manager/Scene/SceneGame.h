@@ -3,6 +3,7 @@
 #include "ObjectPool.h"
 #include "Champion.h"
 #include "ChampionEffect.h"
+#include "SkillObject.h"
 #include "GameState.h"
 #include "AnimatioControler.h"
 #include "TextGo.h"
@@ -37,6 +38,7 @@ protected:
 
 	ObjectPool<Champion> championPool;
 	ObjectPool<ChampionEffect> effectPool;
+	ObjectPool<SkillObject> skillObjPool;
 	
 	std::vector<Champion*> redTeam;
 	std::vector<Champion*> blueTeam;
