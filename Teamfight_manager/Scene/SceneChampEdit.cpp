@@ -8,6 +8,7 @@
 #include "InputMgr.h"
 #include "ResourceMgr.h"
 #include "Framework.h"
+#include "ChampionMgr.h"
 
 #include "SpriteGo.h"
 #include "TextGo.h"
@@ -16,7 +17,7 @@
 
 SceneChampEdit::SceneChampEdit() : Scene(SceneId::ChampEdit)
 {
-	resourceListPath = "tables/ChampEditResourceList.csv";
+	resourceListPath = "tables/GameResourceList.csv";
 }
 
 SceneChampEdit::~SceneChampEdit()
@@ -34,7 +35,10 @@ void SceneChampEdit::Init()
 	uiView.setSize(windowSize);
 	uiView.setCenter(centerPos);
 
-	AddGo(new UiButton("graphics/Origin/Sprite/sponser_logo_new_16.png","ChampEdit"));
+	AddGo(new UiButton("graphics/Origin/Sprite/default_button_1.png","ChampEdit"));
+	champ = SpriteGo("graphics/UiFix/character_icons_0.png","Champ");
+	AddGo(&champ);
+
 
 	for (auto go : gameObjects)
 	{
@@ -53,7 +57,7 @@ void SceneChampEdit::Release()
 void SceneChampEdit::Enter()
 {
 	Scene::Enter();
-	RESOURCE_MGR.LoadFromCsv("tables/ChampEditResourceList.csv");
+	RESOURCE_MGR.LoadFromCsv("tables/GameResourceList.csv");
 
 	std::string path = "graphics/CustomSprite";
 
@@ -66,6 +70,13 @@ void SceneChampEdit::Enter()
 	bt->SetSize(1.5, 1.5);
 	bt->sortLayer = 100;
 
+	champ.SetPosition(FRAMEWORK.GetWindowSize() * 0.5f);
+	champ.SetOrigin(Origins::MC);
+	champ.SetSize(2, 2);
+
+	animation = CHAMPION_MGR.GetChampion(0)->animaition;
+	animation.SetTarget(&champ.sprite);
+	animation.Play("Idle");
 }
 
 void SceneChampEdit::Exit()
@@ -76,6 +87,7 @@ void SceneChampEdit::Exit()
 void SceneChampEdit::Update(float dt)
 {
 	Scene::Update(dt);	
+	animation.Update(dt);
 	if (INPUT_MGR.GetKeyDown(sf::Keyboard::Escape))
 	{
 		SCENE_MGR.ChangeScene(SceneId::Title);

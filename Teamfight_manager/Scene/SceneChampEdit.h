@@ -1,11 +1,16 @@
 #pragma once
 #include "Scene.h"
 #include "SpriteGo.h"
+#include "AnimatioControler.h"
 
+class Champion;
 
 class SceneChampEdit : public Scene
 {
 protected:
+	AnimatioControler animation;
+	SpriteGo champ;
+
 public:
 	SceneChampEdit();
 	virtual ~SceneChampEdit() override;

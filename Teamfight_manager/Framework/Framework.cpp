@@ -21,9 +21,9 @@ void Framework::Init(int width, int height, const std::string& title)
     DATATABLE_MGR.LoadAll();
     TEAM_MGR.Init();
     RESOURCE_MGR.Init();
-    SCENE_MGR.Init();
     CHAMPION_MGR.Init();
     SKILL_MGR.Init();
+    SCENE_MGR.Init();
 }
 
 void Framework::Release()
