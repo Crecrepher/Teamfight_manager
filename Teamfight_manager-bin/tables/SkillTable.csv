@@ -1,4 +1,4 @@
-SkillCode,SkillPath
+SkillCode,SkillPath,,
 1,ArcherSkill,3,animations/Skills/skillcode_1/path.csv
 2,ArcherUltimaiteSkill,0,animations/Skills/skillcode_2/path.csv
 3,BerserkerSkill,0,animations/Skills/skillcode_3/path.csv
