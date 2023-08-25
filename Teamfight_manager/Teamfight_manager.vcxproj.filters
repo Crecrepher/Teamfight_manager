@@ -36,6 +36,7 @@
     <ClCompile Include="GameObject\ChampionEffect.cpp" />
     <ClCompile Include="GameObject\BuffState.cpp" />
     <ClCompile Include="SkillObject.cpp" />
+    <ClCompile Include="GameObject\BindPlayerEffect.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="3rd\rapidcsv.h" />
@@ -78,5 +79,6 @@
     <ClInclude Include="GameObject\ChampionEffect.h" />
     <ClInclude Include="GameObject\BuffState.h" />
     <ClInclude Include="SkillObject.h" />
+    <ClInclude Include="GameObject\BindPlayerEffect.h" />
   </ItemGroup>
 </Project>

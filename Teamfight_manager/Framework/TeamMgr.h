@@ -406,6 +406,7 @@ public:
 	void EarnMoney(int money) { this->money += money; }
 	void UseMoney(int money) { this->money -= money; }
 
+	int GetTotalChampsCount() { return totalChamps; }
 	int GetAbleChamps() { return ableChamp; }
 	int GetAbleCharacteristic() { return ableCharacteristic; }
 
