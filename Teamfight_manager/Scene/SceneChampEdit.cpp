@@ -63,11 +63,13 @@ void SceneChampEdit::Enter()
 	for (const auto& file : std::filesystem::directory_iterator(path))
 		std::cout << file.path() << std::endl;
 
+	State* defaultChamp = CHAMPION_MGR.GetChampion(0);
+
 	champ.SetPosition(FRAMEWORK.GetWindowSize() * 0.5f);
 	champ.SetOrigin(Origins::MC);
 	champ.SetSize(2, 2);
 
-	animation = CHAMPION_MGR.GetChampion(0)->animaition;
+	animation = defaultChamp->animaition;
 	animation.SetTarget(&champ.sprite);
 	animation.Play("Idle");
 	champ.SetOrigin(Origins::MC);
@@ -81,6 +83,26 @@ void SceneChampEdit::Enter()
 	spr->SetOrigin(Origins::MC);
 	spr->SetSize(2, 2);
 	spr->sortLayer = 100;
+
+	bt = (UiButton*)FindGo("ChangeChampL");
+	bt->SetPosition(FRAMEWORK.GetWindowSize().x * 0.35f, 50);
+	bt->SetOrigin(Origins::MC);
+	bt->SetSize(2, 2);
+	bt->sortLayer = 100;
+
+	bt = (UiButton*)FindGo("ChangeChampR");
+	bt->SetPosition(FRAMEWORK.GetWindowSize().x * 0.65f, 50);
+	bt->SetOrigin(Origins::MC);
+	bt->SetSize(2, 2);
+	bt->sortLayer = 100;
+
+	text = (TextGo*)FindGo("ChampNameText");
+	text->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
+	text->text.setString(defaultChamp->charId);
+	text->text.setCharacterSize(24);
+	text->SetOrigin(Origins::MC);
+	text->SetPosition(FRAMEWORK.GetWindowSize().x * 0.5f, 50);
+	text->sortLayer = 101;
 
 }
 
@@ -121,4 +143,5 @@ void SceneChampEdit::InitSpriteGo()
 
 void SceneChampEdit::InitTextGo()
 {
+	AddGo(new TextGo("ChampNameText"));
 }
