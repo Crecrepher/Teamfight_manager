@@ -34,6 +34,7 @@ public:
 	void SetFrame(const AnimationFrame& frame);
 
 	int GetCurrFrame() { return this->currentFrame; }
+	void SetCurrFrame(int i) { this->currentFrame = i; }
 	int GetTotalFrame() { return this->totalFrame - 1; }
 	bool GetLastFrame();
 };

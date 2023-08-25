@@ -1,0 +1,11 @@
+ID,FPS,LOOPTYPE,,
+SkillEffect,10,0,,
+,,,,
+TEXTUREID,LEFT,TOP,WIDTH,HEIGHT
+graphics/CustomSprite/magicknightskill.png,0,0,95,36
+graphics/CustomSprite/magicknightskill.png,0,36,104,47
+graphics/CustomSprite/magicknightskill.png,0,83,107,53
+graphics/CustomSprite/magicknightskill.png,0,136,117,56
+graphics/CustomSprite/magicknightskill.png,0,249,125,66
+graphics/CustomSprite/magicknightskill.png,0,315,106,57
+graphics/CustomSprite/magicknightskill.png,0,192,106,57

@@ -541,6 +541,21 @@ void SkillMgr::KnightUltiSkill(Champion* champ)
 
 void SkillMgr::MagicknightSkill(Champion* champ)
 {
+	if (champ->GetCurretState().animaition.GetCurrentClipId() != "Skill")
+	{
+		std::cout << "스킬 : " << champ->GetCurretState().charId << std::endl;
+		champ->UseSkill();
+		return;
+	}
+
+	if (champ->GetCurretState().animaition.GetLastFrame())
+	{
+		sf::Vector2f temp = Utils::Normalize(champ->GetTarget()->GetPosition() - champ->GetPosition());
+		champ->SetSkillObj(7, 30.f, 0.01f, 0.f,temp,"animations/Effect/MagicknightSkill.csv","SkillEffect");
+		champ->SetUltiSkill(false);
+		champ->SkillChangeIdle();
+		return;
+	}
 }
 
 
@@ -626,7 +641,6 @@ void SkillMgr::NinjaSkill(Champion* champ)
 	if (champ->GetCurretState().animaition.GetCurrentClipId() != "Skill")
 	{
 		champ->UseSkill();
-		champ->SetAir(true);
 		return;
 	}
 
@@ -634,25 +648,29 @@ void SkillMgr::NinjaSkill(Champion* champ)
 	{
 		if (!champ->GetFrameLimit())
 		{
-			if (champ->GetTarget()->GetOrder() != TargetingOrder::Aggro)
+			if (!champ->GetAir())
 			{
-				champ->TargetOrderLR();
-			}
+				if (champ->GetTarget()->GetOrder() != TargetingOrder::Aggro)
+				{
+					champ->TargetOrderLR();
+				}
 
-			sf::Vector2f dir = Utils::Normalize(champ->GetTarget()->GetPosition() - champ->GetPosition());
+				sf::Vector2f dir = Utils::Normalize(champ->GetTarget()->GetPosition() - champ->GetPosition());
 
-			if (dir.x >= 0)
-			{
-				champ->SetEndPos({ champ->GetTarget()->GetPosition().x + 30.f, champ->GetTarget()->GetPosition().y });
-				champ->SetSacleX(-1);
+				if (dir.x >= 0)
+				{
+					champ->SetEndPos({ champ->GetTarget()->GetPosition().x + 30.f, champ->GetTarget()->GetPosition().y });
+					champ->SetSacleX(-1);
+				}
+				else if (dir.x < 0)
+				{
+					champ->SetEndPos({ champ->GetTarget()->GetPosition().x - 30.f, champ->GetTarget()->GetPosition().y });
+					champ->SetSacleX(1);
+				}
+
+				champ->SetPosition(champ->GetEndPos());
+				champ->SetFrameLimit(true);
 			}
-			else if (dir.x < 0)
-			{
-				champ->SetEndPos({ champ->GetTarget()->GetPosition().x - 30.f, champ->GetTarget()->GetPosition().y });
-				champ->SetSacleX(1);
-			}
-			champ->SetPosition(champ->GetEndPos());
-			champ->SetFrameLimit(true);
 		}
 		return;
 	}
@@ -755,11 +773,23 @@ void SkillMgr::PriestUltiSkill(Champion* champ)
 // 완료
 
 
-
 void SkillMgr::PyromancerSkill(Champion* champ)
 {
-}
+	if (champ->GetCurretState().animaition.GetCurrentClipId() != "Skill")
+	{
+		champ->UseSkill();
+		return;
+	}
 
+	if (champ->GetCurretState().animaition.GetLastFrame())
+	{
+		std::cout << "fire ball" << std::endl;
+		champ->SetSkillObj(5, 5.f, 0.7f, 0.f);
+		champ->SkillChangeIdle();
+		return;
+	}
+}
+// 완료
 
 
 void SkillMgr::PyromancerUltiSkill(Champion* champ)
@@ -832,8 +862,23 @@ void SkillMgr::PythonessSkill(Champion* champ)
 
 void SkillMgr::PythonessUltiSkill(Champion* champ)
 {
-}
+	if (champ->GetCurretState().animaition.GetCurrentClipId() != "UltiSkill")
+	{
+		std::cout << "궁극기 : " << champ->GetCurretState().charId << std::endl;
+		champ->UseUltiSkill();
+		return;
+	}
 
+	if (champ->GetCurretState().animaition.GetLastFrame())
+	{
+		std::cout << "door ground" << std::endl;
+		champ->SetSkillObj(6, 10.f, 0.3f, 0.f);
+		champ->SetUltiSkill(false);
+		champ->SkillChangeIdle();
+		return;
+	}
+}
+// 완료
 
 
 void SkillMgr::ShieldbearerUltiSkill(Champion* champ)

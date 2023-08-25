@@ -112,6 +112,7 @@ public:
 	void SetTeamScore(int* score) { this->teamScore = score; }
 	void SetMyTeam(std::vector<Champion*>* myTeam);
 	void SetEnemyTeam(std::vector<Champion*>* enemyTeam);
+	std::vector<Champion*> GetEnemyTeam() { return *this->enemyTeam; }
 	void SetDieChampion(std::vector<Champion*>* cemetery);
 	void SetChampionPool(ObjectPool<Champion>* effect) { this->cPool = effect; }
 	void SetEffectPool(ObjectPool<ChampionEffect>* effect) { this->pool = effect; }
@@ -150,6 +151,7 @@ public:
 	void TargetOrderLR();
 	void TargetOrderCIE(int code, float range, float value);
 	void TargetOrderCIE(int code, float range, float value, sf::Vector2f pos);
+	void TargetOrderCIE(int code, float range, float value, sf::Vector2f pos, std::vector<Champion*>* check);
 	void TargetOrderCIT(int code, float range, float value);
 	void TargetOrderCIT(int code, float range, float value, sf::Vector2f pos);
 	void TargetOrderCITB(int code, float range, BuffState* state, sf::Vector2f pos);
@@ -204,6 +206,8 @@ public:
 	bool CurrBuffEmpty();
 	void BuffUpdate(float dt);
 	void SetSkillObj(int type, float oTimer, float eTime, float eTimer);
+	void SetSkillObj(int type, float oTimer, float eTime, float eTimer, std::string path1, std::string path2);
+	void SetSkillObj(int type, float oTimer, float eTime, float eTimer, sf::Vector2f dir, std::string path1, std::string path2);
 	void SetBlackhole(int torgle, sf::Vector2f pos);
 	void SetCopyChar(Champion* champ);
 	Champion* GetPool();

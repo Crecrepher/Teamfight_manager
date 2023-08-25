@@ -536,6 +536,7 @@ void SceneGame::ChampionPick(int id, Team team)
 	champ->SetOrigin(Origins::MC);
 	champ->SetSacleX(1);
 	champ->SetUltiTimer(Utils::RandomRange(10.f, 30.f));
+	champ->SetUltiSkill(true);
 
 	switch (team)
 	{
@@ -816,6 +817,7 @@ void SceneGame::ResultPhase(float dt)
 				team->ReleaseSkill();
 				RemoveGo(team);
 				team->SetTeamColor(Team::None);
+				team->Release();
 				championPool.Return(team);
 			}
 			redTeam.clear();
@@ -833,6 +835,7 @@ void SceneGame::ResultPhase(float dt)
 				team->ReleaseSkill();
 				RemoveGo(team);
 				team->SetTeamColor(Team::None);
+				team->Release();
 				championPool.Return(team);
 			}
 			blueTeam.clear();
@@ -853,6 +856,7 @@ void SceneGame::ResultPhase(float dt)
 				team->ReleaseSkill();
 				RemoveGo(team);
 				team->SetTeamColor(Team::None);
+				team->Release();
 				championPool.Return(team);
 			}
 			cemetery.clear();

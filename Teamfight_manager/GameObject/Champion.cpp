@@ -51,6 +51,19 @@ void Champion::Reset()
 void Champion::Release()
 {
 	SpriteGo::Release();
+
+	this->champMgrState.charId = "";
+	this->champMgrState.maxHp = 0.f;
+	this->champMgrState.attack = 0.f;
+	this->champMgrState.defend = 0.f;
+	this->champMgrState.attackSpeed = 0.f;
+	this->champMgrState.attackRange = 0.f;
+	this->champMgrState.speed = 0.f;
+	this->champMgrState.skillCode1 = -1;
+	this->champMgrState.skillCode2 = -1;
+	this->champMgrState.type = ChampionType::None;
+
+	team = Team::None;
 }
 
 void Champion::BattleUpdate(float dt)
@@ -114,16 +127,12 @@ void Champion::BattleUpdate(float dt)
 	//일시적 평타버그해결용 *******나중에지워야함*******
 	////////////////////////////////////////////////////////
 	///////////////////////지워주세요///////////////////////
-	if (currentState.skillCode1 == 10 || currentState.skillCode1 == 18)
-	{
-		skillTimer = 0;
-	}
+	//if (currentState.skillCode1 == 10)
+	//{
+	//	skillTimer = 0;
+	//}
 
-	if (this->currentState.charId !="knight" && this->currentState.charId != "monk" && this->currentState.charId != "shieldbearer"
-		&& this->currentState.charId != "berserker" && this->currentState.charId != "archer" && this->currentState.charId != "soldier"
-		&& this->currentState.charId != "icemage" && this->currentState.charId != "priest"
-		&& this->currentState.charId != "magicknight"&& this->currentState.charId != "pyromancer"
-		&& this->currentState.charId != "fighter"&&this->currentState.charId!="ninja")
+	if (this->currentState.charId =="swordman")
 	{
 		ActiveUltiSkill = false;
 	}
@@ -283,7 +292,6 @@ void Champion::BattleUpdate(float dt)
 	}
 	case ChampionStance::Attack:
 	{
-
 		Attack(dt);
 		break;
 	}
@@ -523,7 +531,11 @@ void Champion::Attack(float dt)
 		{
 			HealCalculate(this->currentState.attack);
 		}
-		else if (this->currentState.charId != "priest")
+		else if (this->currentState.charId != "priest" && this->currentState.charId == "pyromancer")
+		{
+			TargetRangeDamage(30.f, this->currentState.attack);
+		}
+		else if (this->currentState.charId != "priest" && this->currentState.charId != "pyromancer")
 		{
 			DamageCalculate(this->currentState.attack);
 		}
@@ -1079,6 +1091,50 @@ void Champion::SetSkillObj(int type, float oTimer, float eTime, float eTimer)
 	SCENE_MGR.GetCurrScene()->AddGo(obj);
 }
 
+void Champion::SetSkillObj(int type, float oTimer, float eTime, float eTimer, std::string path1, std::string path2)
+{
+	SkillObject* obj = sObjPool->Get();
+	obj->SetType(type);
+	obj->SetChampion(this);
+	obj->SetObjectTimer(oTimer);
+	obj->SetEffectTime(eTime);
+	obj->SetEffectTimer(eTimer);
+	obj->SetPosition(this->GetPosition());
+	obj->SetActive(true);
+	obj->SetAni(path1);
+
+	SCENE_MGR.GetCurrScene()->AddGo(obj);
+
+	obj->PlayAni(path2);
+}
+
+void Champion::SetSkillObj(int type, float oTimer, float eTime, float eTimer, sf::Vector2f dir, std::string path1, std::string path2)
+{
+	SkillObject* obj = sObjPool->Get();
+	obj->SetType(type);
+	obj->SetChampion(this);
+	obj->SetObjectTimer(oTimer);
+	obj->SetEffectTime(eTime);
+	obj->SetEffectTimer(eTimer);
+	obj->SetDir(dir);
+	obj->SetPosition(this->GetPosition());
+	obj->SetActive(true);
+	obj->SetAni(path1);
+	
+	if (this->sprite.getScale().x < 0)
+	{
+		obj->SetScaleY(-1.f);
+	}
+	else if (this->sprite.getScale().x > 0)
+	{
+		obj->SetScaleY(1.f);
+	}
+
+	SCENE_MGR.GetCurrScene()->AddGo(obj);
+
+	obj->PlayAni(path2);
+}
+
 void Champion::SetBlackhole(int torgle, sf::Vector2f pos)
 {
 	this->blackhole = torgle;
@@ -1546,8 +1602,14 @@ void Champion::TargetOrderCIE(int code, float range, float value)
 	}
 		for (auto enemy : *this->enemyTeam)
 		{
+			if (enemy == nullptr)
+			{
+				continue;
+			}
 			if (abs(Utils::Distance(this->GetPosition(), enemy->GetPosition())) <= range)
 			{
+				this->target = enemy;
+
 				switch (code)
 				{
 				case 0:
@@ -1560,7 +1622,6 @@ void Champion::TargetOrderCIE(int code, float range, float value)
 					DamageCalculate(value);
 					break;
 				}
-
 				}
 			}
 		}
@@ -1574,8 +1635,14 @@ void Champion::TargetOrderCIE(int code, float range, float value, sf::Vector2f p
 	}
 	for (auto enemy : *this->enemyTeam)
 	{
+		if (enemy == nullptr)
+		{
+			continue;
+		}
 		if (abs(Utils::Distance(pos, enemy->GetPosition())) <= range)
 		{
+			this->target = enemy;
+
 			switch (code)
 			{
 			case 0:
@@ -1592,6 +1659,64 @@ void Champion::TargetOrderCIE(int code, float range, float value, sf::Vector2f p
 			{
 				enemy->SetBlackhole(value, pos);
 				break;
+			}
+			case 3:
+			{
+				std::cout << this->currentState.charId << " 가 " << this->GetTarget()->GetCurretState().charId << " 에게 딜" << std::endl;
+				DamageCalculate(value);
+				return;
+			}
+			}
+		}
+	}
+}
+
+void Champion::TargetOrderCIE(int code, float range, float value, sf::Vector2f pos, std::vector<Champion*>* check)
+{
+	if (this->enemyTeam->empty())
+	{
+		return;
+	}
+	for (auto enemy : *this->enemyTeam)
+	{
+		if (enemy == nullptr)
+		{
+			continue;
+		}
+		if (abs(Utils::Distance(pos, enemy->GetPosition())) <= range)
+		{
+			this->target = enemy;
+
+			switch (code)
+			{
+			case 0:
+			{
+				//std::cout << "아무 일도 없었다." << std::endl;
+				break;
+			}
+			case 1:
+			{
+				DamageCalculate(value);
+				break;
+			}
+			case 2:
+			{
+				enemy->SetBlackhole(value, pos);
+				break;
+			}
+			case 3:
+			{
+				for (auto c : *check)
+				{
+					if (c == enemy)
+					{
+						return;
+					}
+				}
+				std::cout << this->currentState.charId << " 가 " << this->GetTarget()->GetCurretState().charId << " 에게 딜" << std::endl;
+				(*check).push_back(enemy);
+				DamageCalculate(value);
+				return;
 			}
 			}
 		}
@@ -1640,6 +1765,7 @@ void Champion::TargetOrderCIT(int code, float range, float value)
 				this->GetTarget()->SetInteraction(true);
 				break;
 			}
+
 			}
 		}
 		
@@ -1691,6 +1817,17 @@ void Champion::TargetOrderCIT(int code, float range, float value, sf::Vector2f p
 			{
 				this->GetTarget()->SetInteraction(true);
 				break;
+			}
+			case 4:
+			{
+				TargetOrderH();
+
+				if (this->target->GetHp() < this->target->currentState.maxHp)
+				{
+					std::cout << this->currentState.charId << " 가 " << this->GetTarget()->GetCurretState().charId << " 에게 힐" << std::endl;
+					HealCalculate(value);
+				}
+				return;
 			}
 			}
 		}
