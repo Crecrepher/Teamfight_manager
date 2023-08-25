@@ -71,6 +71,8 @@ protected:
 	std::vector<UiButton*> pickSlot;
 	std::vector<UiButton*> enemySlot;
 
+	std::vector<TextGo*> championSlotName;
+
 	int pickSlotCount = 3; // 우리 팀원의 수
 	int pickSlotEnemyCount = 3; // 적 팀원의 수
 

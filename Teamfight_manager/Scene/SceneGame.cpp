@@ -138,7 +138,7 @@ void SceneGame::Init()
 	pickText->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
 	pickText->text.setCharacterSize(45);
 	pickText->text.setFillColor(sf::Color::White);
-	pickText->text.setString(L"밴픽 단계");
+	pickText->text.setString(L"선택 단계");
 	pickText->SetPosition(0, FRAMEWORK.GetWindowSize().y / 2);
 	pickText->SetOrigin(Origins::MC);
 	pickText->SetActive(false);
@@ -210,6 +210,7 @@ void SceneGame::Enter()
 	banChamps = std::vector<int>(14, -1);
 
 	banSheet->SetActive(false);
+	banSheet->SetPosition(-100, -100);
 	banSheetBlueTeam->SetActive(false);
 	banSheetRedTeam->SetActive(false);
 
@@ -306,11 +307,12 @@ void SceneGame::Exit()
 void SceneGame::Update(float dt)
 {
 	// 마우스 좌표 테스트
-	/*if (INPUT_MGR.GetMouseButtonDown(sf::Mouse::Left))
+	if (INPUT_MGR.GetMouseButtonDown(sf::Mouse::Left))
 	{
 		std::cout << INPUT_MGR.GetMousePos().x << "\t"
 			<< INPUT_MGR.GetMousePos().y << std::endl;
-	}*/
+	}
+
 	banAnimation.Update(dt);
 	for (int i = 0; i < 6; i++)
 	{
@@ -1446,46 +1448,6 @@ void SceneGame::UiInit()
 		banBg22->SetOrigin(Origins::TL);
 		banBg22->SetActive(false);
 
-		SpriteGo* banEffectAnimation0 = (SpriteGo*)AddGo(new SpriteGo("graphics/LeagueSystem/Banpick/ban_effect_animation_0.png", "Ban Effect Animation0"));
-		banEffectAnimation0->sprite.setScale(2, 2);
-		banEffectAnimation0->sortLayer = 101;
-		banEffectAnimation0->sortOrder = 1;
-		banEffectAnimation0->SetPosition(0, 0);
-		banEffectAnimation0->SetOrigin(Origins::TL);
-		banEffectAnimation0->SetActive(false);
-
-		SpriteGo* banEffectAnimation1 = (SpriteGo*)AddGo(new SpriteGo("graphics/LeagueSystem/Banpick/ban_effect_animation_1.png", "Ban Effect Animation1"));
-		banEffectAnimation1->sprite.setScale(2, 2);
-		banEffectAnimation1->sortLayer = 101;
-		banEffectAnimation1->sortOrder = 1;
-		banEffectAnimation1->SetPosition(0, 0);
-		banEffectAnimation1->SetOrigin(Origins::TL);
-		banEffectAnimation1->SetActive(false);
-
-		SpriteGo* banEffectAnimation2 = (SpriteGo*)AddGo(new SpriteGo("graphics/LeagueSystem/Banpick/ban_effect_animation_2.png", "Ban Effect Animation2"));
-		banEffectAnimation2->sprite.setScale(2, 2);
-		banEffectAnimation2->sortLayer = 101;
-		banEffectAnimation2->sortOrder = 1;
-		banEffectAnimation2->SetPosition(0, 0);
-		banEffectAnimation2->SetOrigin(Origins::TL);
-		banEffectAnimation2->SetActive(false);
-
-		SpriteGo* banEffectAnimation3 = (SpriteGo*)AddGo(new SpriteGo("graphics/LeagueSystem/Banpick/ban_effect_animation_3.png", "Ban Effect Animation3"));
-		banEffectAnimation3->sprite.setScale(2, 2);
-		banEffectAnimation3->sortLayer = 101;
-		banEffectAnimation3->sortOrder = 1;
-		banEffectAnimation3->SetPosition(0, 0);
-		banEffectAnimation3->SetOrigin(Origins::TL);
-		banEffectAnimation3->SetActive(false);
-
-		SpriteGo* banEffectAnimation4 = (SpriteGo*)AddGo(new SpriteGo("graphics/LeagueSystem/Banpick/ban_effect_animation_4.png", "Ban Effect Animation4"));
-		banEffectAnimation4->sprite.setScale(2, 2);
-		banEffectAnimation4->sortLayer = 101;
-		banEffectAnimation4->sortOrder = 1;
-		banEffectAnimation4->SetPosition(0, 0);
-		banEffectAnimation4->SetOrigin(Origins::TL);
-		banEffectAnimation4->SetActive(false);
-
 		SpriteGo* banFeedbackIcon = (SpriteGo*)AddGo(new SpriteGo("graphics/LeagueSystem/Banpick/ban_feedback_icon.png", "Ban Feedback Icon"));
 		banFeedbackIcon->sprite.setScale(2, 2);
 		banFeedbackIcon->sortLayer = 101;
@@ -1737,6 +1699,9 @@ void SceneGame::BanPickInit()
 	SpriteGo* spr;
 	TextGo* text;
 
+	championSlotName = std::vector<TextGo*>(champCount);
+
+
 	for (int i = 0; i < 4; i++)
 	{
 		std::stringstream ssPickSlot;
@@ -1889,6 +1854,7 @@ void SceneGame::BanPickInit()
 		ss << "PickImage" << i + 1;
 		AddGo(new SpriteGo(pickTexture.str(), ss.str()));
 		SpriteGo* pick = (SpriteGo*)FindGo(ss.str());
+		pick->SetPosition(-100, -100);
 		pick->SetOrigin(Origins::MC);
 		pick->sortLayer = 104;
 		pick->sortOrder = 1;
@@ -1967,7 +1933,9 @@ void SceneGame::BanPickInit()
 
 				////
 				SpriteGo* spr = (SpriteGo*)FindGo(ss.str());
-				spr->sprite.setColor(sf::Color(250, 0, 0));
+				spr->sprite.setColor(sf::Color(40, 40, 40));
+
+			
 
 				banChamps[step] = i;
 				banCount++;
@@ -2040,6 +2008,40 @@ void SceneGame::BanPickInit()
 			}
 			};
 	}
+
+	for (int i = 0; i < champCount; i++)
+	{
+		// 275     266
+		// 353     266
+
+		std::stringstream ss;
+		ss << "ChampionSlotName" << i + 1;
+		text = (TextGo*)AddGo(new TextGo(ss.str()));
+
+		text->sortLayer = 107;
+		text->sortOrder = 1;
+		text->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
+		text->text.setCharacterSize(12);
+		text->text.setFillColor(sf::Color::White);
+		text->text.setString(CHAMPION_MGR.GetChampion(i)->charId);
+
+		text->SetPosition(championSlot[i]->GetPosition().x, championSlot[i]->GetPosition().y + 30);
+
+		text->SetOrigin(Origins::MC);
+		text->SetActive(true);
+
+		//if (i < 4)
+		//{
+		//	swapSlot[i]->SetPosition(204 + ((i % 2) * 171), 309 + ((i / 2) * 168));
+		//}
+		//else
+		//{
+		//	swapSlot[i]->SetPosition(684, 309 + ((i - 4) * 168));
+		//}
+
+	}
+
+
 }
 
 void SceneGame::BanPickTrue(bool on)
@@ -2143,10 +2145,6 @@ void SceneGame::LineUpInit()
 				FindGo("Line Up Swap")->SetActive(false);
 				FindGo("Draft Arrow2")->SetActive(false);
 				draftSlotBlueClicked->SetActive(false);
-
-				//firstPosition = selectedButton->GetPosition();
-				//selectedButton->SetPosition(swapSlot[i]->GetPosition());
-				//swapSlot[i]->SetPosition(firstPosition);
 
 				isSwapCheck1 = false;
 				selectedButton = nullptr;
@@ -2382,6 +2380,7 @@ void SceneGame::LineUpFalse()
 	FindGo("Enemy Draft Slot2")->SetActive(false);
 	FindGo("Enemy Draft Slot3")->SetActive(false);
 	FindGo("Enemy Draft Slot4")->SetActive(false);
+	//FindGo("Enemy Draft Slot5")->SetActive(false);
 
 	FindGo("Draft Arrow1")->SetActive(false);
 	for (int i = 0; i < 6; i++)
@@ -2427,6 +2426,11 @@ void SceneGame::LineUpFalse()
 
 void SceneGame::BanPickToBattleFalse()
 {
+	for (int i = 0; i < 6; i++)
+	{
+		banEffectSheet[i]->SetActive(false);
+	}
+
 	SpriteGo* spr;
 	banSheet->SetActive(false);
 	banSheetBlueTeam->SetActive(false);
@@ -2658,6 +2662,7 @@ void SceneGame::SwapSlotFalse()
 {
 	FindGo("Line Up Swap")->SetActive(false);
 	FindGo("Draft Arrow2")->SetActive(false);
+	FindGo("Draft_Slot_White")->SetActive(false);
 	for (int i = 0; i < 6; i++)
 	{
 		swapSlot[i]->SetActive(false);
