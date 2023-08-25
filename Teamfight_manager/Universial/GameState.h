@@ -112,4 +112,5 @@ enum class BuffType
 	AGGRO,
 	BARRIER,
 	ULTIMATE,
+	COPY,
 };

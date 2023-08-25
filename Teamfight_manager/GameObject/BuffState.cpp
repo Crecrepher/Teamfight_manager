@@ -19,6 +19,10 @@ void BuffState::Update(float dt)
 		{
 			this->buffTimer = 0.f;
 			this->buffCount--;
+			if (this->GetType() == BuffType::COPY)
+			{
+				std::cout << "닌자 카운트 " << this->buffCount << std::endl;
+			}
 		}
 	}
 }

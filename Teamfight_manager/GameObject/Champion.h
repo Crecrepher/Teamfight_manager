@@ -50,6 +50,7 @@ protected:
 	float skillTimer;
 	float reviveTimer;
 	float attackDelay = 0.f;
+	float stanceChangeDelay = -1.f;
 
 	int kill = 0;
 	int death = 0;
@@ -68,6 +69,7 @@ protected:
 	bool blackhole = false;
 	bool ActiveUltiSkill = true;
 	float UesUltiSkillTiming = 0.f;
+	float rangePos;
 
 	//skill용 위치 지정 변수 ( SkillMgr 이 싱글톤 이기 때문에 위치 변수 따로 필요 )
 	sf::Vector2f startPos;
@@ -85,6 +87,7 @@ protected:
 	Champion* target=nullptr;
 	Champion* dotDamage = nullptr;
 
+	ObjectPool<Champion>* cPool = nullptr;
 	ObjectPool<ChampionEffect>* pool = nullptr;
 	ObjectPool<SkillObject>* sObjPool = nullptr;
 
@@ -110,6 +113,7 @@ public:
 	void SetMyTeam(std::vector<Champion*>* myTeam);
 	void SetEnemyTeam(std::vector<Champion*>* enemyTeam);
 	void SetDieChampion(std::vector<Champion*>* cemetery);
+	void SetChampionPool(ObjectPool<Champion>* effect) { this->cPool = effect; }
 	void SetEffectPool(ObjectPool<ChampionEffect>* effect) { this->pool = effect; }
 	void SetSkillObjPool(ObjectPool<SkillObject>* effect) { this->sObjPool = effect; }
 	void ChangeStance(ChampionStance stance);
@@ -124,6 +128,7 @@ public:
 	Team GetTeamColor() { return this->team; }
 	void Hit(float attack);
 	void Heal(float heal);
+	void SetFullHp() { this->hp = this->currentState.maxHp; }
 	float GetHp() { return this->hp; }
 	void DamageCalculate(float attack);
 	void HealCalculate(float attack);
@@ -133,6 +138,8 @@ public:
 	void SetUltiTimer(float num) { this->UesUltiSkillTiming = num; }
 	void SetInteraction(bool on) { this->interaction = on; }
 	bool GetInteranction() { return this->interaction; }
+	void SetRangePos() { this->rangePos = abs(Utils::Distance(this->GetPosition(), this->GetTarget()->GetPosition())); }
+	float GetRangePos() { return this->rangePos; }
 
 	// 타겟팅
 	void FindTaget();
@@ -198,7 +205,8 @@ public:
 	void BuffUpdate(float dt);
 	void SetSkillObj(int type, float oTimer, float eTime, float eTimer);
 	void SetBlackhole(int torgle, sf::Vector2f pos);
-
+	void SetCopyChar(Champion* champ);
+	Champion* GetPool();
 
 	// 선수에게 넘길 스테이터스
 	int GetKillScore() { return this->kill; }
