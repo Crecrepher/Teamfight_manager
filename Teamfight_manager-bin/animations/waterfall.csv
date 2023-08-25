@@ -1,0 +1,12 @@
+ID,FPS,LOOPTYPE,,
+Idle,9,1,,
+,,,,
+TEXTUREID,LEFT,TOP,WIDTH,HEIGHT
+graphics/BackGround/stadium_waterfall_animation.png,0,0,35,222
+graphics/BackGround/stadium_waterfall_animation.png,35,0,35,222
+graphics/BackGround/stadium_waterfall_animation.png,70,0,35,222
+graphics/BackGround/stadium_waterfall_animation.png,105,0,35,222
+graphics/BackGround/stadium_waterfall_animation.png,140,0,35,222
+graphics/BackGround/stadium_waterfall_animation.png,175,0,35,222
+graphics/BackGround/stadium_waterfall_animation.png,210,0,35,222
+graphics/BackGround/stadium_waterfall_animation.png,245,0,35,222

@@ -25,7 +25,11 @@ protected:
 
 	float battleTimer;
 	float readyTimer;
-	float aiBanTimer = 5.f;
+	float aiBanTimer = 0.5f;
+	float aiPickTimer = 0.5f;
+
+	bool banPickCheck = true;
+
 	float textSpeed = 1000.f;
 	float textDuration = 1.2f;
 
@@ -60,6 +64,21 @@ protected:
 	AnimatioControler banAnimation2;
 	AnimatioControler banAnimation3;
 
+	SpriteGo* Waterfall;
+	SpriteGo* Waterfall2;
+
+	AnimatioControler waterfallAnimation;
+	AnimatioControler waterfallAnimation2;
+
+	SpriteGo* stadiumSkyBg;
+
+	SpriteGo* turnArrowBlue;
+	SpriteGo* banBlueLine;
+	AnimatioControler turnArrowBlueAnimation;
+
+	SpriteGo* turnArrowRed;
+	SpriteGo* banRedLine;
+	AnimatioControler turnArrowRedAnimation;
 
 	// csv하나로 됨, sheet.png도 하나로 됨
 	// 
@@ -71,10 +90,20 @@ protected:
 	std::vector<UiButton*> pickSlot;
 	std::vector<UiButton*> enemySlot;
 
+	std::vector<SpriteGo*> pickDoingSlot;
+	std::vector<SpriteGo*> enemyPickDoingSlot;
+
 	std::vector<TextGo*> championSlotName;
+	std::vector<TextGo*> banPickText;
+	int banPickTextCount = 14; // 일단 최대값기준
+	int banPickTextClickCount = 0;
+	int pickDoingSlotClickCount = 0;
 
 	int pickSlotCount = 3; // 우리 팀원의 수
 	int pickSlotEnemyCount = 3; // 적 팀원의 수
+
+	int pickDoingSlotCount = 0;
+	int enemyPickDoingSlotCount = 0;
 
 	int banCount = 0;
 	int pickCount = 0;
@@ -139,7 +168,6 @@ public:
 
 	void UiInit();
 	void UiEnter();
-
 	void LineUpInit();
 	void LineUpTrue();
 	void LineUpFalse();
@@ -151,6 +179,8 @@ public:
 	void BanPickPlayersOn(int index, bool on = true);
 	void SetBanPick();
 	
+	void ChampSlotFalse();
+
 	void AiSelect();
 
 	void SwapSlotFalse();

@@ -90,7 +90,7 @@ int AiBanPick::CompareHighStatChampionIndex(const std::vector<int>& banChamps)
     {
         if (std::find(banChamps.begin(), banChamps.end(), i) != banChamps.end())
         {
-            std::cout << "banChamps ½½·Ô ¹øÈ£: " << banChamps[i] + 1 << std::endl;
+            // std::cout << "banChamps ½½·Ô ¹øÈ£: " << banChamps[i] + 1 << std::endl;
             continue; // °Ç³Ê¶Ù±â
         }
 
@@ -133,10 +133,10 @@ int AiBanPick::CompareNextStatChampion(std::vector<int>& banChamps)
     {
         // ÀÌ¹Ì ¼±ÅÃµÈ °æ¿ì
         nextHighStatIndex = CompareHighStatChampionIndex(banChamps);
-        std::cout << "Ã¨ÇÇ¾ð ½½·Ô ¹øÈ£ " << CompareHighStatChampionIndex(banChamps) + 1 << std::endl;
+        // std::cout << "Ã¨ÇÇ¾ð ½½·Ô ¹øÈ£ " << CompareHighStatChampionIndex(banChamps) + 1 << std::endl;
         
     }
-    std::cout << "´ÙÀ½ ½ºÅÈÀÇ Ã¨ÇÇ¾ð ½½·Ô ¹øÈ£ " << nextHighStatIndex + 2 << std::endl;
+    // std::cout << "´ÙÀ½ ½ºÅÈÀÇ Ã¨ÇÇ¾ð ½½·Ô ¹øÈ£ " << nextHighStatIndex + 2 << std::endl;
 
     return nextHighStatIndex;
 }
