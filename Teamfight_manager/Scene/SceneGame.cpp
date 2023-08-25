@@ -171,11 +171,11 @@ void SceneGame::Init()
 	championPool.OnCreate = [this, field](Champion* champion) {
 		champion->ChangeStance(ChampionStance::None);
 		champion->SetField(field);
+		champion->SetChampionPool(&championPool);
 		champion->SetEffectPool(&effectPool);
 		champion->SetSkillObjPool(&skillObjPool);
 		champion->sortLayer = 3;
 		};
-
 	championPool.Init();
 
 	// 경기장 x : 366 - 910
@@ -745,6 +745,15 @@ void SceneGame::BattlePhase(float dt)
 			champ->BattleUpdate(dt * 1.5f * speedUp);
 		}
 
+		for (auto champ : championPool.GetUseList())
+		{
+			if (champ->GetTeamColor() == Team::None)
+			{
+				championPool.Return(champ);
+				break;
+			}
+		}
+
 		for (auto it = skillObjPool.GetUseList().begin(); it != skillObjPool.GetUseList().end();)
 		{
 			if ((*it) != nullptr)
@@ -798,7 +807,7 @@ void SceneGame::ResultPhase(float dt)
 		{
 			for (auto team : redTeam)
 			{
-				std::cout << team->GetName() << " 킬 : " << team->GetKillScore() << std::endl;
+				std::cout << team->GetName() << " "<<team->GetCurretState().charId << " 킬 : " << team->GetKillScore() << std::endl;
 				std::cout << team->GetName() << " 데스 : " << team->GetDeathScore() << std::endl;
 				std::cout << team->GetName() << " 입힌 피해 : " << team->GetTotalDamage() << std::endl;
 				std::cout << team->GetName() << " 당한 피해 : " << team->GetTotalOnHit() << std::endl;
@@ -815,7 +824,7 @@ void SceneGame::ResultPhase(float dt)
 			for (auto team : blueTeam)
 			{
 				TEAM_MGR.SetKillDeath(team->GetPlayerIndex(), team->GetKillScore(), team->GetDeathScore());
-				std::cout << team->GetName() << " 킬 : " << team->GetKillScore() << std::endl;
+				std::cout << team->GetName() << " " << team->GetCurretState().charId << " 킬 : " << team->GetKillScore() << std::endl;
 				std::cout << team->GetName() << " 데스 : " << team->GetDeathScore() << std::endl;
 				std::cout << team->GetName() << " 입힌 피해 : " << team->GetTotalDamage() << std::endl;
 				std::cout << team->GetName() << " 당한 피해 : " << team->GetTotalOnHit() << std::endl;
@@ -835,7 +844,7 @@ void SceneGame::ResultPhase(float dt)
 				{
 					TEAM_MGR.SetKillDeath(team->GetPlayerIndex(), team->GetKillScore(), team->GetDeathScore());
 				}
-				std::cout << team->GetName() << " 킬 : " << team->GetKillScore() << std::endl;
+				std::cout << team->GetName() << " " << team->GetCurretState().charId << " 킬 : " << team->GetKillScore() << std::endl;
 				std::cout << team->GetName() << " 데스 : " << team->GetDeathScore() << std::endl;
 				std::cout << team->GetName() << " 입힌 피해 : " << team->GetTotalDamage() << std::endl;
 				std::cout << team->GetName() << " 당한 피해 : " << team->GetTotalOnHit() << std::endl;

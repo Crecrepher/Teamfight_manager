@@ -397,8 +397,25 @@ void SkillMgr::FighterSkill(Champion* champ)
 
 void SkillMgr::FighterUltiSkill(Champion* champ)
 {
-}
+	if (champ->GetCurretState().animaition.GetCurrentClipId() != "UltiSkill")
+	{
+		champ->UseUltiSkill();
+		return;
+	}
 
+	if (champ->GetCurretState().animaition.GetLastFrame())
+	{
+		BuffState* buff = new BuffState;
+		buff->SetType(BuffType::STUN);
+		buff->SetCount(0.5);
+		champ->TargetOrderCIEB(1, 175, buff);
+		champ->TargetOrderCIE(1, 175, champ->GetCurretState().attack);
+		champ->SetUltiSkill(false);
+		champ->SkillChangeIdle();
+		return;
+	}
+}
+// 완료
 
 
 void SkillMgr::IcemageSkill(Champion* champ)
@@ -609,6 +626,7 @@ void SkillMgr::NinjaSkill(Champion* champ)
 	if (champ->GetCurretState().animaition.GetCurrentClipId() != "Skill")
 	{
 		champ->UseSkill();
+		champ->SetAir(true);
 		return;
 	}
 
@@ -642,6 +660,7 @@ void SkillMgr::NinjaSkill(Champion* champ)
 	if (champ->GetCurretState().animaition.GetLastFrame())
 	{
 		champ->SetFrameLimit(false);
+		champ->SetAir(false);
 		champ->DamageCalculate(champ->GetCurretState().attack);
 		champ->GetTarget()->SetBloodingStack(5);
 		champ->GetTarget()->UseBloodingPlayer(champ);
@@ -662,23 +681,32 @@ void SkillMgr::NinjaUltiSkill(Champion* champ)
 
 	if (champ->GetCurretState().animaition.GetLastFrame())
 	{
-		BuffState* dummy = new BuffState;
-		dummy->SetType(BuffType::ULTIMATE);
-		dummy->SetCount(15);
-		dummy->SetValue(0.5f);
-		champ->SetBuff(dummy);
 		champ->SetUltiSkill(false);
+		Champion* dummyChamp = champ->GetPool();
 
-		Champion* dummyChamp = new Champion;
-		
 		*dummyChamp = *champ;
 
+		dummyChamp->SetShadow();
+		dummyChamp->SetHpGuage();
+		dummyChamp->SetFullHp();
+		dummyChamp->SetPosition(champ->GetPosition().x - 10.f, champ->GetPosition().y);
+		champ->SetCopyChar(dummyChamp);
 		SCENE_MGR.GetCurrScene()->AddGo(dummyChamp);
+
+		BuffState* dummy = new BuffState;
+		dummy->SetType(BuffType::COPY);
+		dummy->SetCount(10);
+		dummy->SetValue(15.f);
+		
+		dummyChamp->SetBuff(dummy);
+		dummyChamp->SkillChangeIdle();
 		champ->SkillChangeIdle();
+
+		std::cout << "닌자 생성" << std::endl;
 		return;
 	}
 }
-
+// 완료
 
 
 void SkillMgr::PriestSkill(Champion* champ)
@@ -745,14 +773,14 @@ void SkillMgr::PyromancerUltiSkill(Champion* champ)
 
 	if (champ->GetCurretState().animaition.GetLastFrame())
 	{
-		std::cout << "blackhole ground" << std::endl;
+		std::cout << "fire ground" << std::endl;
 		champ->SetSkillObj(2, 8.f, 1.0f, 0.f);
 		champ->SetUltiSkill(false);
 		champ->SkillChangeIdle();
 		return;
 	}
 }
-
+// 완료
 
 
 void SkillMgr::PythonessSkill(Champion* champ)
@@ -1044,12 +1072,15 @@ void SkillMgr::ShieldbearerSkill(Champion* champ)
 
 	champ->TargetOrderSR();
 
-	if (abs(Utils::Distance(champ->GetPosition(), champ->GetTarget()->GetPosition()) > champ->GetCurretState().attackRange))
+
+	if (abs(Utils::Distance(champ->GetPosition(), champ->GetTarget()->GetPosition()) > champ->GetCurretState().attackRange) ||
+		(abs(Utils::Distance(champ->GetPosition(), champ->GetTarget()->GetPosition()) < champ->GetCurretState().attackRange * 0.66f)))
 	{
 		champ->ChangeStance(ChampionStance::Move);
 		return;
 	}
-	else if (abs(Utils::Distance(champ->GetPosition(), champ->GetTarget()->GetPosition())<= champ->GetCurretState().attackRange))
+	else if (abs(Utils::Distance(champ->GetPosition(), champ->GetTarget()->GetPosition())<= champ->GetCurretState().attackRange) ||
+		(abs(Utils::Distance(champ->GetPosition(), champ->GetTarget()->GetPosition())>= champ->GetCurretState().attackRange*0.66f)))
 	{
 		champ->ChangeStance(ChampionStance::Action);
 		return;
