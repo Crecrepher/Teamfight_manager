@@ -158,3 +158,8 @@ RESOURCE_TYPES 0.TEX 1.FONT 2.SOUND 3.ANI,RESOURCE_PATH
 0,graphics/Origin/Sprite/champion_face_bg_0.png
 0,graphics/Origin/Sprite/champion_face_bg_1.png
 3,animations/banEffect.csv
+3,animations/waterfall.csv
+3,animations/clouds.csv
+3,animations/birdFly.csv
+3,animations/turnArrowBlue.csv
+3,animations/turnArrowRed.csv

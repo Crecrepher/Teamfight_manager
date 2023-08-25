@@ -50,6 +50,27 @@ void SceneGame::Init()
 	bg->SetOrigin(Origins::MC);
 	bg->SetActive(false);
 
+	stadiumSkyBg = (SpriteGo*)AddGo(new SpriteGo("graphics/BackGround/stadium_sky_bg.png", "StadiumSkyBg"));
+	stadiumSkyBg->sortLayer = -3;
+	stadiumSkyBg->SetPosition(centerPos);
+	stadiumSkyBg->SetOrigin(Origins::MC);
+	stadiumSkyBg->SetActive(false);
+
+	banBlueLine = (SpriteGo*)AddGo(new SpriteGo("graphics/LeagueSystem/Banpick/middle_ban_blue_line.png", "BanBlueLine"));
+	banBlueLine->sprite.setScale(15, 29);
+	banBlueLine->sortLayer = 102;
+	banBlueLine->sortOrder = 1;
+	banBlueLine->SetPosition(525, 127);
+	banBlueLine->SetOrigin(Origins::MC);
+	banBlueLine->SetActive(false);
+
+	banRedLine = (SpriteGo*)AddGo(new SpriteGo("graphics/LeagueSystem/Banpick/middle_ban_red_line.png", "BanRedLine"));
+	banRedLine->sprite.setScale(15, 29);
+	banRedLine->sortLayer = 102;
+	banRedLine->sortOrder = 1;
+	banRedLine->SetPosition(525, 127);
+	banRedLine->SetOrigin(Origins::MC);
+	banRedLine->SetActive(false);
 
 	//벡터 임시위치
 	championSlot = std::vector<UiButton*>(champCount);
@@ -85,8 +106,33 @@ void SceneGame::Init()
 	banAnimation.SetTarget(&banSheet->sprite);
 	banAnimation.AddClip(*RESOURCE_MGR.GetAnimationClip("animations/banSlotBlue.csv"));
 
-	
+	Waterfall = new SpriteGo("", "WaterFall");
+	AddGo(Waterfall);
+	Waterfall->sortLayer = -3;
+	Waterfall->SetSize(1.5, 1);
+	waterfallAnimation.SetTarget(&Waterfall->sprite);
+	waterfallAnimation.AddClip(*RESOURCE_MGR.GetAnimationClip("animations/waterfall.csv"));
 
+	Waterfall2 = new SpriteGo("", "WaterFall2");
+	AddGo(Waterfall2);
+	Waterfall2->sortLayer = -3;
+	Waterfall2->SetSize(1.5, 1);
+	waterfallAnimation2.SetTarget(&Waterfall2->sprite);
+	waterfallAnimation2.AddClip(*RESOURCE_MGR.GetAnimationClip("animations/waterfall.csv"));
+
+	turnArrowBlue = new SpriteGo("", "TurnArrowBlue");
+	AddGo(turnArrowBlue);
+	turnArrowBlue->SetSize(2, 2);
+	turnArrowBlue->sortLayer = 107;
+	turnArrowBlueAnimation.SetTarget(&turnArrowBlue->sprite);
+	turnArrowBlueAnimation.AddClip(*RESOURCE_MGR.GetAnimationClip("animations/turnArrowBlue.csv"));
+
+	turnArrowRed = new SpriteGo("", "TurnArrowRed");
+	AddGo(turnArrowRed);
+	turnArrowRed->SetSize(2, 2);
+	turnArrowRed->sortLayer = 107;
+	turnArrowRedAnimation.SetTarget(&turnArrowRed->sprite);
+	turnArrowRedAnimation.AddClip(*RESOURCE_MGR.GetAnimationClip("animations/turnArrowRed.csv"));
 
 	RectGo* field = (RectGo*)AddGo(new RectGo("field"));
 	field->rectangle.setSize({ 544, 308 });
@@ -182,8 +228,19 @@ void SceneGame::Enter()
 {
 	Scene::Enter();
 	RESOURCE_MGR.LoadFromCsv("tables/GameResourceList.csv");
-	banAnimation.Play("Idle"); // 무조건 한번만 호출되게
+
+	banAnimation.Play("Idle");
+	waterfallAnimation.Play("Idle");
+	waterfallAnimation2.Play("Idle");
+	turnArrowBlueAnimation.Play("Idle");
+	turnArrowRedAnimation.Play("Idle");
+
 	banSheet->SetOrigin(Origins::MC);
+	Waterfall->SetOrigin(Origins::MC);
+	Waterfall2->SetOrigin(Origins::MC);
+	turnArrowBlue->SetOrigin(Origins::MC);
+	turnArrowRed->SetOrigin(Origins::MC);
+
 	currentPhase = Phase::None;
 	banChamps = std::vector<int>(14, -1);
 
@@ -192,17 +249,33 @@ void SceneGame::Enter()
 	banSheetBlueTeam->SetActive(false);
 	banSheetRedTeam->SetActive(false);
 
+	for (int i = 0; i < champCount; i++)
+	{
+		std::stringstream ss;
+		ss << "ChampionSlotName" << i + 1;
+		FindGo(ss.str())->SetActive(false);
+	}
+
+	Waterfall->SetActive(false);
+	Waterfall2->SetActive(false);
+	stadiumSkyBg->SetActive(false);
+	turnArrowBlue->SetActive(false);
+	turnArrowRed->SetActive(false);
+
 	for (int i = 0; i < 6; i++)
 	{
 		banEffectSheet[i]->SetOrigin(Origins::MC);
 		banEffectSheet[i]->SetActive(false);
 	}
-	
+
 	banCount = 0;
 	pickCount = 0;
 	pickEnemyCount = 0;
 
 	pickSlotCount = (int)mode + 2;
+	pickDoingSlotCount = (int)mode + 2;
+	pickSlotEnemyCount = (int)mode + 2;
+	enemyPickDoingSlotCount = (int)mode + 2;
 
 	redScore = 0;
 	blueScore = 0;
@@ -224,11 +297,19 @@ void SceneGame::Enter()
 	UiButton* ui = (UiButton*)FindGo("Next Button");
 	ui->OnClick = [this, ui]()
 		{
+			banPickTextClickCount = 0;
+			pickDoingSlotClickCount = 0;
+
+			pickDoingSlotCount = 0;
+			enemyPickDoingSlotCount = 0;
+
+
 			FindGo("Draft_Slot_Blue_Clicked")->SetActive(false);
 			std::cout << "벤 페이즈!" << std::endl;
 			LineUpFalse();
-			SwapSlotFalse();
+			SwapSlotFalse();		
 			ChangePhase(Phase::Ban);
+			ChampSlotFalse();
 		};
 
 	isPlayerEnough = TEAM_MGR.GetPlayerNum() > 0;
@@ -271,13 +352,27 @@ void SceneGame::Exit()
 void SceneGame::Update(float dt)
 {
 	// 마우스 좌표 테스트
-	if (INPUT_MGR.GetMouseButtonDown(sf::Mouse::Left))
+	/*if (INPUT_MGR.GetMouseButtonDown(sf::Mouse::Left))
 	{
 		std::cout << INPUT_MGR.GetMousePos().x << "\t"
 			<< INPUT_MGR.GetMousePos().y << std::endl;
-	}
+	}*/
+
+	// 월드 마우스 좌표 테스트
+	/*if (INPUT_MGR.GetMouseButtonDown(sf::Mouse::Left))
+	{
+		std::cout << this->ScreenToWorldPos(INPUT_MGR.GetMousePos()).x << "\t"
+			<< this->ScreenToWorldPos(INPUT_MGR.GetMousePos()).y << std::endl;
+	}*/
+
+
 
 	banAnimation.Update(dt);
+	waterfallAnimation.Update(dt);
+	waterfallAnimation2.Update(dt);
+	turnArrowBlueAnimation.Update(dt);
+	turnArrowRedAnimation.Update(dt);
+
 	for (int i = 0; i < 6; i++)
 	{
 		banEffectAnimation[i].Update(dt);
@@ -556,7 +651,9 @@ void SceneGame::BanPhase(float dt)
 		banText->SetActive(false);
 	}
 
-	if (currentTurn == Turn::Enemy)
+	aiBanTimer -= dt;
+
+	if (currentTurn == Turn::Enemy && aiBanTimer <= 0.f)
 	{
 		AiSelect();
 	}
@@ -629,10 +726,13 @@ void SceneGame::PickPhase(float dt)
 		pickText->SetActive(false);
 	}
 
-	if (currentTurn == Turn::Enemy)
+	aiPickTimer -= dt;
+
+	if (currentTurn == Turn::Enemy && aiPickTimer <= 0.f)
 	{
 		AiSelect();
 	}
+
 	if (step == fullStep)
 	{
 		readyTimer = 1.f;
@@ -673,6 +773,14 @@ void SceneGame::BattlePhase(float dt)
 	text->text.setString(std::to_string(redScore));
 	text = (TextGo*)FindGo("BlueScoreCounter");
 	text->text.setString(std::to_string(blueScore));
+
+	FindGo("WaterFall")->SetActive(true);
+	FindGo("WaterFall2")->SetActive(true);
+
+	stadiumSkyBg->SetActive(true);
+
+	Waterfall->SetPosition(747.1f, 629.4f);
+	Waterfall2->SetPosition(530.1f, 629.4f);
 
 	if (INPUT_MGR.GetKeyDown(sf::Keyboard::Numpad0))
 	{
@@ -734,6 +842,7 @@ void SceneGame::BattlePhase(float dt)
 
 void SceneGame::ResultPhase(float dt)
 {
+
 	if (INPUT_MGR.GetKeyDown(sf::Keyboard::Enter) ||
 		INPUT_MGR.GetMouseButtonDown(sf::Mouse::Left))
 	{
@@ -1475,22 +1584,6 @@ void SceneGame::UiInit()
 		globalBanIcon->SetPosition(0, 0);
 		globalBanIcon->SetOrigin(Origins::TL);
 		globalBanIcon->SetActive(false);
-
-		SpriteGo* middleBanBlueLine = (SpriteGo*)AddGo(new SpriteGo("graphics/LeagueSystem/Banpick/middle_ban_blue_line.png", ""));
-		middleBanBlueLine->sprite.setScale(2, 2);
-		middleBanBlueLine->sortLayer = 101;
-		middleBanBlueLine->sortOrder = 1;
-		middleBanBlueLine->SetPosition(0, 0);
-		middleBanBlueLine->SetOrigin(Origins::TL);
-		middleBanBlueLine->SetActive(false);
-
-		SpriteGo* middleBanRedLine = (SpriteGo*)AddGo(new SpriteGo("graphics/LeagueSystem/Banpick/middle_ban_red_line.png", ""));
-		middleBanRedLine->sprite.setScale(2, 2);
-		middleBanRedLine->sortLayer = 101;
-		middleBanRedLine->sortOrder = 1;
-		middleBanRedLine->SetPosition(0, 0);
-		middleBanRedLine->SetOrigin(Origins::TL);
-		middleBanRedLine->SetActive(false);
 	}
 
 	// 리그 시스템 스왑 / swap_line겸칩 / 위치 라인업
@@ -1612,11 +1705,34 @@ void SceneGame::BanPickInit()
 {
 	pickSlot = std::vector<UiButton*>(4);
 	enemySlot = std::vector<UiButton*>(4);
+	pickDoingSlot = std::vector<SpriteGo*>(4);
+	enemyPickDoingSlot = std::vector<SpriteGo*>(4);
+
 	SpriteGo* spr;
 	TextGo* text;
 
 	championSlotName = std::vector<TextGo*>(champCount);
+	banPickText = std::vector<TextGo*>(banPickTextCount); // 일단 3:3기준이라 카운트가 6임
 
+	for (int i = 0; i < banPickTextCount; i++)
+	{
+		std::stringstream ss;
+		ss << "BanPickText" << i + 1;
+
+		banPickText[i] = (TextGo*)AddGo(new TextGo(ss.str()));
+		banPickText[i]->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
+		banPickText[i]->sortLayer = 106;
+		banPickText[i]->sortOrder = 1;
+		banPickText[i]->text.setCharacterSize(30);
+		banPickText[i]->text.setFillColor(sf::Color::White);
+
+		auto stringTable = DATATABLE_MGR.Get<StringTable>(DataTable::Ids::String);
+		banPickText[i]->text.setString(stringTable->GetW(ss.str()));
+
+		banPickText[i]->SetPosition(FRAMEWORK.GetWindowSize().x / 2.f, 125);
+		banPickText[i]->SetOrigin(Origins::MC);
+		banPickText[i]->SetActive(false);
+	}
 
 	for (int i = 0; i < 4; i++)
 	{
@@ -1639,6 +1755,26 @@ void SceneGame::BanPickInit()
 		enemySlot[i]->sortOrder = 1;
 		enemySlot[i]->SetPosition(1200, 157 + (i * 158));
 		enemySlot[i]->SetActive(false);
+
+		ssPickSlot.str("");
+		ssPickSlot << "PickDoingSlot" << i + 1;
+		pickDoingSlot[i] = (SpriteGo*)AddGo(new SpriteGo("graphics/LeagueSystem/Lineup/draft_slot_0_clicked.png", ssPickSlot.str()));
+		pickDoingSlot[i]->sprite.setScale(2, 2);
+		pickDoingSlot[i]->SetOrigin(Origins::MC);
+		pickDoingSlot[i]->sortLayer = 104;
+		pickDoingSlot[i]->sortOrder = 1;
+		pickDoingSlot[i]->SetPosition(80, 157 + (i * 158));
+		pickDoingSlot[i]->SetActive(false);
+
+		ssPickSlot.str("");
+		ssPickSlot << "EnemyPickDoingSlot" << i + 1;
+		enemyPickDoingSlot[i] = (SpriteGo*)AddGo(new SpriteGo("graphics/LeagueSystem/Lineup/draft_slot_1_clicked.png", ssPickSlot.str()));
+		enemyPickDoingSlot[i]->sprite.setScale(2, 2);
+		enemyPickDoingSlot[i]->SetOrigin(Origins::MC);
+		enemyPickDoingSlot[i]->sortLayer = 103;
+		enemyPickDoingSlot[i]->sortOrder = 1;
+		enemyPickDoingSlot[i]->SetPosition(1200, 157 + (i * 158));
+		enemyPickDoingSlot[i]->SetActive(false);
 
 		std::stringstream ss;
 		ss << "BanPickPlayerName" << i;
@@ -1733,7 +1869,6 @@ void SceneGame::BanPickInit()
 		}
 	}
 
-	//// 밴픽단계 챔피언 슬롯 18개
 	for (int i = 0; i < champCount; i++)
 	{
 
@@ -1781,6 +1916,7 @@ void SceneGame::BanPickInit()
 		championSlot[i]->OnEnter = [this, i]() {
 			FindGo("BanSheet")->SetActive(true);
 			banSheet->SetPosition(championSlot[i]->GetPosition());
+			
 			selectCheck = true;
 			};
 		championSlot[i]->OnExit = [this]() {
@@ -1811,46 +1947,66 @@ void SceneGame::BanPickInit()
 						return;
 					}
 				}
+				
+				if (aiBanTimer >= 0 && currentTurn == Turn::Enemy)
+				{
+					std::cout << "상대방의 턴입니다." << std::endl;
+					return;
+				}
+
+				if (currentTurn == Turn::Player && banPickCheck)
+				{
+					FindGo("TurnArrowRed")->SetActive(true);
+					FindGo("BanRedLine")->SetActive(true);
+
+					FindGo("TurnArrowBlue")->SetActive(false);
+					FindGo("BanBlueLine")->SetActive(false);
+
+					banPickText[banPickTextClickCount]->SetActive(false);
+					banPickTextClickCount++;
+					banPickText[banPickTextClickCount]->SetActive(true);
+					
+					turnArrowRed->SetPosition(1048, 125);
+					banPickCheck = false;
+				}
+				else if (currentTurn == Turn::Enemy && !banPickCheck)
+				{
+
+					FindGo("TurnArrowBlue")->SetActive(true);
+					FindGo("BanBlueLine")->SetActive(true);
+
+					std::cout << "banPickTextClickCount" << banPickTextClickCount << std::endl;
+					if (banPickTextClickCount >= 8)
+					{
+						FindGo("TurnArrowBlue")->SetActive(false);
+						FindGo("BanBlueLine")->SetActive(false);
+					}
+
+					FindGo("TurnArrowRed")->SetActive(false);
+					FindGo("BanRedLine")->SetActive(false);
+
+					pickDoingSlot[pickDoingSlotCount]->SetActive(true);
+
+					banPickText[banPickTextClickCount]->SetActive(false);
+					banPickTextClickCount++;
+					banPickText[banPickTextClickCount]->SetActive(true);
+
+					turnArrowBlue->SetPosition(232, 125);
+					banPickCheck = true;
+				}
+				
+				aiBanTimer = 2.f;
+
 				banEffectAnimation[banCount].Play("Idle");
 				banEffectAnimation[banCount].GetTarget()->setScale(1.f, 1.f);
 				banEffectSheet[banCount]->SetOrigin(Origins::MC);
-	
-				// 밴 이펙트 애니메이션 테스트
+
+				// 밴 이펙트 애니메이션
 				banEffectSheet[banCount]->SetActive(true);
 				banEffectSheet[banCount]->SetPosition(championSlot[i]->GetPosition());
 
-
-				// ai가 중복 벤이나 픽이 되면 계속 실행돼서 선택하게
-
-				// 작업중
-				// 밴픽 슬롯에서 이미지 들어가게 추가
-				// 밴했을때 슬롯 레드, 블루 처리
-
-				/*SpriteGo* enemyPickIcon;
-
-				sf::Vector2f size = (sf::Vector2f)enemyPickIcon->sprite.getTexture()->getSize();
-				enemyPickIcon->sprite.setTexture(*RESOURCE_MGR.GetTexture(""));
-				enemyPickIcon->sprite.setTextureRect({ 0,0,size.x,size.y });
-
-				std::stringstream ss;
-				for (int i = 0; i < champCount; i++)
-				{
-					ss.str("");
-					ss << "PickImage" << i + 1;
-					SpriteGo* enemyPickIcon = (SpriteGo*)FindGo(ss.str());
-					enemyPickIcon->SetPosition(BanSlotPosition2);
-					enemyPickIcon->SetActive(true);
-
-					sf::Vector2f size = (sf::Vector2f)enemyPickIcon->sprite.getTexture()->getSize();
-					enemyPickIcon->sprite.setTexture(*RESOURCE_MGR.GetTexture(""));
-					enemyPickIcon->sprite.setTextureRect({ 0,0,size.x,size.y });
-				}*/
-
-				////
 				SpriteGo* spr = (SpriteGo*)FindGo(ss.str());
 				spr->sprite.setColor(sf::Color(40, 40, 40));
-
-			
 
 				banChamps[step] = i;
 				banCount++;
@@ -1869,31 +2025,56 @@ void SceneGame::BanPickInit()
 					}
 				}
 
+				// 본인의 턴이 아닐때 클릭방지
+				if (aiPickTimer >= 0 && currentTurn == Turn::Enemy)
+				{
+					std::cout << "상대방의 턴입니다." << std::endl;
+					return;
+				}
 
+				if (currentTurn == Turn::Player && banPickCheck)
+				{
+					FindGo("TurnArrowRed")->SetActive(true);
+					FindGo("BanRedLine")->SetActive(true);
 
+					FindGo("TurnArrowBlue")->SetActive(false);
+					FindGo("BanBlueLine")->SetActive(false);
 
-				//aiBanPick.SetChampions();
-				//int highStatIndex = aiBanPick.CompareHighStatChampionIndex(banChamps);
+					enemyPickDoingSlot[enemyPickDoingSlotCount]->SetActive(true);
 
-				//for (int j = 0; j < banChamps.size(); j++)
-				//{
-				//	if (banChamps[j] == highStatIndex)
-				//	{
-				//		std::cout << "넥스트 스탯 호출!" << std::endl;
-				//		championSlot[aiBanPick.CompareNextStatChampion(banChamps)]->OnClick();
-				//	}
-				//	else if (highStatIndex >= 0 && highStatIndex < 14 && banChamps[j] != highStatIndex)
-				//	{
-				//		std::cout << "제일 높은 스탯의 챔피언 슬롯 번호 " << highStatIndex + 1 << std::endl;
-				//		championSlot[highStatIndex]->OnClick();
-				//	}
-				//}
+					pickDoingSlot[pickDoingSlotCount]->SetActive(false);
+					if (pickDoingSlotCount < 3)
+					{
+						pickDoingSlotCount++;
+					}
 
+					banPickText[banPickTextClickCount]->SetActive(false);
+					banPickTextClickCount++;
+					banPickText[banPickTextClickCount]->SetActive(true);
+					banPickCheck = false;
+				}
+				else if (currentTurn == Turn::Enemy && !banPickCheck)
+				{
+					FindGo("TurnArrowBlue")->SetActive(true);
+					FindGo("BanBlueLine")->SetActive(true);
 
+					FindGo("TurnArrowRed")->SetActive(false);
+					FindGo("BanRedLine")->SetActive(false);
 
+					pickDoingSlot[pickDoingSlotCount]->SetActive(true);
+					//pickDoingSlotCount++;
 
+					enemyPickDoingSlot[enemyPickDoingSlotCount]->SetActive(false);
+					enemyPickDoingSlotCount++;
 
+					banPickText[banPickTextClickCount]->SetActive(false);
+					banPickTextClickCount++;
+					banPickText[banPickTextClickCount]->SetActive(true);
 
+					banPickCheck = true;
+				}
+
+				aiPickTimer = 2.f;
 
 				if (team == Team::Red)
 				{
@@ -1934,9 +2115,6 @@ void SceneGame::BanPickInit()
 
 	for (int i = 0; i < champCount; i++)
 	{
-		// 275     266
-		// 353     266
-
 		std::stringstream ss;
 		ss << "ChampionSlotName" << i + 1;
 		text = (TextGo*)AddGo(new TextGo(ss.str()));
@@ -1953,17 +2131,7 @@ void SceneGame::BanPickInit()
 		text->SetOrigin(Origins::MC);
 		text->SetActive(true);
 
-		//if (i < 4)
-		//{
-		//	swapSlot[i]->SetPosition(204 + ((i % 2) * 171), 309 + ((i / 2) * 168));
-		//}
-		//else
-		//{
-		//	swapSlot[i]->SetPosition(684, 309 + ((i - 4) * 168));
-		//}
-
 	}
-
 
 }
 
@@ -1973,6 +2141,11 @@ void SceneGame::BanPickTrue(bool on)
 	banSheet->SetActive(on);
 	banSheetBlueTeam->SetActive(on);
 	banSheetRedTeam->SetActive(on);
+
+	FindGo("TurnArrowBlue")->SetActive(on);
+	turnArrowBlue->SetPosition(232, 125);
+
+	banPickText[banPickTextClickCount]->SetActive(on);
 
 	spr = (SpriteGo*)FindGo("Ban Bg 2:2");
 	spr->SetActive(on);
@@ -2347,6 +2520,11 @@ void SceneGame::LineUpFalse()
 
 void SceneGame::BanPickToBattleFalse()
 {
+	for (int i = 0; i < 4; i++)
+	{
+		pickDoingSlot[i]->SetActive(false);
+	}
+
 	for (int i = 0; i < 6; i++)
 	{
 		banEffectSheet[i]->SetActive(false);
@@ -2356,6 +2534,13 @@ void SceneGame::BanPickToBattleFalse()
 	banSheet->SetActive(false);
 	banSheetBlueTeam->SetActive(false);
 	banSheetRedTeam->SetActive(false);
+
+	FindGo("TurnArrowRed")->SetActive(false);
+	FindGo("BanRedLine")->SetActive(false);
+	FindGo("TurnArrowBlue")->SetActive(false);
+	FindGo("BanBlueLine")->SetActive(false);
+	banPickText[banPickTextClickCount]->SetActive(false);
+
 	for (int i = 0; i < championSlot.size(); i++)
 	{
 		championSlot[i]->SetActive(false);
@@ -2367,6 +2552,7 @@ void SceneGame::BanPickToBattleFalse()
 	spr = (SpriteGo*)FindGo("Ban Bg 2:2");
 	spr->SetActive(false);
 	spr = (SpriteGo*)FindGo("1");
+	//spr->sortLayer = 101;
 	spr->SetActive(true);
 }
 
@@ -2556,6 +2742,16 @@ void SceneGame::SetBanPick()
 		}
 	}
 
+}
+
+void SceneGame::ChampSlotFalse()
+{
+	for (int i = 0; i < champCount; i++)
+	{
+		std::stringstream ss;
+		ss << "PickImage" << i + 1;
+		FindGo(ss.str())->SetActive(false);
+	}
 }
 
 void SceneGame::AiSelect()
