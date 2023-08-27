@@ -1,0 +1,14 @@
+ID,FPS,LOOPTYPE
+BP1,15,0
+
+TEXTUREID,LEFT,TOP,WIDTH,HEIGHT,DisX,DisY
+graphics/BindPlayerEffect/5.png,0,0,0,0,-149.5,-145.5,
+graphics/BindPlayerEffect/5.png,0,0,0,0,0,0,
+graphics/BindPlayerEffect/5.png,281,149,19,21,-11,-27,
+graphics/BindPlayerEffect/5.png,7,202,46,53,-20,-37,
+graphics/BindPlayerEffect/5.png,198,79,70,54,-36,-31,
+graphics/BindPlayerEffect/5.png,212,10,58,50,-26,-33,
+graphics/BindPlayerEffect/5.png,93,83,68,59,-31,-37,
+graphics/BindPlayerEffect/5.png,9,81,76,65,-32,-42,
+graphics/BindPlayerEffect/5.png,6,268,39,21,-20,-1,
+graphics/BindPlayerEffect/5.png,0,0,0,0,0,0,

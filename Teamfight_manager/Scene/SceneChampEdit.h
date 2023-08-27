@@ -11,25 +11,39 @@ struct FrameInfo
 	int top = 0;
 	int width = 0;
 	int height = 0;
+
+	int disX = 0;
+	int disY = 0;
 };
 
 class SceneChampEdit : public Scene
 {
 protected:
-	
-	int maxFrame;
-	int curFrame;
-	int fps;
-	int loopType;
+	sf::Vector2f mouseMove;
+	float zoom = 0.5f;
+
+	int maxFrame = 0;
+	int curFrame = 0;
+	int fps = 0;
+	int loopType = 0;
 	std::vector<FrameInfo> frameInfo;
+	std::vector<FrameInfo> freeset;
 
 	AnimatioControler animation;
+	AnimatioControler skillAni;
 	SpriteGo champ;
+	SpriteGo skillEffect;
 	int curChampCode = 0;
+	bool isClipWorks = false;
 
 	bool isCSVMakerOn = false;
+	bool isDragMode = false;
+	bool isButtonInDrag = false;
 	int curChampAni = 0;
+	int aniPosType = 0;
+	sf::Vector2f csvPickPoint;
 
+	float csvEffectPreviewSize = 1.f;
 public:
 	SceneChampEdit();
 	virtual ~SceneChampEdit() override;
@@ -48,11 +62,17 @@ public:
 
 	void EnterDefaultUi();
 	void ActivceDefaultUi(bool on = true);
-	void EnterCSVMaker(); 
+	void LoadEffectPreview();
+	void UpdateEffectPreviewAni();
+
+	void EnterCSVMaker();
 	void ActiveCSVMaker(bool on = true);
 	void LoadCsvMaker();
 	void ResetFrameInfo();
 	void ResetCsvEffectPreview();
+	void UpdateCsvMaker(float dt);
+	void LoadCSVDistanceCalculator();
+	void CSVDistanceCalculator();
 
 	void LoadCsv();
 	void SaveCsv();

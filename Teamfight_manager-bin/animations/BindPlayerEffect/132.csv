@@ -1,0 +1,5 @@
+ID,FPS,LOOPTYPE,,,,
+BP2,1,1,,,,
+,,,,,,
+TEXTUREID,LEFT,TOP,WIDTH,HEIGHT,DisX,DisY
+graphics/BindPlayerEffect/13.png,988,1,145,142,-71.5,-75.5

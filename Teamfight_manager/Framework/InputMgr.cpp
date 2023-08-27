@@ -40,7 +40,7 @@ void InputMgr::Update(float dt)
 		}
 		float diff = axisInfo.sensi * dt;
 		axisInfo.value = Utils::Clamp(axisInfo.value + raw * diff, -1.0f, 1.0f);
-		if (abs(axisInfo.value) < diff*0.5) //Áß¾Ó°ª º¸Á¤
+		if (abs(axisInfo.value) < diff * 0.5) //Áß¾Ó°ª º¸Á¤
 		{
 			axisInfo.value = 0.f;
 		}
@@ -49,8 +49,6 @@ void InputMgr::Update(float dt)
 
 void InputMgr::UpdateEvent(const sf::Event& ev)
 {
-
-
 	switch (ev.type)
 	{
 	case sf::Event::KeyPressed:
@@ -150,7 +148,7 @@ float InputMgr::GetAxisRaw(Axis axis)
 	while (rit != ingList.rend())
 	{
 		int code = *rit;
-		if (std::find(info.positivies.begin(),info.positivies.end(),code) != info.positivies.end())
+		if (std::find(info.positivies.begin(), info.positivies.end(), code) != info.positivies.end())
 		{
 			return 1.f;
 		}

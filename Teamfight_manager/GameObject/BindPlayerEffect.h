@@ -1,25 +1,39 @@
 #pragma once
 #include "SpriteGo.h"
 #include "ObjectPool.h"
+#include "AnimatioControler.h"
 
+class Champion;
 
 class BindPlayerEffect : public SpriteGo
 {
 protected:
-	float duration = 0.f;
-	float timer = 0.f;
+	AnimatioControler skillAni;
+	int curAnimation = 0;
+	int champCode = 0;
 
-	ObjectPool<BindPlayerEffect>* pool = nullptr;
+	bool isClipWorks1 = false;
+	bool isClipWorks2 = false;
+	bool isClipWorks3 = false;
 
+	Champion* player;
+	std::vector<std::vector<sf::Vector2f>> dist;
 public:
 	BindPlayerEffect(const std::string id = "", const std::string n = "");
-	virtual ~BindPlayerEffect() override {};
+	virtual ~BindPlayerEffect();
 
-	void SetDuration(float duration) { this->duration = duration; }
-	virtual void SetPool(ObjectPool<BindPlayerEffect>* pool) { this->pool = pool; }
+	bool ClipChecker();
+	void Play(int code);
+	void Stop();
+	void Hide();
+	void SetPlayer(int champCode, Champion* player);
+	void LoadEffect();
+
 	virtual void Init()override;
 	virtual void Reset()override;
 	virtual void Release() override;
 	virtual void Update(float dt)override;
+
+
 };
 
