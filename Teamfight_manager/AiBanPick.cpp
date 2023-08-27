@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "AiBanPick.h"
+#include "TeamMgr.h"
 
 AiBanPick::AiBanPick()
 {
@@ -85,7 +86,9 @@ int AiBanPick::CompareHighStatChampionIndex(const std::vector<int>& banChamps)
 {
     int highStat = -1;
     int highStatIndex = -1;
-
+    std::vector<float> winR = TEAM_MGR.GetChampWinRates();
+    std::vector<float> pickR = TEAM_MGR.GetChampPickRates();
+    
     for (int i = 0; i < champions.size(); ++i)
     {
         if (std::find(banChamps.begin(), banChamps.end(), i) != banChamps.end())
@@ -95,7 +98,8 @@ int AiBanPick::CompareHighStatChampionIndex(const std::vector<int>& banChamps)
         }
 
         int currentStat = AddStat(champions[i]);
-
+        currentStat += winR[i] * 3;
+        currentStat += pickR[i] * 2;
         if (currentStat > highStat)
         {
             highStat = currentStat;

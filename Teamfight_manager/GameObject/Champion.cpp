@@ -34,6 +34,11 @@ void Champion::Init()
 	team = Team::None;
 }
 
+void Champion::Draw(sf::RenderWindow& window)
+{
+	SpriteGo::Draw(window);
+}
+
 void Champion::Reset()
 {
 	SpriteGo::Reset();
@@ -112,7 +117,7 @@ void Champion::BattleUpdate(float dt)
 		SetRangePos();
 	}
 
-	this->skillTimer += dt/1.5f;
+	this->skillTimer += dt / 1.5f;
 	this->UesUltiSkillTiming -= dt / 1.5f;
 	this->stanceChangeDelay -= dt / 1.5;
 
@@ -132,7 +137,7 @@ void Champion::BattleUpdate(float dt)
 	//	skillTimer = 0;
 	//}
 
-	if (this->currentState.charId =="swordman")
+	if (this->currentState.charId == "swordman")
 	{
 		ActiveUltiSkill = false;
 	}
@@ -152,13 +157,13 @@ void Champion::BattleUpdate(float dt)
 			this->bloodingTimer = 0.5f;
 			this->bloodingStack--;
 
-			if (this->bloodingStack == 0||this->GetHp()==0)
+			if (this->bloodingStack == 0 || this->GetHp() == 0)
 			{
 				this->dotDamage == nullptr;
 				return;
 			}
 
-			float damage = ((this->dotDamage->currentState.attack/15.f) * 100 + 99 +
+			float damage = ((this->dotDamage->currentState.attack / 15.f) * 100 + 99 +
 				this->currentState.defend) / (100 + this->currentState.defend);
 
 			if (damage >= this->GetHp())
@@ -192,11 +197,11 @@ void Champion::BattleUpdate(float dt)
 		}
 	}
 
-	if (this->hp <= 0 && this->currentStance!=ChampionStance::Dead)
+	if (this->hp <= 0 && this->currentStance != ChampionStance::Dead)
 	{
 		if (this->currentState.animaition.GetCurrentClipId() != "Die")
 		{
-			if (this->currentState.animaition.GetCurrentClipId() == "Skill"&&
+			if (this->currentState.animaition.GetCurrentClipId() == "Skill" &&
 				this->currentState.charId == "fighter")
 			{
 				this->target->SetAir(false);
@@ -211,7 +216,7 @@ void Champion::BattleUpdate(float dt)
 				ChangeStance(ChampionStance::Dead);
 				for (auto it = this->currentBuff.begin(); it != this->currentBuff.end();)
 				{
-					if ((*it)->GetType()==BuffType::COPY)
+					if ((*it)->GetType() == BuffType::COPY)
 					{
 						delete (*it);
 						break;
@@ -223,20 +228,20 @@ void Champion::BattleUpdate(float dt)
 				}
 				this->currentBuff.clear();
 				this->SetTeamColor(Team::None);
-			
+
 				auto it = std::find(myTeam->begin(), myTeam->end(), this);
 				this->myTeam->erase(it);
 				SCENE_MGR.GetCurrScene()->RemoveGo(this);
 				std::cout << "닌자 사망" << std::endl;
 				return;
 			}
-				if (!this->currentBuff.empty())
+			if (!this->currentBuff.empty())
+			{
+				for (auto it = this->currentBuff.begin(); it != this->currentBuff.end(); ++it)
 				{
-					for (auto it = this->currentBuff.begin(); it != this->currentBuff.end(); ++it)
-					{
-						delete (*it);
-					}
-					this->currentBuff.clear();
+					delete (*it);
+				}
+				this->currentBuff.clear();
 			}
 			if (this->currentState.charId == "berserker")
 			{
@@ -248,6 +253,7 @@ void Champion::BattleUpdate(float dt)
 			this->cemetery->push_back(*it);
 			this->myTeam->erase(it);
 			this->currentState.animaition.Play("Die");
+			*bpStop = true;
 			this->dotDamage = nullptr;
 			this->bloodingStack = 0;
 			this->limit = false;
@@ -260,8 +266,8 @@ void Champion::BattleUpdate(float dt)
 			ChampionDie();
 		}
 		return;
-	}	
-	
+	}
+
 	if (this->currentState.animaition.GetCurrentClipId() != "Die")
 	{
 		for (auto deBuff : this->currentBuff)
@@ -316,14 +322,14 @@ void Champion::BattleUpdate(float dt)
 		break;
 	}
 	}
-	
+
 }
 
 void Champion::ChangeStance(ChampionStance stance)
 {
-		this->SetOrigin(Origins::MC);
-		this->currentStance = stance;
-		this->stanceChangeDelay = 0.5f;
+	this->SetOrigin(Origins::MC);
+	this->currentStance = stance;
+	this->stanceChangeDelay = 0.5f;
 }
 
 void Champion::Idle(float dt)
@@ -364,7 +370,7 @@ void Champion::Idle(float dt)
 	{
 		SetSacleX(Utils::Normalize(target->GetPosition() - this->position).x);
 
-		if (this->currentState.charId=="ninja"|| this->currentState.charId=="knight"|| this->currentState.charId == "priest")
+		if (this->currentState.charId == "ninja" || this->currentState.charId == "knight" || this->currentState.charId == "priest")
 		{
 			if (this->skillTimer >= this->currentSkill[0].skillCoolTime && this->currentSkill[0].skillCoolTime != 0.f)
 			{
@@ -381,7 +387,7 @@ void Champion::Idle(float dt)
 			}
 		}
 		if ((this->GetRangePos() > this->currentState.attackRange ||
-			this->GetRangePos() < this->currentState.attackRange*0.66f) && bind<0.f && stanceChangeDelay<=0.f)
+			this->GetRangePos() < this->currentState.attackRange * 0.66f) && bind < 0.f && stanceChangeDelay <= 0.f)
 		{
 			ChangeStance(ChampionStance::Move);
 			return;
@@ -436,7 +442,7 @@ void Champion::Move(float dt)
 		SetSacleX(Utils::Normalize(target->GetPosition() - this->position).x);
 		SetPosition(this->position + Utils::Normalize(target->GetPosition() - this->position) * this->currentState.speed * dt * 5.f);
 	}
-	else if (GetRangePos() < this->currentState.attackRange * 0.66f && this->attackDelay>0.f)
+	else if (GetRangePos() < this->currentState.attackRange * 0.66f && this->attackDelay > 0.f)
 	{
 		SetSacleX(Utils::Normalize(target->GetPosition() - this->position).x * -1.f);
 		SetPosition(this->position + (Utils::Normalize(target->GetPosition() - this->position)) * -1.f * this->currentState.speed * dt * 5.f);
@@ -452,7 +458,7 @@ void Champion::Move(float dt)
 void Champion::Action(float dt)
 {
 	if (GetRangePos() <= this->currentState.attackRange &&
-		this->UesUltiSkillTiming == 0.f && this->ActiveUltiSkill==true)
+		this->UesUltiSkillTiming == 0.f && this->ActiveUltiSkill == true)
 	{
 		ChangeStance(ChampionStance::UltimateSkill);
 		return;
@@ -461,8 +467,8 @@ void Champion::Action(float dt)
 	if (GetRangePos() <= this->currentState.attackRange &&
 		this->skillTimer >= this->currentSkill[0].skillCoolTime)
 	{
-		if(this->currentState.charId=="berserker"&&this->attackDelay<=0.f)
-		{ 
+		if (this->currentState.charId == "berserker" && this->attackDelay <= 0.f)
+		{
 			this->ChangeStance(ChampionStance::Attack);
 			return;
 		}
@@ -474,7 +480,7 @@ void Champion::Action(float dt)
 		ChangeStance(ChampionStance::Skill);
 		return;
 	}
-	else if (this->attackDelay <= 0.f && this->currentState.charId=="priest")
+	else if (this->attackDelay <= 0.f && this->currentState.charId == "priest")
 	{
 		if (this->currentState.charId == "priest" && this->GetTarget()->currentState.maxHp == this->GetTarget()->GetHp())
 		{
@@ -492,7 +498,7 @@ void Champion::Action(float dt)
 			return;
 		}
 	}
-	else if (this->attackDelay<=0.f)
+	else if (this->attackDelay <= 0.f)
 	{
 		ChangeStance(ChampionStance::Attack);
 		return;
@@ -506,7 +512,7 @@ void Champion::Action(float dt)
 
 void Champion::Attack(float dt)
 {
-	this->currentState.animaition.Update(dt*this->currentState.attackSpeed);
+	this->currentState.animaition.Update(dt * this->currentState.attackSpeed);
 	this->SetOrigin(Origins::MC);
 	this->sMoveT += dt * this->currentState.attackSpeed;
 
@@ -514,6 +520,7 @@ void Champion::Attack(float dt)
 	if (this->currentState.animaition.GetCurrentClipId() != "Attack")
 	{
 		this->currentState.animaition.Play("Attack");
+		*bpEffect1 = true;
 		return;
 	}
 
@@ -539,7 +546,7 @@ void Champion::Attack(float dt)
 		{
 			DamageCalculate(this->currentState.attack);
 		}
-		
+
 		if (this->currentState.charId == "berserker")
 		{
 			for (auto it = this->currentBuff.begin(); it != this->currentBuff.end(); ++it)
@@ -551,7 +558,7 @@ void Champion::Attack(float dt)
 				}
 			}
 		}
-		
+
 		this->attackDelay = 1.f;
 		ChangeStance(ChampionStance::Idle);
 		return;
@@ -560,10 +567,14 @@ void Champion::Attack(float dt)
 
 void Champion::Skill(float dt)
 {
-	this->currentState.animaition.Update(dt*this->currentState.attackSpeed);
+	this->currentState.animaition.Update(dt * this->currentState.attackSpeed);
 	this->SetOrigin(Origins::MC);
 	this->sMoveT += dt * this->currentState.attackSpeed;
 	SKILL_MGR.ActiveSkill(this->currentState.skillCode1, this);
+	if (this->currentState.charId == "shieldbearer" && reviveTimer <= 0.f)
+	{
+		*bpEffect2 = true;
+	}
 }
 
 void Champion::SetState(State path)
@@ -600,7 +611,7 @@ void Champion::ReleaseSkill()
 	{
 		return;
 	}
-	
+
 	this->currentSkill.clear();
 	return;
 }
@@ -696,13 +707,13 @@ void Champion::UpdateState(float dt)
 	this->currentState.maxHp = this->champMgrState.maxHp;
 	this->currentState.attack = this->champMgrState.attack + (getedAtk * 0.1f);
 	this->currentState.defend = this->champMgrState.defend + (getedDef * 0.1f);
-	this->currentState.attackSpeed = this->champMgrState.attackSpeed +(this->champMgrState.attackSpeed/100 * getedAtkSpeed);
+	this->currentState.attackSpeed = this->champMgrState.attackSpeed + (this->champMgrState.attackSpeed / 100 * getedAtkSpeed);
 	this->currentState.attackRange = this->champMgrState.attackRange;
 	this->currentState.speed = this->champMgrState.speed;
 
 	if (this->currentState.charId == "berserker")
 	{
-		BuffUpdate(this->GetHpPercent()*2.f);
+		BuffUpdate(this->GetHpPercent() * 2.f);
 	}
 
 	if (!this->currentBuff.empty())
@@ -732,16 +743,16 @@ void Champion::UpdateState(float dt)
 				}
 				else if ((*it)->GetType() == BuffType::STUN)
 				{
-					if (this->currentStance!=ChampionStance::UltimateSkill && this->currentStance!=ChampionStance::Skill)
+					if (this->currentStance != ChampionStance::UltimateSkill && this->currentStance != ChampionStance::Skill)
 					{
-							ChangeStance(ChampionStance::Idle);
+						ChangeStance(ChampionStance::Idle);
 					}
 				}
-				else if ((*it)->GetType()==BuffType::COPY)
-					{
+				else if ((*it)->GetType() == BuffType::COPY)
+				{
 					this->hp = 0.f;
 					continue;
-					}
+				}
 
 				delete (*it);
 				it = this->currentBuff.erase(it);
@@ -868,7 +879,7 @@ void Champion::UpdateState(float dt)
 			}
 			case BuffType::COPY:
 			{
-				this->hp -= (*it)->GetValue()*dt;
+				this->hp -= (*it)->GetValue() * dt;
 				break;
 			}
 			}
@@ -883,6 +894,7 @@ void Champion::UseSkill()
 	this->currentState.animaition.SetTarget(&this->sprite);
 	this->SetOrigin(Origins::MC);
 	this->currentState.animaition.Play("Skill");
+	*bpEffect2 = true;
 }
 
 void Champion::UseUltiSkill()
@@ -895,6 +907,7 @@ void Champion::UseUltiSkill()
 		return;
 	}
 	this->currentState.animaition.Play("UltiSkill");
+	*bpEffect3 = true;
 }
 
 void Champion::SkillChangeIdle()
@@ -964,9 +977,9 @@ void Champion::SetMyTeamBuff(BuffState* state)
 		*cState = *state;
 
 		std::cout << "캐릭터 :" << "\t" << this->currentState.charId << std::endl;
-			std::cout << "사용자 : " << "\t" << this << std::endl;
-			std::cout << "BuffType : " << "\t" << (int)state->GetType() << std::endl;
-			std::cout << "주소값 : " << "\t" << cState << std::endl << std::endl;
+		std::cout << "사용자 : " << "\t" << this << std::endl;
+		std::cout << "BuffType : " << "\t" << (int)state->GetType() << std::endl;
+		std::cout << "주소값 : " << "\t" << cState << std::endl << std::endl;
 
 		team->currentBuff.push_back(cState);
 	}
@@ -1041,7 +1054,7 @@ void Champion::BuffUpdate(float dt)
 	{
 		for (auto it = this->currentBuff.begin(); it != this->currentBuff.end(); ++it)
 		{
-			if ((*it)->GetType()==BuffType::ULTIMATE)
+			if ((*it)->GetType() == BuffType::ULTIMATE)
 			{
 				dt = 0.1;
 				break;
@@ -1079,7 +1092,7 @@ void Champion::BuffUpdate(float dt)
 
 void Champion::SetSkillObj(int type, float oTimer, float eTime, float eTimer)
 {
-	SkillObject*  obj = sObjPool->Get();
+	SkillObject* obj = sObjPool->Get();
 	obj->SetType(type);
 	obj->SetChampion(this);
 	obj->SetObjectTimer(oTimer);
@@ -1120,7 +1133,7 @@ void Champion::SetSkillObj(int type, float oTimer, float eTime, float eTimer, sf
 	obj->SetPosition(this->GetPosition());
 	obj->SetActive(true);
 	obj->SetAni(path1);
-	
+
 	if (this->sprite.getScale().x < 0)
 	{
 		obj->SetScaleY(-1.f);
@@ -1228,6 +1241,14 @@ void Champion::SetHpGuage()
 	SCENE_MGR.GetCurrScene()->AddGo(coolGuage);
 }
 
+void Champion::SetBPEffectSwitch(bool* s1, bool* s2, bool* s3, bool* stop)
+{
+	bpEffect1 = s1;
+	bpEffect2 = s2;
+	bpEffect3 = s3;
+	bpStop = stop;
+}
+
 void Champion::GetStat(int atk, int def, int atkSpeed, int coolDown, int drain, int index)
 {
 	getedAtk = atk;
@@ -1305,7 +1326,7 @@ void Champion::DamageCalculate(float attack)
 {
 	float damage = (attack * 100 + 99 +
 		this->target->currentState.defend) / (100 + this->target->currentState.defend);
-	
+
 	for (auto enemy : *this->enemyTeam)
 	{
 		if (enemy->currentState.charId == "shieldbearer" && this->GetTarget()->GetInteranction())
@@ -1327,7 +1348,7 @@ void Champion::DamageCalculate(float attack)
 			}
 			if (this->GetUseBuff(BuffType::COPY))
 			{
-				for (auto it = this->myTeam->begin(); it!= this->myTeam->end();++it)
+				for (auto it = this->myTeam->begin(); it != this->myTeam->end(); ++it)
 				{
 					if ((*it)->currentState.charId == "ninja" && !(*it)->GetUseBuff(BuffType::COPY))
 					{
@@ -1364,19 +1385,19 @@ void Champion::DamageCalculate(float attack)
 				}
 				(*this->teamScore)++;
 				//std::cout << this->GetName() << " 킬 : " << this->kill << std::endl;
-				this->target=temp;
+				this->target = temp;
 				break;
 			}
 			this->target = temp;
 		}
 	}
-	
+
 	if (damage <= 0.f)
 	{
 		damage = 0.f;
 	}
 
-	else if (damage >= this->target->GetHp()+this->target->GetBarrier())
+	else if (damage >= this->target->GetHp() + this->target->GetBarrier())
 	{
 		damage = this->target->GetHp() + this->target->GetBarrier();
 	}
@@ -1394,7 +1415,7 @@ void Champion::DamageCalculate(float attack)
 	{
 		this->total_Damage += damage;
 	}
-	
+
 	//std::cout << this->GetName() << " 입힌 피해 : " << this->total_Damage << std::endl;
 	this->target->Hit(damage);
 	if (this->target->GetHp() == 0)
@@ -1426,7 +1447,7 @@ void Champion::DamageCalculate(float attack)
 void Champion::HealCalculate(float attack)
 {
 	float heal = attack;
-	if (heal+this->target->GetHp() >= this->target->GetCurretState().maxHp)
+	if (heal + this->target->GetHp() >= this->target->GetCurretState().maxHp)
 	{
 		heal = this->target->GetCurretState().maxHp - this->target->GetHp();
 	}
@@ -1479,12 +1500,12 @@ void Champion::FindTaget()
 	}
 	case TargetingOrder::CircleInRangeEnemy:
 	{
-		TargetOrderCIE(0, 0.f,0.f);
+		TargetOrderCIE(0, 0.f, 0.f);
 		break;
 	}
 	case TargetingOrder::CircleInRangeTeam:
 	{
-		TargetOrderCIT(0, 0.f,0.f);
+		TargetOrderCIT(0, 0.f, 0.f);
 		break;
 	}
 	case TargetingOrder::Aggro:
@@ -1536,7 +1557,7 @@ void Champion::TargetOrderSR()
 		}
 	}
 }
-	
+
 void Champion::TargetOrderRH()
 {
 	if (!enemyTeam->empty())
@@ -1583,16 +1604,16 @@ void Champion::TargetOrderLR()
 	if (!enemyTeam->empty())
 	{
 		float tagetRange = 0.f;
-			for (auto enemy : *enemyTeam)
+		for (auto enemy : *enemyTeam)
+		{
+			if (abs(Utils::Distance(this->GetPosition(), enemy->GetPosition())) >= tagetRange)
 			{
-				if (abs(Utils::Distance(this->GetPosition(), enemy->GetPosition())) >= tagetRange)
-				{
-					tagetRange = abs(Utils::Distance(this->GetPosition(), enemy->GetPosition()));
-					this->target = enemy;
-				}
+				tagetRange = abs(Utils::Distance(this->GetPosition(), enemy->GetPosition()));
+				this->target = enemy;
 			}
 		}
 	}
+}
 
 void Champion::TargetOrderCIE(int code, float range, float value)
 {
@@ -1600,32 +1621,32 @@ void Champion::TargetOrderCIE(int code, float range, float value)
 	{
 		return;
 	}
-		for (auto enemy : *this->enemyTeam)
+	for (auto enemy : *this->enemyTeam)
+	{
+		if (enemy == nullptr)
 		{
-			if (enemy == nullptr)
-			{
-				continue;
-			}
-			if (abs(Utils::Distance(this->GetPosition(), enemy->GetPosition())) <= range)
-			{
-				this->target = enemy;
+			continue;
+		}
+		if (abs(Utils::Distance(this->GetPosition(), enemy->GetPosition())) <= range)
+		{
+			this->target = enemy;
 
-				switch (code)
-				{
-				case 0:
-				{
-					//std::cout << "아무 일도 없었다." << std::endl;
-					break;
-				}
-				case 1:
-				{
-					DamageCalculate(value);
-					break;
-				}
-				}
+			switch (code)
+			{
+			case 0:
+			{
+				//std::cout << "아무 일도 없었다." << std::endl;
+				break;
+			}
+			case 1:
+			{
+				DamageCalculate(value);
+				break;
+			}
 			}
 		}
 	}
+}
 
 void Champion::TargetOrderCIE(int code, float range, float value, sf::Vector2f pos)
 {
@@ -1768,7 +1789,7 @@ void Champion::TargetOrderCIT(int code, float range, float value)
 
 			}
 		}
-		
+
 		if (code == 3 && abs(Utils::Distance(this->GetPosition(), team->GetPosition())) > range)
 		{
 			team->SetInteraction(false);
@@ -1906,7 +1927,7 @@ void Champion::TargetOrderCITB(int code, float range, BuffState* state)
 			}
 			}
 		}
-		
+
 	}
 	delete state;
 }
@@ -1999,5 +2020,5 @@ void Champion::TargetAggro()
 
 float Champion::GetRowHealth()
 {
-	return (this->hp/this->currentState.maxHp);
+	return (this->hp / this->currentState.maxHp);
 }

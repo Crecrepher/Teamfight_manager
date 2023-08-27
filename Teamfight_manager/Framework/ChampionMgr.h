@@ -16,6 +16,7 @@ public:
 
 	State* GetChampion(int id);
 	State* GetChampion(const std::string& id);
+	int GetChampionCode(const std::string& id);
 };
 
 #define CHAMPION_MGR (ChampionMgr::Instance())

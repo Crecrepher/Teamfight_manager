@@ -10,9 +10,18 @@
 #include "TeamMgr.h"
 
 #include "AiBanPick.h"
+#include "BindPlayerEffect.h"
 #include "vector"
 
 class UiButton;
+
+struct BPSwitch
+{
+	bool bp1 = false;
+	bool bp2 = false;
+	bool bp3 = false;
+	bool bpStop = false;
+};
 
 class SceneGame : public Scene
 {
@@ -137,6 +146,10 @@ protected:
 	std::vector<int> playerOriginIndex;
 	std::vector<int> playerPick;
 	std::vector<int> enemyPick;
+
+	std::vector<BindPlayerEffect*> bpEffect;
+	std::vector<BPSwitch> bpSwitch;
+	int spawndchamp = 0;
 public:
 	SceneGame();
 	virtual ~SceneGame() override;
@@ -187,6 +200,8 @@ public:
 	void GetPlayers();
 
 	void SetChampionStat();
+
+	void UpdateBPSwitch();
 };
 
 template<typename T>

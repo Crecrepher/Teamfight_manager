@@ -87,7 +87,6 @@ void SceneGame::Init()
 	banEffectSheet = std::vector<SpriteGo*>(effectCount);
 	banEffectAnimation = std::vector<AnimatioControler>(effectAniCount);
 
-
 	UiInit();
 	BanPickInit();
 	LineUpInit();
@@ -198,6 +197,18 @@ void SceneGame::Init()
 	grayScreen->SetOrigin(Origins::MC);
 	grayScreen->SetActive(false);
 
+	bpSwitch = std::vector<BPSwitch>(8);
+	bpEffect = std::vector<BindPlayerEffect*>(8);
+	for (int i = 0; i < 8; i++)
+	{
+		bpEffect[i] = (BindPlayerEffect*)AddGo(new BindPlayerEffect("graphics/Origin/Sprite/archer_effect_0.png", "BpEffect" + std::to_string(i)));
+		bpEffect[i]->SetPosition(FRAMEWORK.GetWindowSize() * 0.5f);
+		bpEffect[i]->SetOrigin(Origins::TL);
+		bpEffect[i]->SetSize(1, 1);
+		bpEffect[i]->sortLayer = 99;
+		
+	}
+
 	effectPool.OnCreate = [this](ChampionEffect* effect) {
 		effect->SetEffectType(0);
 		effect->SetPool(&effectPool);
@@ -211,7 +222,7 @@ void SceneGame::Init()
 		effect->SetEffectTimer(0.f);
 		effect->SetActive(false);
 		effect->SetPool(&skillObjPool);
-	};
+		};
 	skillObjPool.Init(1000);
 
 	championPool.OnCreate = [this, field](Champion* champion) {
@@ -224,6 +235,8 @@ void SceneGame::Init()
 		};
 	championPool.Init();
 
+	
+	
 	// 경기장 x : 366 - 910
 	// 경기장 y : 198 - 490
 
@@ -250,6 +263,11 @@ void SceneGame::Enter()
 	sound->Play();
 
 	RESOURCE_MGR.LoadFromCsv("tables/GameResourceList.csv");
+
+	for (int i = 0; i < 8; i++)
+	{
+		bpEffect[i]->SetActive(false);
+	}
 
 	banAnimation.Play("Idle");
 	waterfallAnimation.Play("Idle");
@@ -293,6 +311,7 @@ void SceneGame::Enter()
 	banCount = 0;
 	pickCount = 0;
 	pickEnemyCount = 0;
+	spawndchamp = 0;
 
 	pickSlotCount = (int)mode + 2;
 	pickDoingSlotCount = (int)mode + 2;
@@ -337,7 +356,7 @@ void SceneGame::Enter()
 			FindGo("Draft_Slot_Blue_Clicked")->SetActive(false);
 			std::cout << "벤 페이즈!" << std::endl;
 			LineUpFalse();
-			SwapSlotFalse();		
+			SwapSlotFalse();
 			ChangePhase(Phase::Ban);
 			ChampSlotFalse();
 		};
@@ -418,7 +437,7 @@ void SceneGame::Update(float dt)
 			banEffectSheet[i]->SetOrigin(Origins::MC);
 		}
 	}
-	
+
 	Scene::Update(dt);
 
 	selectCheck = true;
@@ -632,6 +651,7 @@ void SceneGame::ChampionPick(int id, Team team)
 	champ->SetSacleX(1);
 	champ->SetUltiTimer(Utils::RandomRange(10.f, 30.f));
 	champ->SetUltiSkill(true);
+	champ->SetBPEffectSwitch(&bpSwitch[spawndchamp].bp1, &bpSwitch[spawndchamp].bp2, &bpSwitch[spawndchamp].bp3, &bpSwitch[spawndchamp].bpStop);
 
 	switch (team)
 	{
@@ -665,8 +685,9 @@ void SceneGame::ChampionPick(int id, Team team)
 	}
 	}
 	AddGo(champ);
-
+	bpEffect[spawndchamp]->SetPlayer(id, champ);
 	step++;
+	spawndchamp++;
 }
 
 void SceneGame::BanPhase(float dt)
@@ -808,6 +829,7 @@ void SceneGame::ReadyPhase(float dt)
 
 void SceneGame::BattlePhase(float dt)
 {
+	UpdateBPSwitch();
 	TextGo* text = (TextGo*)FindGo("GameTimeCounter");
 	text->text.setString(std::to_string((int)floor(battleTimer)));
 	text->SetOrigin(Origins::MC);
@@ -919,7 +941,7 @@ void SceneGame::ResultPhase(float dt)
 		{
 			for (auto team : redTeam)
 			{
-				std::cout << team->GetName() << " "<<team->GetCurretState().charId << " 킬 : " << team->GetKillScore() << std::endl;
+				std::cout << team->GetName() << " " << team->GetCurretState().charId << " 킬 : " << team->GetKillScore() << std::endl;
 				std::cout << team->GetName() << " 데스 : " << team->GetDeathScore() << std::endl;
 				std::cout << team->GetName() << " 입힌 피해 : " << team->GetTotalDamage() << std::endl;
 				std::cout << team->GetName() << " 당한 피해 : " << team->GetTotalOnHit() << std::endl;
@@ -2004,7 +2026,7 @@ void SceneGame::BanPickInit()
 		championSlot[i]->OnEnter = [this, i]() {
 			FindGo("BanSheet")->SetActive(true);
 			banSheet->SetPosition(championSlot[i]->GetPosition());
-			
+
 			selectCheck = true;
 			};
 		championSlot[i]->OnExit = [this]() {
@@ -2056,7 +2078,7 @@ void SceneGame::BanPickInit()
 					banPickText[banPickTextClickCount]->SetActive(false);
 					banPickTextClickCount++;
 					banPickText[banPickTextClickCount]->SetActive(true);
-					
+
 					turnArrowRed->SetPosition(1048, 125);
 					banPickCheck = false;
 				}
@@ -2085,7 +2107,7 @@ void SceneGame::BanPickInit()
 					turnArrowBlue->SetPosition(232, 125);
 					banPickCheck = true;
 				}
-				
+
 				aiBanTimer = 2.f;
 
 				banEffectAnimation[banCount].Play("Idle");
@@ -2205,7 +2227,7 @@ void SceneGame::BanPickInit()
 				ChangeTeam();
 				ChangeTurn();
 			}
-			};
+		};
 	}
 
 	for (int i = 0; i < champCount; i++)
@@ -2853,13 +2875,20 @@ void SceneGame::ChampSlotFalse()
 
 void SceneGame::AiSelect()
 {
+	//확률 변수
+	//if (Utils::RandomRange(0,2) < 2)
+	//{
+	//	championSlot[Utils::RandomRange(0, 13)]->OnClick();
+	//	return;
+	//}
+
 	int highStatIndex = aiBanPick.CompareHighStatChampionIndex(banChamps);
 
 	for (int j = 0; j < banChamps.size(); j++)
 	{
 		if (banChamps[j] == highStatIndex)
 		{
-			std::cout << "넥스트 스탯 호출!"<< std::endl;
+			std::cout << "넥스트 스탯 호출!" << std::endl;
 			championSlot[aiBanPick.CompareNextStatChampion(banChamps)]->OnClick();
 			return;
 		}
@@ -2955,7 +2984,7 @@ void SceneGame::SetChampionStat()
 		int AtkSpeed = 0;
 		int CoolDown = 0;
 		int HpDrain = 0;
-		
+
 		Atk += enemyInfo.player[count].attack;
 		Def += enemyInfo.player[count].defence;
 		for (int i = 0; i < enemyInfo.player[count].knownChamp; i++)
@@ -2968,6 +2997,33 @@ void SceneGame::SetChampionStat()
 		}
 		team->GetStat(Atk, Def, AtkSpeed, CoolDown, HpDrain, count);
 		count++;
+	}
+}
+
+void SceneGame::UpdateBPSwitch()
+{
+	for (int i = 0; i < spawndchamp; i++)
+	{
+		if (bpSwitch[i].bp1)
+		{
+			bpEffect[i]->Play(1);
+			bpSwitch[i].bp1 = false;
+		}
+		else if (bpSwitch[i].bp2)
+		{
+			bpEffect[i]->Play(2);
+			bpSwitch[i].bp2 = false;
+		}
+		else if (bpSwitch[i].bp3)
+		{
+			bpEffect[i]->Play(3);
+			bpSwitch[i].bp3 = false;
+		}
+		else if (bpSwitch[i].bpStop)
+		{
+			bpEffect[i]->Hide();
+			bpSwitch[i].bpStop = false;
+		}
 	}
 }
 

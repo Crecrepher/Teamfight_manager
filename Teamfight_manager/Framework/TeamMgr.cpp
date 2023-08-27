@@ -94,6 +94,11 @@ std::vector<float> TeamMgr::GetChampWinRates()
 	std::vector<float> champWinRates = std::vector<float>(totalChamps);
 	for (int i = 0; i < totalChamps; i++)
 	{
+		if (champWin[i] == 0)
+		{
+			champWinRates[i] = 0.f;
+			continue;
+		}
 		champWinRates[i] = champWin[i] / (champWin[i] + champLose[i]) * 100;
 	}
 	return champWinRates;
@@ -109,6 +114,11 @@ std::vector<float> TeamMgr::GetChampPickRates()
 	}
 	for (int i = 0; i < totalChamps; i++)
 	{
+		if (maxPick == 0)
+		{
+			champPickRates[i] = 0.f;
+			continue;
+		}
 		champPickRates[i] = (float)(champWin[i] + champLose[i]) / (float)maxPick * 100.f;
 	}
 	return champPickRates;

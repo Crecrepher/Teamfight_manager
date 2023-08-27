@@ -4,6 +4,7 @@
 #include "GameState.h"
 #include "ObjectPool.h"
 #include "BuffState.h"
+#include "BindPlayerEffect.h"
 
 class ChampionEffect;
 class SkillObject;
@@ -12,7 +13,7 @@ class Champion : public SpriteGo
 {
 protected:
 	//// Ban/Pick 선택 값
-	
+
 	//// ChampionMgr 기반 선택 값 (임시) struct 로 받을 예정
 	//AnimatioControler championAnimation;
 	//float championmaxHp;
@@ -38,14 +39,14 @@ protected:
 
 	ChampionStance currentStance;
 	TargetingOrder currentOrder;
-	
+
 	State champMgrState;
 	ChampionSkill skillMgrSkill;
 
 	State currentState;
 	std::vector<ChampionSkill> currentSkill;
 	std::vector<BuffState*> currentBuff;
-	
+
 	float hp;
 	float skillTimer;
 	float reviveTimer;
@@ -76,7 +77,7 @@ protected:
 	sf::Vector2f endPos;
 	float sMoveT = 0.f;
 	float blackholeTimer = 0.f;
-	
+
 
 	std::vector<Champion*>* enemyTeam;
 	std::vector<Champion*>* myTeam;
@@ -84,7 +85,7 @@ protected:
 
 	RectGo* field;
 
-	Champion* target=nullptr;
+	Champion* target = nullptr;
 	Champion* dotDamage = nullptr;
 
 	ObjectPool<Champion>* cPool = nullptr;
@@ -98,11 +99,18 @@ protected:
 	int getedAtkSpeed = 0;
 	int getedCoolDown = 0;
 	int getedHpDrain = 0;
+
+	bool* bpEffect1;
+	bool* bpEffect2;
+	bool* bpEffect3;
+	bool* bpStop;
 public:
+
 	Champion(const std::string id = "", const std::string n = "");
 	virtual ~Champion();
 
 	virtual void Init()override;
+	virtual void Draw(sf::RenderWindow& window);
 	virtual void Reset()override;
 	virtual void Release() override;
 
@@ -135,7 +143,7 @@ public:
 	void HealCalculate(float attack);
 	float GetHpPercent() { return this->GetHp() / this->currentState.maxHp; }
 	float GetCoolTimePercent() { return this->skillTimer / this->currentSkill[0].skillCoolTime; }
-	float GetUltiTimer() {return this->UesUltiSkillTiming;}
+	float GetUltiTimer() { return this->UesUltiSkillTiming; }
 	void SetUltiTimer(float num) { this->UesUltiSkillTiming = num; }
 	void SetInteraction(bool on) { this->interaction = on; }
 	bool GetInteranction() { return this->interaction; }
@@ -226,9 +234,10 @@ public:
 	//effect
 	void SetShadow();
 	void SetHpGuage();
+	void SetBPEffectSwitch(bool* s1, bool* s2, bool* s3, bool* stop);
 
 	// 선수 / 장비스텟 적용
-	void GetStat(int atk, int def, int atkSpeed, int coolDown,int drain,int index);
+	void GetStat(int atk, int def, int atkSpeed, int coolDown, int drain, int index);
 	int GetPlayerIndex() { return playerIndex; }
 };
 

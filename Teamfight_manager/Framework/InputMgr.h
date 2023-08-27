@@ -32,7 +32,6 @@ private:
 	sf::Vector2f mousePos;
 
 	std::map<Axis, AxisInfo> axisInfoMap;
-
 public:
 	void Update(float dt);
 	void UpdateEvent(const sf::Event& ev);

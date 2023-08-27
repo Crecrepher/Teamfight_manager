@@ -28,7 +28,7 @@ void ChampionMgr::LoadFromCsv(const std::string path)
 	for (size_t i = 0; i < id.size(); ++i)
 	{
 		rapidcsv::Document ani(animation[i]);
-		
+
 		std::vector<std::string> aniPath = ani.GetColumn<std::string>(0);
 
 		AnimatioControler temp;
@@ -65,4 +65,17 @@ State* ChampionMgr::GetChampion(const std::string& id)
 	}
 	std::cout << "ERR : NOT EXIST CHAMPION" << std::endl;
 	return nullptr;
+}
+
+int ChampionMgr::GetChampionCode(const std::string& id)
+{
+	for (auto it : champions)
+	{
+		if (it.second.charId == id)
+		{
+			return it.first;
+		}
+	}
+	std::cout << "ERR : NOT EXIST CHAMPION" << std::endl;
+	return 0;
 }
