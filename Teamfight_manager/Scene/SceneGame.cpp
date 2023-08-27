@@ -2239,7 +2239,7 @@ void SceneGame::BanPickInit()
 					ss.str("");
 					ss << "PickImage" << i + 1;
 					SpriteGo* enemyPickIcon = (SpriteGo*)FindGo(ss.str());
-					if (pickEnemyCount < 3)
+					if (pickEnemyCount < 4)
 					{
 						enemyPickIcon->SetPosition(1150, 137 + (pickEnemyCount * 158));
 						pickEnemyCount++;
@@ -2254,7 +2254,7 @@ void SceneGame::BanPickInit()
 					ss.str("");
 					ss << "PickImage" << i + 1;
 					SpriteGo* pickIcon = (SpriteGo*)FindGo(ss.str());
-					if (pickCount < 3)
+					if (pickCount < 4)
 					{
 						pickIcon->SetPosition(29, 137 + (pickCount * 158));
 						pickCount++;
