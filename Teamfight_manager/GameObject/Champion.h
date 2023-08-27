@@ -112,7 +112,6 @@ public:
 	virtual ~Champion();
 
 	virtual void Init()override;
-	virtual void Draw(sf::RenderWindow& window);
 	virtual void Reset()override;
 	virtual void Release() override;
 

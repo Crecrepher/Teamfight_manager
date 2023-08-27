@@ -34,11 +34,6 @@ void Champion::Init()
 	team = Team::None;
 }
 
-void Champion::Draw(sf::RenderWindow& window)
-{
-	SpriteGo::Draw(window);
-}
-
 void Champion::Reset()
 {
 	SpriteGo::Reset();
@@ -1271,7 +1266,7 @@ void Champion::SetShadow()
 	shadow->SetHight(12.f);
 	shadow->SetActive(true);
 	shadow->sortLayer = 1;
-
+	
 	SCENE_MGR.GetCurrScene()->AddGo(shadow);
 }
 
