@@ -299,9 +299,18 @@ BanPickText5,사용할 챔피언을 선택하세요
 BanPickText6,레드 팀이 사용할 챔피언을 선택중입니다
 BanPickText7,사용할 챔피언을 선택하세요
 BanPickText8,레드 팀이 사용할 챔피언을 선택중입니다
-BanPickText9,
-BanPickText10,
-BanPickText11,
-BanPickText12,
-BanPickText13,
-BanPickText14,
+BanPickText_4:4_1,금지할 챔피언을 선택하세요
+BanPickText_4:4_2,레드 팀이 금지할 챔피언을 선택중입니다
+BanPickText_4:4_3,금지할 챔피언을 선택하세요
+BanPickText_4:4_4,레드 팀이 금지할 챔피언을 선택중입니다
+BanPickText_4:4_5,사용할 챔피언을 선택하세요
+BanPickText_4:4_6,레드 팀이 사용할 챔피언을 선택중입니다
+BanPickText_4:4_7,사용할 챔피언을 선택하세요
+BanPickText_4:4_8,레드 팀이 사용할 챔피언을 선택중입니다
+BanPickText_4:4_9,금지할 챔피언을 선택하세요
+BanPickText_4:4_10,레드 팀이 금지할 챔피언을 선택중입니다
+BanPickText_4:4_11,사용할 챔피언을 선택하세요
+BanPickText_4:4_12,레드 팀이 사용할 챔피언을 선택중입니다
+BanPickText_4:4_13,사용할 챔피언을 선택하세요
+BanPickText_4:4_14,레드 팀이 사용할 챔피언을 선택중입니다
+BanPickText_4:4_15,

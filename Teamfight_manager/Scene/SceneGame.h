@@ -104,7 +104,7 @@ protected:
 
 	std::vector<TextGo*> championSlotName;
 	std::vector<TextGo*> banPickText;
-	int banPickTextCount = 14; // 일단 최대값기준
+	int banPickTextCount = 15; // 일단 최대값기준
 	int banPickTextClickCount = 0;
 	int pickDoingSlotClickCount = 0;
 

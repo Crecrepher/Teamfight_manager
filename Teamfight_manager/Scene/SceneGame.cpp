@@ -288,6 +288,46 @@ void SceneGame::Enter()
 	banSheet->SetPosition(-100, -100);
 	banSheetBlueTeam->SetActive(false);
 	banSheetRedTeam->SetActive(false);
+	FindGo("BanBlueLine")->SetActive(false);
+	FindGo("BanRedLine")->SetActive(false);
+
+	switch (mode)
+	{
+	case Mode::Duo:
+	case Mode::Trio:
+		for (int i = 0; i < 8; i++)
+		{
+			std::stringstream ss;
+			ss << "BanPickText" << i + 1;
+			auto stringTable = DATATABLE_MGR.Get<StringTable>(DataTable::Ids::String);
+			banPickText[i]->text.setString(stringTable->GetW(ss.str()));
+
+			banPickText[i]->SetOrigin(Origins::MC);
+		}
+		break;
+	case Mode::Sqaud:
+		for (int i = 0; i < 14; i++)
+		{
+			std::stringstream ss;
+			ss << "BanPickText_4:4_" << i + 1;
+			auto stringTable = DATATABLE_MGR.Get<StringTable>(DataTable::Ids::String);
+			banPickText[i]->text.setString(stringTable->GetW(ss.str()));
+
+			banPickText[i]->SetOrigin(Origins::MC);
+		}
+		break;
+	default:
+		break;
+	}
+	for (int i = 0; i < 14; i++)
+	{
+		FindGo("PickImage" + std::to_string(i + 1))->SetPosition(-100, -100);
+	}
+
+	for (int i = 0; i < 4; i++)
+	{
+		pickDoingSlot[i]->SetActive(false);
+	}
 
 	for (int i = 0; i < champCount; i++)
 	{
