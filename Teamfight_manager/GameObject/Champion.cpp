@@ -659,12 +659,11 @@ void Champion::Dead(float dt)
 
 	if (this->reviveTimer <= 0)
 	{
+		this->currentState.animaition.Stop();
 		this->hp = this->currentState.maxHp;
-		this->target = nullptr;
 		auto it = std::find(cemetery->begin(), cemetery->end(), this);
 		this->myTeam->push_back(*it);
 		this->cemetery->erase(it);
-
 		switch (team)
 		{
 		case Team::Red:
@@ -679,7 +678,6 @@ void Champion::Dead(float dt)
 		}
 		}
 		this->sprite.setColor(sf::Color(255, 255, 255, 255));
-		ChangeStance(ChampionStance::Idle);
 		this->SetShadow();
 		this->SetHpGuage();
 		return;
@@ -690,6 +688,9 @@ void Champion::ChampionDie()
 {
 	this->reviveTimer = 3.f;
 	this->death++;
+	this->target = nullptr;
+	this->currentState.animaition.Stop();
+	ChangeStance(ChampionStance::Idle);
 	//std::cout << this->GetName() << "Ã¨ÇÇ¾ð Á×À½" << std::endl;
 	//std::cout << this->GetName() << " µ¥½º : " << this->death << std::endl;
 	this->sprite.setColor(sf::Color(0, 0, 0, 0));
@@ -1259,10 +1260,10 @@ void Champion::SetShadow()
 	ChampionEffect* shadow = this->pool->Get();
 	sf::IntRect setting = { 0, 0, 20, 10 };
 	shadow->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/CustomSprite/player_shadow.png"));
-	shadow->SetOrigin(Origins::MC);
 	shadow->sprite.setTextureRect(setting);
 	shadow->SetChampion(this);
 	shadow->SetEffectType(2);
+	shadow->SetOrigin(Origins::MC);
 	shadow->SetHight(12.f);
 	shadow->SetActive(true);
 	shadow->sortLayer = 1;
@@ -1276,21 +1277,22 @@ void Champion::SetHpGuage()
 	ChampionEffect* Guage = this->pool->Get();
 	Guage->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/CustomSprite/player_ingame_guage_5.png"));
 	Guage->sprite.setTextureRect(setting);
-	Guage->SetOrigin(Origins::MC);
 	Guage->SetChampion(this);
 	Guage->SetEffectType(1);
+	Guage->SetOrigin(Origins::MC);
 	Guage->SetHight(23.f);
 	Guage->SetActive(true);
 	Guage->sortLayer = 7;
 	Guage->sortOrder = 2;
 	SCENE_MGR.GetCurrScene()->AddGo(Guage);
 
+	sf::IntRect hpBgSetting = { 0,0,30,6 };
 	ChampionEffect* hpGuageBg = this->pool->Get();
 	hpGuageBg->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/CustomSprite/player_ingame_guage_0.png"));
-	hpGuageBg->sprite.setTextureRect(setting);
-	hpGuageBg->SetOrigin(Origins::MC);
+	hpGuageBg->sprite.setTextureRect(hpBgSetting);
 	hpGuageBg->SetChampion(this);
 	hpGuageBg->SetEffectType(1);
+	hpGuageBg->SetOrigin(Origins::MC);
 	hpGuageBg->SetHight(23.f);
 	hpGuageBg->SetActive(true);
 	hpGuageBg->sortLayer = 4;
@@ -1298,7 +1300,7 @@ void Champion::SetHpGuage()
 	SCENE_MGR.GetCurrScene()->AddGo(hpGuageBg);
 
 
-	setting = { 0,0,29,2 };
+	sf::IntRect GuageSetting = { 0,0,29,2 };
 	ChampionEffect* hpGuage = this->pool->Get();
 	if (this->team == Team::Red)
 	{
@@ -1308,10 +1310,10 @@ void Champion::SetHpGuage()
 	{
 		hpGuage->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/CustomSprite/player_ingame_guage_3.png"));
 	}
-	hpGuage->sprite.setTextureRect(setting);
-	hpGuage->SetOrigin(Origins::ML);
+	hpGuage->sprite.setTextureRect(GuageSetting);
 	hpGuage->SetChampion(this);
 	hpGuage->SetEffectType(3);
+	hpGuage->SetOrigin(Origins::ML);
 	hpGuage->SetHight(22.f);
 	hpGuage->SetWidth(-14.5f);
 	hpGuage->SetActive(true);
@@ -1319,13 +1321,13 @@ void Champion::SetHpGuage()
 	hpGuage->sortOrder = 1;
 	SCENE_MGR.GetCurrScene()->AddGo(hpGuage);
 
-	setting = { 0,0,30,1 };
+	sf::IntRect coolSetting = {0,0,30,1};
 	ChampionEffect* coolGuage = this->pool->Get();
 	coolGuage->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/CustomSprite/player_ingame_guage_2.png"));
-	coolGuage->sprite.setTextureRect(setting);
-	coolGuage->SetOrigin(Origins::ML);
+	coolGuage->sprite.setTextureRect(coolSetting);
 	coolGuage->SetChampion(this);
 	coolGuage->SetEffectType(4);
+	coolGuage->SetOrigin(Origins::ML);
 	coolGuage->SetHight(24.f);
 	coolGuage->SetWidth(-14.5f);
 	coolGuage->SetActive(true);

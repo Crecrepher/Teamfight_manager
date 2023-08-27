@@ -2203,7 +2203,12 @@ void SceneGame::BanPickInit()
 					{
 						pickDoingSlotCount++;
 					}
-
+					
+					if (pickDoingSlotCount == 3)
+					{
+						// 2로 끝날때 실행되는 조건들
+					}
+ 
 					banPickText[banPickTextClickCount]->SetActive(false);
 					banPickTextClickCount++;
 					banPickText[banPickTextClickCount]->SetActive(true);

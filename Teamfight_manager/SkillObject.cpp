@@ -102,6 +102,11 @@ void SkillObject::Update(float dt)
 void SkillObject::PublicUpdate(float dt)
 {
 	effect.Update(dt);
+	if (this->champ->GetTarget() == nullptr)
+	{
+		this->objectTimer = 0.f;
+		return;
+	}
 	this->SetOrigin(Origins::MC);
 	this->SetPosition(champ->GetTarget()->GetPosition());
 }
