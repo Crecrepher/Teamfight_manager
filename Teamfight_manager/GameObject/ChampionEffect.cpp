@@ -74,9 +74,13 @@ void ChampionEffect::Setting()
 	this->champ = nullptr;
 	this->plusWidth = 0.f;
 	this->plusHight = 0.f;
+
 	this->sprite.setScale(1.f, 1.f);
 	this->sprite.setRotation(0);
+
+
 	this->SetActive(false);
+
 	SCENE_MGR.GetCurrScene()->RemoveGo(this);
 	pool->Return(this);
 }
@@ -147,6 +151,10 @@ void ChampionEffect::CoolTimeUpdate(float dt)
 
 void ChampionEffect::ObjectUpdate(float dt)
 {
+	if (this->champ->GetTarget() == nullptr)
+	{
+		Setting();
+	}
 	float a = Utils::Angle(Utils::Normalize(this->champ->GetTarget()->GetPosition() - this->champ->GetPosition()));
 	this->sprite.setRotation(a);
 	

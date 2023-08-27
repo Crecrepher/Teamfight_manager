@@ -233,19 +233,19 @@ void SkillMgr::ArcherSkill(Champion* champ)
 	{
 		if(!champ->GetAttackFrame())
 		{ 
-		ChampionEffect* arrow = champ->GetEffectPool();
-		sf::IntRect setting = { 0,0,16,16 };
-		arrow->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/CustomSprite/arrow.png"));
-		arrow->SetOrigin(Origins::MC);
-		arrow->sprite.setTextureRect(setting);
-		arrow->SetChampion(champ);
-		arrow->SetEffectType(5);
-		arrow->sortLayer = 2;
-		arrow->SetActive(true);
-		arrow->SetPosition(champ->GetPosition());
-		champ->SetAttackFrame(true);
-		champ->SetAMoveT(0.f);
-		SCENE_MGR.GetCurrScene()->AddGo(arrow);
+			ChampionEffect* arrow = champ->GetEffectPool();
+			sf::IntRect setting = { 0,0,16,16 };
+			arrow->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/CustomSprite/arrow.png"));
+			arrow->SetOrigin(Origins::MC);
+			arrow->sprite.setTextureRect(setting);
+			arrow->SetChampion(champ);
+			arrow->SetEffectType(5);
+			arrow->sortLayer = 2;
+			arrow->SetActive(true);
+			arrow->SetPosition(champ->GetPosition());
+			champ->SetAttackFrame(true);
+			champ->SetAMoveT(0.f);
+			SCENE_MGR.GetCurrScene()->AddGo(arrow);
 		}
 	}
 
@@ -534,6 +534,7 @@ void SkillMgr::KnightSkill(Champion* champ)
 		aggro->SetCount(4);
 		if (champ->GetTarget()->GetCurretState().charId != "priest")
 		{
+			champ->TargetOrderLR();
 			champ->GetTarget()->SetTarget(champ);
 		}
 		else if (champ->GetTarget()->GetCurretState().charId == "priest")
