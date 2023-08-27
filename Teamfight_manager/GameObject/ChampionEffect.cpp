@@ -55,9 +55,14 @@ void ChampionEffect::Update(float dt)
 	}
 	case EffectType::CoolTime:
 	{
-
 		this->sortOrder = this->GetPosition().y;
 		CoolTimeUpdate(dt);
+		break;
+	}
+	case EffectType::Object:
+	{
+		this->sortOrder = this->GetPosition().y;
+		ObjectUpdate(dt/1.5f);
 		break;
 	}
 	}
@@ -70,6 +75,8 @@ void ChampionEffect::Setting()
 	this->plusWidth = 0.f;
 	this->plusHight = 0.f;
 	this->sprite.setScale(1.f, 1.f);
+	this->sprite.setRotation(0);
+	this->SetActive(false);
 	SCENE_MGR.GetCurrScene()->RemoveGo(this);
 	pool->Return(this);
 }
@@ -135,5 +142,31 @@ void ChampionEffect::CoolTimeUpdate(float dt)
 	if (this->champ != nullptr)
 	{
 		this->SetPosition(this->champ->GetPosition().x + this->plusWidth, this->champ->GetPosition().y + this->plusHight);
+	}
+}
+
+void ChampionEffect::ObjectUpdate(float dt)
+{
+	float a = Utils::Angle(Utils::Normalize(this->champ->GetTarget()->GetPosition() - this->champ->GetPosition()));
+	this->sprite.setRotation(a);
+	
+	float t = this->champ->GetAMoveT() / 0.1f;
+
+	if (t >= 1.f)
+	{
+		t = 1.f;
+	}
+
+	sf::Vector2f temp = this->champ->GetPosition() + t * (this->champ->GetTarget()->GetPosition() - this->champ->GetPosition());
+
+	this->SetPosition(temp);
+
+	if (this->champ->GetCurrentStance() == ChampionStance::Dead)
+	{
+		Setting();
+	}
+	if (t==1)
+	{
+		Setting();
 	}
 }

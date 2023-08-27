@@ -17,6 +17,7 @@ enum class SkillType
 	PyromancerPSkill,
 	Pythoness,
 	MagicknightSkill,
+	SwordUltiSkill,
 };
 
 class SkillObject : public SpriteGo
@@ -45,6 +46,7 @@ public:
 	virtual void Release() override;
 	void Update(float dt);
 
+	void PublicUpdate(float dt);
 	void IcemageUpdate(float dt);
 	void MagicknightUpdate(float dt);
 	void PriestUpdate(float dt);
@@ -52,6 +54,7 @@ public:
 	void PyromancerSkillUpdate(float dt);
 	void PythonessUpdate(float dt);
 	void MagicknightSkillUpdate(float dt);
+	void SwordUltiSkillUpdate(float dt);
 
 
 	void SetPool(ObjectPool<SkillObject>* object) { this->pool = object; }
@@ -68,5 +71,7 @@ public:
 	void SetDir(sf::Vector2f d) { this->dir = d; }
 	void SetAngle(sf::Vector2f d) { this->sprite.setRotation(Utils::Angle(d)); }
 	float GetObjectTimer() { return this->objectTimer; }
+
+	float SwordmanDamageRange(sf::Vector2f enemy, sf::Vector2f start, sf::Vector2f end);
 };
 

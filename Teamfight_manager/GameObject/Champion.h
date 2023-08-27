@@ -75,7 +75,9 @@ protected:
 	sf::Vector2f startPos;
 	sf::Vector2f endPos;
 	float sMoveT = 0.f;
+	float aMoveT = 0.f;
 	float blackholeTimer = 0.f;
+	bool attackFrame = false;
 	
 
 	std::vector<Champion*>* enemyTeam;
@@ -141,6 +143,8 @@ public:
 	bool GetInteranction() { return this->interaction; }
 	void SetRangePos() { this->rangePos = abs(Utils::Distance(this->GetPosition(), this->GetTarget()->GetPosition())); }
 	float GetRangePos() { return this->rangePos; }
+	void SetAttackFrame(bool on) { this->attackFrame = on; }
+	bool GetAttackFrame() { return this->attackFrame; }
 
 	// 타겟팅
 	void FindTaget();
@@ -182,9 +186,12 @@ public:
 	void SkillChangeIdle();
 	void SkillAniChange();
 	Champion* GetTarget();
+	ChampionEffect* GetEffectPool();
 	void SetTarget(Champion* champ);
 	void SetBind(float t) { this->bind = t; }
 	float GetMoveTime() { return this->sMoveT; }
+	float GetAMoveT() { return this->aMoveT; }
+	void SetAMoveT(float t) { this->aMoveT = t; }
 	void SetMoveTime(float t) { this->sMoveT = t; }
 	bool GetAir() { return this->air; }
 	void SetAir(bool change) { this->air = change; }
@@ -206,11 +213,14 @@ public:
 	bool CurrBuffEmpty();
 	void BuffUpdate(float dt);
 	void SetSkillObj(int type, float oTimer, float eTime, float eTimer);
+	void SetSkillObj(int type, float oTimer, std::string path1, std::string path2);
 	void SetSkillObj(int type, float oTimer, float eTime, float eTimer, std::string path1, std::string path2);
+	void SetSkillObj(int type, float oTimer, sf::Vector2f dir, std::string path1, std::string path2);
 	void SetSkillObj(int type, float oTimer, float eTime, float eTimer, sf::Vector2f dir, std::string path1, std::string path2);
 	void SetBlackhole(int torgle, sf::Vector2f pos);
 	void SetCopyChar(Champion* champ);
 	Champion* GetPool();
+	void AttackObj();
 
 	// 선수에게 넘길 스테이터스
 	int GetKillScore() { return this->kill; }

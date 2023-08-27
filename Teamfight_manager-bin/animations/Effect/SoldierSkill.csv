@@ -1,0 +1,16 @@
+ID,FPS,LOOPTYPE,,
+SkillEffect,10,0,,
+,,,,
+TEXTUREID,LEFT,TOP,WIDTH,HEIGHT
+graphics/CustomSprite/soldierSkill.png,0,852,182,182
+graphics/CustomSprite/soldierSkill.png,0,702,150,150
+graphics/CustomSprite/soldierSkill.png,0,584,118,118
+graphics/CustomSprite/soldierSkill.png,0,498,86,86
+graphics/CustomSprite/soldierSkill.png,0,422,76,76
+graphics/CustomSprite/soldierSkill.png,0,2,70,70
+graphics/CustomSprite/soldierSkill.png,0,72,70,70
+graphics/CustomSprite/soldierSkill.png,0,142,70,70
+graphics/CustomSprite/soldierSkill.png,0,212,70,70
+graphics/CustomSprite/soldierSkill.png,0,282,70,70
+graphics/CustomSprite/soldierSkill.png,0,352,70,70
+graphics/CustomSprite/soldierSkill.png,0,0,2,2

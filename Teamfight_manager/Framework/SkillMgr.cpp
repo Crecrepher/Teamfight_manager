@@ -4,6 +4,7 @@
 #include "SceneMgr.h"
 #include "rapidcsv.h"
 #include "BuffState.h"
+#include "ChampionEffect.h"
 
 
 void SkillMgr::Init()
@@ -228,9 +229,29 @@ void SkillMgr::ArcherSkill(Champion* champ)
 		sf::Vector2f temp = champ->GetStartPos() + t * (champ->GetEndPos() - champ->GetStartPos());
 		champ->SetPosition(temp);
 	}
+	if (champ->GetCurretState().animaition.GetCurrFrame() == 5)
+	{
+		if(!champ->GetAttackFrame())
+		{ 
+		ChampionEffect* arrow = champ->GetEffectPool();
+		sf::IntRect setting = { 0,0,16,16 };
+		arrow->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/CustomSprite/arrow.png"));
+		arrow->SetOrigin(Origins::MC);
+		arrow->sprite.setTextureRect(setting);
+		arrow->SetChampion(champ);
+		arrow->SetEffectType(5);
+		arrow->sortLayer = 2;
+		arrow->SetActive(true);
+		arrow->SetPosition(champ->GetPosition());
+		champ->SetAttackFrame(true);
+		champ->SetAMoveT(0.f);
+		SCENE_MGR.GetCurrScene()->AddGo(arrow);
+		}
+	}
 
 	if (champ->GetCurretState().animaition.GetLastFrame())
 	{
+		champ->SetAttackFrame(false);
 		//std::cout << "스킬" << std::endl;
 		champ->DamageCalculate(champ->GetCurretState().attack - 10);
 		champ->GetTarget()->SetBind(0.5f);
@@ -256,9 +277,28 @@ void SkillMgr::ArcherUltiSkill(Champion* champ)
 		champ->SetAir(true);
 		return;
 	}
-
+	if (champ->GetMoveTime() >= 0.2f)
+	{
+		if (!champ->GetAttackFrame())
+		{
+			ChampionEffect* arrow = champ->GetEffectPool();
+			sf::IntRect setting = { 0,0,16,16 };
+			arrow->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/CustomSprite/arrow.png"));
+			arrow->SetOrigin(Origins::MC);
+			arrow->sprite.setTextureRect(setting);
+			arrow->SetChampion(champ);
+			arrow->SetEffectType(5);
+			arrow->sortLayer = 2;
+			arrow->SetActive(true);
+			arrow->SetPosition(champ->GetPosition());
+			champ->SetAttackFrame(true);
+			champ->SetAMoveT(0.f);
+			SCENE_MGR.GetCurrScene()->AddGo(arrow);
+		}
+	}
 	if (champ->GetMoveTime() >= 0.3f)
 	{
+		champ->SetAttackFrame(false);
 		champ->TargetOrderSR();
 		champ->DamageCalculate(champ->GetCurretState().attack - 10);
 		champ->SetMoveTime(0.f);
@@ -916,6 +956,7 @@ void SkillMgr::SoldierSkill(Champion* champ)
 {
 	if (champ->GetCurretState().animaition.GetCurrentClipId() != "Skill")
 	{
+		champ->SetSkillObj(0, 2.f, "animations/Effect/SoldierSkill.csv", "SkillEffect");
 		champ->UseSkill();
 		return;
 	}
@@ -927,8 +968,28 @@ void SkillMgr::SoldierSkill(Champion* champ)
 		return;
 	}
 
+	if (champ->GetCurretState().animaition.GetCurrFrame() == 3)
+	{
+		if (!champ->GetAttackFrame())
+		{
+			ChampionEffect* bullet = champ->GetEffectPool();
+			sf::IntRect setting = { 0,0,5,3 };
+			bullet->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/CustomSprite/bullet.png"));
+			bullet->SetOrigin(Origins::MC);
+			bullet->sprite.setTextureRect(setting);
+			bullet->SetChampion(champ);
+			bullet->SetEffectType(5);
+			bullet->sortLayer = 2;
+			bullet->SetActive(true);
+			bullet->SetPosition(champ->GetPosition());
+			champ->SetAttackFrame(true);
+			champ->SetAMoveT(0.f);
+			SCENE_MGR.GetCurrScene()->AddGo(bullet);
+		}
+	}
 	if (champ->GetCurretState().animaition.GetCurrFrame() == 4)
 	{
+		champ->SetAttackFrame(false);
 		if (!champ->GetFrameLimit())
 		{
 			champ->DamageCalculate(champ->GetCurretState().attack);
@@ -938,6 +999,22 @@ void SkillMgr::SoldierSkill(Champion* champ)
 	}
 	else if (champ->GetCurretState().animaition.GetCurrFrame() == 5)
 	{
+		if (!champ->GetAttackFrame())
+		{
+			ChampionEffect* bullet = champ->GetEffectPool();
+			sf::IntRect setting = { 0,0,5,3 };
+			bullet->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/CustomSprite/bullet.png"));
+			bullet->SetOrigin(Origins::MC);
+			bullet->sprite.setTextureRect(setting);
+			bullet->SetChampion(champ);
+			bullet->SetEffectType(5);
+			bullet->sortLayer = 2;
+			bullet->SetActive(true);
+			bullet->SetPosition(champ->GetPosition());
+			champ->SetAttackFrame(true);
+			champ->SetAMoveT(0.f);
+			SCENE_MGR.GetCurrScene()->AddGo(bullet);
+		}
 		champ->SetFrameLimit(false);
 		if (champ->GetTarget() == 0)
 		{
@@ -948,6 +1025,7 @@ void SkillMgr::SoldierSkill(Champion* champ)
 	}
 	else if (champ->GetCurretState().animaition.GetCurrFrame() == 6)
 	{
+		champ->SetAttackFrame(false);
 		if (!champ->GetFrameLimit())
 		{
 			champ->DamageCalculate(champ->GetCurretState().attack);
@@ -957,6 +1035,22 @@ void SkillMgr::SoldierSkill(Champion* champ)
 	}
 	else if (champ->GetCurretState().animaition.GetCurrFrame() == 7)
 	{
+		if (!champ->GetAttackFrame())
+		{
+			ChampionEffect* bullet = champ->GetEffectPool();
+			sf::IntRect setting = { 0,0,5,3 };
+			bullet->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/CustomSprite/bullet.png"));
+			bullet->SetOrigin(Origins::MC);
+			bullet->sprite.setTextureRect(setting);
+			bullet->SetChampion(champ);
+			bullet->SetEffectType(5);
+			bullet->sortLayer = 2;
+			bullet->SetActive(true);
+			bullet->SetPosition(champ->GetPosition());
+			champ->SetAttackFrame(true);
+			champ->SetAMoveT(0.f);
+			SCENE_MGR.GetCurrScene()->AddGo(bullet);
+		}
 		champ->SetFrameLimit(false);
 		if (champ->GetTarget() == 0)
 		{
@@ -967,6 +1061,7 @@ void SkillMgr::SoldierSkill(Champion* champ)
 	}
 	else if (champ->GetCurretState().animaition.GetCurrFrame() == 8)
 	{
+		champ->SetAttackFrame(false);
 		if (!champ->GetFrameLimit())
 		{
 			champ->DamageCalculate(champ->GetCurretState().attack);
@@ -1078,6 +1173,16 @@ void SkillMgr::SwordmanSkill(Champion* champ)
 
 void SkillMgr::SwordmanUltiSkill(Champion* champ)
 {
+	if (champ->GetCurretState().animaition.GetCurrentClipId() != "UltiSkill")
+	{
+		std::cout << "스킬 : " << champ->GetCurretState().charId << std::endl;
+		champ->UseUltiSkill();
+		champ->SetStartPos(champ->GetPosition());
+		sf::Vector2f temp = Utils::Normalize(champ->GetTarget()->GetPosition() - champ->GetPosition());
+		champ->SetEndPos(champ->GetPosition() + temp * 300.f);
+		champ->SetSkillObj(8, 1.f, temp, "animations/Effect/SwordmanUltiSkill.csv", "SkillEffect");
+		return;
+	}
 }
 
 

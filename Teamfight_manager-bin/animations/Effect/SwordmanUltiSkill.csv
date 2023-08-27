@@ -1,0 +1,11 @@
+ID,FPS,LOOPTYPE,,
+SkillEffect,10,0,,
+,,,,
+TEXTUREID,LEFT,TOP,WIDTH,HEIGHT
+graphics/CustomSprite/swordmanUltiSkill.png,0,0,310,14
+graphics/CustomSprite/swordmanUltiSkill.png,0,313,384,384
+graphics/CustomSprite/swordmanUltiSkill.png,0,14,320,42
+graphics/CustomSprite/swordmanUltiSkill.png,0,56,355,53
+graphics/CustomSprite/swordmanUltiSkill.png,0,109,318,63
+graphics/CustomSprite/swordmanUltiSkill.png,0,172,315,68
+graphics/CustomSprite/swordmanUltiSkill.png,0,240,314,73

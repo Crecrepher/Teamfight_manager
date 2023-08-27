@@ -132,10 +132,6 @@ void Champion::BattleUpdate(float dt)
 	//	skillTimer = 0;
 	//}
 
-	if (this->currentState.charId =="swordman")
-	{
-		ActiveUltiSkill = false;
-	}
 	////////////////////////////////////////////////////////
 
 	if (this->skillTimer >= this->currentSkill[0].skillCoolTime)
@@ -509,6 +505,7 @@ void Champion::Attack(float dt)
 	this->currentState.animaition.Update(dt*this->currentState.attackSpeed);
 	this->SetOrigin(Origins::MC);
 	this->sMoveT += dt * this->currentState.attackSpeed;
+	this->aMoveT += dt * this->currentState.attackSpeed;
 
 
 	if (this->currentState.animaition.GetCurrentClipId() != "Attack")
@@ -523,6 +520,9 @@ void Champion::Attack(float dt)
 		ChangeStance(ChampionStance::Idle);
 		return;
 	}
+
+	
+	AttackObj();
 
 	if (this->currentState.animaition.GetLastFrame())
 	{
@@ -563,6 +563,7 @@ void Champion::Skill(float dt)
 	this->currentState.animaition.Update(dt*this->currentState.attackSpeed);
 	this->SetOrigin(Origins::MC);
 	this->sMoveT += dt * this->currentState.attackSpeed;
+	this->aMoveT += dt * this->currentState.attackSpeed;
 	SKILL_MGR.ActiveSkill(this->currentState.skillCode1, this);
 }
 
@@ -644,6 +645,7 @@ void Champion::UltimateSkill(float dt)
 	this->currentState.animaition.Update(dt * this->currentState.attackSpeed);
 	this->SetOrigin(Origins::MC);
 	this->sMoveT += dt * this->currentState.attackSpeed;
+	this->aMoveT += dt * this->currentState.attackSpeed;
 	SKILL_MGR.ActiveSkill(this->currentState.skillCode2, this);
 }
 
@@ -930,6 +932,11 @@ Champion* Champion::GetTarget()
 	return this->target;
 }
 
+ChampionEffect* Champion::GetEffectPool()
+{
+	return this->pool->Get();
+}
+
 void Champion::SetTarget(Champion* champ)
 {
 	this->target = champ;
@@ -1091,17 +1098,55 @@ void Champion::SetSkillObj(int type, float oTimer, float eTime, float eTimer)
 	SCENE_MGR.GetCurrScene()->AddGo(obj);
 }
 
-void Champion::SetSkillObj(int type, float oTimer, float eTime, float eTimer, std::string path1, std::string path2)
+void Champion::SetSkillObj(int type, float oTimer, std::string path1, std::string path2)
 {
 	SkillObject* obj = sObjPool->Get();
 	obj->SetType(type);
 	obj->SetChampion(this);
 	obj->SetObjectTimer(oTimer);
-	obj->SetEffectTime(eTime);
-	obj->SetEffectTimer(eTimer);
 	obj->SetPosition(this->GetPosition());
 	obj->SetActive(true);
 	obj->SetAni(path1);
+
+	SCENE_MGR.GetCurrScene()->AddGo(obj);
+
+	obj->PlayAni(path2);
+}
+
+void Champion::SetSkillObj(int type, float oTimer, float eTime, float eTimer, std::string path1, std::string path2)
+{
+	SkillObject* obj = sObjPool->Get();
+	obj->SetType(type);
+	obj->SetChampion(this->GetTarget());
+	obj->SetObjectTimer(oTimer);
+	obj->SetPosition(this->GetTarget()->GetPosition());
+	obj->SetActive(true);
+	obj->SetAni(path1);
+
+	SCENE_MGR.GetCurrScene()->AddGo(obj);
+
+	obj->PlayAni(path2);
+}
+
+void Champion::SetSkillObj(int type, float oTimer, sf::Vector2f dir, std::string path1, std::string path2)
+{
+	SkillObject* obj = sObjPool->Get();
+	obj->SetType(type);
+	obj->SetChampion(this);
+	obj->SetObjectTimer(oTimer);
+	obj->SetDir(dir);
+	obj->SetPosition(this->GetPosition());
+	obj->SetActive(true);
+	obj->SetAni(path1);
+
+	if (this->sprite.getScale().x < 0)
+	{
+		obj->SetScaleY(-1.f);
+	}
+	else if (this->sprite.getScale().x > 0)
+	{
+		obj->SetScaleY(1.f);
+	}
 
 	SCENE_MGR.GetCurrScene()->AddGo(obj);
 
@@ -1153,6 +1198,56 @@ Champion* Champion::GetPool()
 	return this->cPool->Get();
 }
 
+void Champion::AttackObj()
+{
+	if (this->GetCurretState().charId == "soldier")
+	{
+		if (this->GetCurretState().animaition.GetCurrFrame() == 4 && !this->attackFrame)
+		{
+			ChampionEffect* bullet = pool->Get();
+			sf::IntRect setting = { 0,0,5,3 };
+			bullet->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/CustomSprite/bullet.png"));
+			bullet->SetOrigin(Origins::MC);
+			bullet->sprite.setTextureRect(setting);
+			bullet->SetChampion(this);
+			bullet->SetEffectType(5);
+			bullet->sortLayer = 2;
+			bullet->SetActive(true);
+			bullet->SetPosition(this->GetPosition());
+			this -> attackFrame = true;
+			this->SetAMoveT(0.f);
+			SCENE_MGR.GetCurrScene()->AddGo(bullet);
+		}
+		else if (this->GetCurretState().animaition.GetLastFrame())
+		{
+			this->attackFrame = false;
+		}
+	}
+	else if (this->GetCurretState().charId == "archer")
+	{
+		if(this->GetCurretState().animaition.GetCurrFrame() == 4 && !this->attackFrame)
+		{
+			ChampionEffect* arrow = pool->Get();
+			sf::IntRect setting = { 0,0,16,16 };
+			arrow->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/CustomSprite/arrow.png"));
+			arrow->SetOrigin(Origins::MC);
+			arrow->sprite.setTextureRect(setting);
+			arrow->SetChampion(this);
+			arrow->SetEffectType(5);
+			arrow->sortLayer = 2;
+			arrow->SetActive(true);
+			arrow->SetPosition(this->GetPosition());
+			this->attackFrame = true;
+			this->SetAMoveT(0.f);
+			SCENE_MGR.GetCurrScene()->AddGo(arrow);
+		}
+		else if (this->GetCurretState().animaition.GetLastFrame())
+		{
+			this->attackFrame = false;
+		}
+	}
+}
+
 void Champion::SetShadow()
 {
 	ChampionEffect* shadow = this->pool->Get();
@@ -1163,6 +1258,7 @@ void Champion::SetShadow()
 	shadow->SetChampion(this);
 	shadow->SetEffectType(2);
 	shadow->SetHight(12.f);
+	shadow->SetActive(true);
 	shadow->sortLayer = 1;
 
 	SCENE_MGR.GetCurrScene()->AddGo(shadow);
@@ -1178,6 +1274,7 @@ void Champion::SetHpGuage()
 	Guage->SetChampion(this);
 	Guage->SetEffectType(1);
 	Guage->SetHight(23.f);
+	Guage->SetActive(true);
 	Guage->sortLayer = 7;
 	Guage->sortOrder = 2;
 	SCENE_MGR.GetCurrScene()->AddGo(Guage);
@@ -1189,6 +1286,7 @@ void Champion::SetHpGuage()
 	hpGuageBg->SetChampion(this);
 	hpGuageBg->SetEffectType(1);
 	hpGuageBg->SetHight(23.f);
+	hpGuageBg->SetActive(true);
 	hpGuageBg->sortLayer = 4;
 	hpGuageBg->sortOrder = 0;
 	SCENE_MGR.GetCurrScene()->AddGo(hpGuageBg);
@@ -1210,6 +1308,7 @@ void Champion::SetHpGuage()
 	hpGuage->SetEffectType(3);
 	hpGuage->SetHight(22.f);
 	hpGuage->SetWidth(-14.5f);
+	hpGuage->SetActive(true);
 	hpGuage->sortLayer = 6;
 	hpGuage->sortOrder = 1;
 	SCENE_MGR.GetCurrScene()->AddGo(hpGuage);
@@ -1223,6 +1322,7 @@ void Champion::SetHpGuage()
 	coolGuage->SetEffectType(4);
 	coolGuage->SetHight(24.f);
 	coolGuage->SetWidth(-14.5f);
+	coolGuage->SetActive(true);
 	coolGuage->sortLayer = 6;
 	coolGuage->sortOrder = 1;
 	SCENE_MGR.GetCurrScene()->AddGo(coolGuage);

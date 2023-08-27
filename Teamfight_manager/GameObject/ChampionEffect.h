@@ -13,6 +13,7 @@ enum class EffectType
 	Base,
 	Hp,
 	CoolTime,
+	Object,
 };
 
 class ChampionEffect : public SpriteGo
@@ -49,5 +50,6 @@ public:
 	void UiUpdate(float dt);
 	void HpUpdate(float dt);
 	void CoolTimeUpdate(float dt);
+	void ObjectUpdate(float dt);
 };
 

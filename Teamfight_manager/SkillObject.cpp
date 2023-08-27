@@ -51,6 +51,11 @@ void SkillObject::Update(float dt)
 		this->SetActive(false);
 		break;
 	}
+	case SkillType::Public:
+	{
+		PublicUpdate(dt);
+		break;
+	}
 	case SkillType::Icemage:
 	{
 		IcemageUpdate(dt);
@@ -86,7 +91,19 @@ void SkillObject::Update(float dt)
 		MagicknightSkillUpdate(dt);
 		break;
 	}
+	case SkillType::SwordUltiSkill:
+	{
+		SwordUltiSkillUpdate(dt);
+		break;
 	}
+	}
+}
+
+void SkillObject::PublicUpdate(float dt)
+{
+	effect.Update(dt);
+	this->SetOrigin(Origins::MC);
+	this->SetPosition(champ->GetTarget()->GetPosition());
 }
 
 void SkillObject::IcemageUpdate(float dt)
@@ -233,6 +250,54 @@ void SkillObject::MagicknightSkillUpdate(float dt)
 	return;
 }
 
+void SkillObject::SwordUltiSkillUpdate(float dt)
+{
+	effect.Update(dt);
+	this->SetOrigin(Origins::ML);
+	this->sprite.setRotation(Utils::Angle(this->dir));
+	this->sprite.setScale(1.f, 1.f * this->scaleY);
+
+	if (this->objectTimer < 0.f)
+	{
+		for (auto enemy : this->champ->GetEnemyTeam())
+		{
+			if (this->check.empty())
+			{
+				if (SwordmanDamageRange(enemy->GetPosition(), this->champ->GetStartPos(), this->champ->GetEndPos()) <= 30)
+				{
+					check.push_back(enemy);
+					this->champ->SetTarget(enemy);
+					this->champ->DamageCalculate(300);
+					std::cout << this->champ->GetCurretState().charId << " °¡ " << this->champ->GetTarget()->GetCurretState().charId << " ¿¡°Ô µô" << std::endl;
+					continue;
+				}
+			}
+			else if(!this->check.empty())
+			{
+				for (auto c : check)
+				{
+					if (c == enemy)
+					{
+						continue;
+					}
+					else if (SwordmanDamageRange(enemy->GetPosition(), this->champ->GetStartPos(), this->champ->GetEndPos()) <= 30)
+					{
+						check.push_back(enemy);
+						this->champ->SetTarget(enemy);
+						this->champ->DamageCalculate(300);
+						std::cout << this->champ->GetCurretState().charId << " °¡ " << this->champ->GetTarget()->GetCurretState().charId << " ¿¡°Ô µô" << std::endl;
+						break;
+					}
+				}
+			}
+		}
+		this->champ->SetPosition(champ->GetEndPos());
+		this->champ->SetUltiSkill(false);
+		this->champ->SkillChangeIdle();
+		return;
+	}
+}
+
 void SkillObject::SetChampion(Champion* champion)
 {
 	this->champ = champion;
@@ -243,5 +308,37 @@ void SkillObject::SetAni(std::string path)
 	this->effect.AddClip(*RESOURCE_MGR.GetAnimationClip(path));
 	this->effect.SetTarget(&this->sprite);
 	this->SetOrigin(Origins::BL);
+}
+
+float SkillObject::SwordmanDamageRange(sf::Vector2f enemy, sf::Vector2f start, sf::Vector2f end)
+{
+	sf::Vector2f targetLine = end - start;
+	float targetLength = Utils::Magnitude(targetLine);
+	
+	targetLine /= targetLength;
+
+	sf::Vector2f enemyPos = enemy - start;
+	float point = enemyPos.x * targetLine.x + enemyPos.y * targetLine.y;
+
+	sf::Vector2f posDis;
+
+	if (point <= 0)
+	{
+		posDis = start;
+	}
+	else if (point >= targetLength)
+	{
+		posDis = end;
+	}
+	else
+	{
+		posDis = start + targetLine * point;
+	}
+
+	sf::Vector2f distance;
+	distance.x = enemy.x - posDis.x;
+	distance.y = enemy.y - posDis.y;
+
+	return Utils::Magnitude(distance);
 }
 

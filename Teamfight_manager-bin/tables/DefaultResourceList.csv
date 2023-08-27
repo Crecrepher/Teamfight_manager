@@ -187,3 +187,7 @@ RESOURCE_TYPES 0.TEX 1.FONT 2.SOUND 3.ANI,RESOURCE_PATH
 3,animations/birdFly.csv
 3,animations/turnArrowBlue.csv
 3,animations/turnArrowRed.csv
+0,graphics/CustomSprite/swordmanUltiSkill.png
+3,animations/Effect/SwordmanUltiSkill.csv
+0,graphics/CustomSprite/soldierSkill.png
+3,animations/Effect/SoldierSkill.csv
