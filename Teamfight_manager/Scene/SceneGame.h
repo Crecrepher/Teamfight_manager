@@ -3,7 +3,6 @@
 #include "ObjectPool.h"
 #include "Champion.h"
 #include "ChampionEffect.h"
-#include "SkillObject.h"
 #include "GameState.h"
 #include "AnimatioControler.h"
 #include "TextGo.h"
@@ -42,7 +41,6 @@ protected:
 
 	ObjectPool<Champion> championPool;
 	ObjectPool<ChampionEffect> effectPool;
-	ObjectPool<SkillObject> skillObjPool;
 	
 	std::vector<Champion*> redTeam;
 	std::vector<Champion*> blueTeam;
@@ -95,7 +93,7 @@ protected:
 
 	std::vector<TextGo*> championSlotName;
 	std::vector<TextGo*> banPickText;
-	int banPickTextCount = 14; // 일단 최대값기준
+	int banPickTextCount = 15; // 일단 최대값기준
 	int banPickTextClickCount = 0;
 	int pickDoingSlotClickCount = 0;
 
@@ -133,10 +131,6 @@ protected:
 	bool isPlayerEnough = true;
 	bool isClickBlocker = false;
 	int swapIndex = -1;
-
-	std::vector<int> playerOriginIndex;
-	std::vector<int> playerPick;
-	std::vector<int> enemyPick;
 public:
 	SceneGame();
 	virtual ~SceneGame() override;
@@ -186,7 +180,10 @@ public:
 	void SwapSlotFalse();
 	void GetPlayers();
 
-	void SetChampionStat();
+
+	// 함수를 두개 만들고
+	// 2:2, 3:3일때 스트링 테이블을 위쪽에서 가져오고
+	// 4:4 일때는 아래쪽으로
 };
 
 template<typename T>

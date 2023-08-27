@@ -3,7 +3,6 @@
 
 #include "DataTableMgr.h"
 #include "StringTable.h"
-#include "ItemTable.h"
 #include "SceneMgr.h"
 #include "InputMgr.h"
 #include "ResourceMgr.h"
@@ -34,13 +33,6 @@ void SceneGame::Init()
 {
 	Release();
 	isClickBlocker = false;
-
-	SoundGo* sound = (SoundGo*)AddGo(new SoundGo("sound/Stupid_Dancer.wav", "BanPickBgm"));
-	sound->sound.setLoop(true);
-	sound = (SoundGo*)AddGo(new SoundGo("sound/Loop Electronic001.wav", "BattleBgm"));
-	sound->sound.setLoop(true);
-	AddGo(new SoundGo("sound/Sword Stab (Flesh) 1 #41315.wav", "BanSound"));
-	AddGo(new SoundGo("sound/RELOAD_Pump_stereo.wav", "PickSound"));
 
 	// 카메라
 	sf::Vector2f windowSize = FRAMEWORK.GetWindowSize();
@@ -204,24 +196,13 @@ void SceneGame::Init()
 		};
 	effectPool.Init(100);
 
-	skillObjPool.OnCreate = [this](SkillObject* effect) {
-		effect->SetType(0);
-		effect->SetObjectTimer(0.f);
-		effect->SetEffectTime(0.f);
-		effect->SetEffectTimer(0.f);
-		effect->SetActive(false);
-		effect->SetPool(&skillObjPool);
-	};
-	skillObjPool.Init(1000);
-
 	championPool.OnCreate = [this, field](Champion* champion) {
 		champion->ChangeStance(ChampionStance::None);
 		champion->SetField(field);
-		champion->SetChampionPool(&championPool);
 		champion->SetEffectPool(&effectPool);
-		champion->SetSkillObjPool(&skillObjPool);
 		champion->sortLayer = 3;
 		};
+
 	championPool.Init();
 
 	// 경기장 x : 366 - 910
@@ -246,9 +227,6 @@ void SceneGame::Release()
 void SceneGame::Enter()
 {
 	Scene::Enter();
-	SoundGo* sound = (SoundGo*)FindGo("BanPickBgm");
-	sound->Play();
-
 	RESOURCE_MGR.LoadFromCsv("tables/GameResourceList.csv");
 
 	banAnimation.Play("Idle");
@@ -270,6 +248,47 @@ void SceneGame::Enter()
 	banSheet->SetPosition(-100, -100);
 	banSheetBlueTeam->SetActive(false);
 	banSheetRedTeam->SetActive(false);
+	FindGo("BanBlueLine")->SetActive(false);
+	FindGo("BanRedLine")->SetActive(false);
+
+	switch (mode)
+	{
+	case Mode::Duo:
+	case Mode::Trio:
+		for (int i = 0; i < 8; i++)
+		{
+			std::stringstream ss;
+			ss << "BanPickText" << i + 1;
+			auto stringTable = DATATABLE_MGR.Get<StringTable>(DataTable::Ids::String);
+			banPickText[i]->text.setString(stringTable->GetW(ss.str()));
+
+			banPickText[i]->SetOrigin(Origins::MC);
+		}
+		break;
+	case Mode::Sqaud:
+		for (int i = 0; i < 14; i++)
+		{
+			std::stringstream ss;
+			ss << "BanPickText_4:4_" << i + 1;
+			auto stringTable = DATATABLE_MGR.Get<StringTable>(DataTable::Ids::String);
+			banPickText[i]->text.setString(stringTable->GetW(ss.str()));
+
+			banPickText[i]->SetOrigin(Origins::MC);
+		}
+		break;
+	default:
+		break;
+	}
+
+	for (int i = 0; i < 14; i++)
+	{
+		FindGo("PickImage" + std::to_string(i + 1))->SetPosition(-100, -100);
+	}
+
+	for (int i = 0; i < 4; i++)
+	{
+		pickDoingSlot[i]->SetActive(false);
+	}
 
 	for (int i = 0; i < champCount; i++)
 	{
@@ -298,17 +317,8 @@ void SceneGame::Enter()
 	pickDoingSlotCount = (int)mode + 2;
 	pickSlotEnemyCount = (int)mode + 2;
 	enemyPickDoingSlotCount = (int)mode + 2;
-
 	redScore = 0;
 	blueScore = 0;
-
-	playerPick = std::vector<int>(4);
-	enemyPick = std::vector<int>(4);
-	playerOriginIndex = std::vector<int>(6);
-	for (int i = 0; i < 6; i++)
-	{
-		playerOriginIndex[i] = i;
-	}
 
 	SpriteGo* spr = (SpriteGo*)FindGo("1");
 	spr->SetActive(false);
@@ -358,11 +368,6 @@ void SceneGame::Enter()
 
 void SceneGame::Exit()
 {
-	SoundGo* sound = (SoundGo*)FindGo("BanPickBgm");
-	sound->sound.stop();
-	sound = (SoundGo*)FindGo("BattleBgm");
-	sound->sound.stop();
-
 	if (!redTeam.empty())
 	{
 		for (auto team : redTeam)
@@ -381,7 +386,6 @@ void SceneGame::Exit()
 	}
 	ClearObjectPool(championPool);
 	ClearObjectPool(effectPool);
-	ClearObjectPool(skillObjPool);
 	Scene::Exit();
 }
 
@@ -560,11 +564,6 @@ void SceneGame::ChangePhase(Phase cPhase)
 	}
 	case Phase::Battle:
 	{
-		SoundGo* sound = (SoundGo*)FindGo("BanPickBgm");
-		sound->sound.stop();
-		sound = (SoundGo*)FindGo("BattleBgm");
-		sound->Play();
-		SetChampionStat();
 		BanPickToBattleFalse();
 		currentPhase = Phase::Battle;
 		battleTimer = 60.f;
@@ -631,7 +630,6 @@ void SceneGame::ChampionPick(int id, Team team)
 	champ->SetOrigin(Origins::MC);
 	champ->SetSacleX(1);
 	champ->SetUltiTimer(Utils::RandomRange(10.f, 30.f));
-	champ->SetUltiSkill(true);
 
 	switch (team)
 	{
@@ -855,33 +853,6 @@ void SceneGame::BattlePhase(float dt)
 		{
 			champ->BattleUpdate(dt * 1.5f * speedUp);
 		}
-
-		for (auto champ : championPool.GetUseList())
-		{
-			if (champ->GetTeamColor() == Team::None)
-			{
-				championPool.Return(champ);
-				break;
-			}
-		}
-
-		for (auto it = skillObjPool.GetUseList().begin(); it != skillObjPool.GetUseList().end();)
-		{
-			if ((*it) != nullptr)
-			{
-				(*it)->Update(dt * speedUp);
-			}
-
-			if ((*it)->GetObjectTimer() <= 0.f)
-			{
-				(*it)->Release();
-				return;
-			}
-			else
-			{
-				++it;
-			}
-		}
 	}
 	if (battleTimer <= 0)
 	{
@@ -919,14 +890,13 @@ void SceneGame::ResultPhase(float dt)
 		{
 			for (auto team : redTeam)
 			{
-				std::cout << team->GetName() << " "<<team->GetCurretState().charId << " 킬 : " << team->GetKillScore() << std::endl;
+				std::cout << team->GetName() << " 킬 : " << team->GetKillScore() << std::endl;
 				std::cout << team->GetName() << " 데스 : " << team->GetDeathScore() << std::endl;
 				std::cout << team->GetName() << " 입힌 피해 : " << team->GetTotalDamage() << std::endl;
 				std::cout << team->GetName() << " 당한 피해 : " << team->GetTotalOnHit() << std::endl;
 				team->ReleaseSkill();
 				RemoveGo(team);
 				team->SetTeamColor(Team::None);
-				team->Release();
 				championPool.Return(team);
 			}
 			redTeam.clear();
@@ -936,15 +906,13 @@ void SceneGame::ResultPhase(float dt)
 		{
 			for (auto team : blueTeam)
 			{
-				TEAM_MGR.SetKillDeath(team->GetPlayerIndex(), team->GetKillScore(), team->GetDeathScore());
-				std::cout << team->GetName() << " " << team->GetCurretState().charId << " 킬 : " << team->GetKillScore() << std::endl;
+				std::cout << team->GetName() << " 킬 : " << team->GetKillScore() << std::endl;
 				std::cout << team->GetName() << " 데스 : " << team->GetDeathScore() << std::endl;
 				std::cout << team->GetName() << " 입힌 피해 : " << team->GetTotalDamage() << std::endl;
 				std::cout << team->GetName() << " 당한 피해 : " << team->GetTotalOnHit() << std::endl;
 				team->ReleaseSkill();
 				RemoveGo(team);
 				team->SetTeamColor(Team::None);
-				team->Release();
 				championPool.Return(team);
 			}
 			blueTeam.clear();
@@ -954,18 +922,13 @@ void SceneGame::ResultPhase(float dt)
 		{
 			for (auto team : cemetery)
 			{
-				if (team->GetTeamColor() == Team::Blue)
-				{
-					TEAM_MGR.SetKillDeath(team->GetPlayerIndex(), team->GetKillScore(), team->GetDeathScore());
-				}
-				std::cout << team->GetName() << " " << team->GetCurretState().charId << " 킬 : " << team->GetKillScore() << std::endl;
+				std::cout << team->GetName() << " 킬 : " << team->GetKillScore() << std::endl;
 				std::cout << team->GetName() << " 데스 : " << team->GetDeathScore() << std::endl;
 				std::cout << team->GetName() << " 입힌 피해 : " << team->GetTotalDamage() << std::endl;
 				std::cout << team->GetName() << " 당한 피해 : " << team->GetTotalOnHit() << std::endl;
 				team->ReleaseSkill();
 				RemoveGo(team);
 				team->SetTeamColor(Team::None);
-				team->Release();
 				championPool.Return(team);
 			}
 			cemetery.clear();
@@ -974,22 +937,11 @@ void SceneGame::ResultPhase(float dt)
 		{
 			TEAM_MGR.DoPerfectWin();
 			TEAM_MGR.EarnMoney(150);
-			for (int i = 0; i < pickSlotCount; i++)
-			{
-				TEAM_MGR.ChampWin(playerPick[i]);
-				TEAM_MGR.ChampLose(enemyPick[i]);
-			}
 		}
 		else if (blueScore < redScore)
 		{
 			TEAM_MGR.DoLose();
-			for (int i = 0; i < pickSlotCount; i++)
-			{
-				TEAM_MGR.ChampWin(enemyPick[i]);
-				TEAM_MGR.ChampLose(playerPick[i]);
-			}
 		}
-		TEAM_MGR.CheckQuest();
 		SCENE_MGR.ChangeScene(SceneId::Home);
 	}
 }
@@ -1800,7 +1752,7 @@ void SceneGame::BanPickInit()
 	TextGo* text;
 
 	championSlotName = std::vector<TextGo*>(champCount);
-	banPickText = std::vector<TextGo*>(banPickTextCount); // 일단 3:3기준이라 카운트가 6임
+	banPickText = std::vector<TextGo*>(banPickTextCount); // 최대값 기준 14번
 
 	for (int i = 0; i < banPickTextCount; i++)
 	{
@@ -1813,9 +1765,6 @@ void SceneGame::BanPickInit()
 		banPickText[i]->sortOrder = 1;
 		banPickText[i]->text.setCharacterSize(30);
 		banPickText[i]->text.setFillColor(sf::Color::White);
-
-		auto stringTable = DATATABLE_MGR.Get<StringTable>(DataTable::Ids::String);
-		banPickText[i]->text.setString(stringTable->GetW(ss.str()));
 
 		banPickText[i]->SetPosition(FRAMEWORK.GetWindowSize().x / 2.f, 125);
 		banPickText[i]->SetOrigin(Origins::MC);
@@ -2035,10 +1984,7 @@ void SceneGame::BanPickInit()
 						return;
 					}
 				}
-
-				SoundGo* sound = (SoundGo*)FindGo("BanSound");
-				sound->Play();
-
+				
 				if (aiBanTimer >= 0 && currentTurn == Turn::Enemy)
 				{
 					std::cout << "상대방의 턴입니다." << std::endl;
@@ -2052,6 +1998,8 @@ void SceneGame::BanPickInit()
 
 					FindGo("TurnArrowBlue")->SetActive(false);
 					FindGo("BanBlueLine")->SetActive(false);
+
+					// 스위치문
 
 					banPickText[banPickTextClickCount]->SetActive(false);
 					banPickTextClickCount++;
@@ -2086,7 +2034,7 @@ void SceneGame::BanPickInit()
 					banPickCheck = true;
 				}
 				
-				aiBanTimer = 2.f;
+				aiBanTimer = 0.5f;
 
 				banEffectAnimation[banCount].Play("Idle");
 				banEffectAnimation[banCount].GetTarget()->setScale(1.f, 1.f);
@@ -2116,9 +2064,6 @@ void SceneGame::BanPickInit()
 					}
 				}
 
-				SoundGo* sound = (SoundGo*)FindGo("PickSound");
-				sound->Play();
-
 				// 본인의 턴이 아닐때 클릭방지
 				if (aiPickTimer >= 0 && currentTurn == Turn::Enemy)
 				{
@@ -2137,10 +2082,6 @@ void SceneGame::BanPickInit()
 					enemyPickDoingSlot[enemyPickDoingSlotCount]->SetActive(true);
 
 					pickDoingSlot[pickDoingSlotCount]->SetActive(false);
-					if (pickDoingSlotCount < 3)
-					{
-						pickDoingSlotCount++;
-					}
 
 					banPickText[banPickTextClickCount]->SetActive(false);
 					banPickTextClickCount++;
@@ -2155,9 +2096,16 @@ void SceneGame::BanPickInit()
 					FindGo("TurnArrowRed")->SetActive(false);
 					FindGo("BanRedLine")->SetActive(false);
 
-					pickDoingSlot[pickDoingSlotCount]->SetActive(true);
-					//pickDoingSlotCount++;
-
+					if (pickDoingSlotCount < 3)
+					{
+						pickDoingSlotCount++;
+						pickDoingSlot[pickDoingSlotCount]->SetActive(true);			
+					}
+					else if (pickDoingSlotCount == 2)
+					{
+						pickDoingSlot[pickDoingSlotCount]->SetActive(false);
+					}
+					
 					enemyPickDoingSlot[enemyPickDoingSlotCount]->SetActive(false);
 					enemyPickDoingSlotCount++;
 
@@ -2168,16 +2116,15 @@ void SceneGame::BanPickInit()
 					banPickCheck = true;
 				}
 
-				aiPickTimer = 2.f;
+				aiPickTimer = 0.5f;
 
 				if (team == Team::Red)
 				{
-					enemyPick[pickEnemyCount] = i;
 					championSlot[i]->sprite.setColor(sf::Color(250, 0, 0));
 					ss.str("");
 					ss << "PickImage" << i + 1;
 					SpriteGo* enemyPickIcon = (SpriteGo*)FindGo(ss.str());
-					if (pickEnemyCount < 3)
+					if (pickEnemyCount < 4)
 					{
 						enemyPickIcon->SetPosition(1150, 137 + (pickEnemyCount * 158));
 						pickEnemyCount++;
@@ -2187,12 +2134,12 @@ void SceneGame::BanPickInit()
 				}
 				else
 				{
-					playerPick[pickCount] = i;
 					championSlot[i]->sprite.setColor(sf::Color(0, 0, 250));
+
 					ss.str("");
 					ss << "PickImage" << i + 1;
 					SpriteGo* pickIcon = (SpriteGo*)FindGo(ss.str());
-					if (pickCount < 3)
+					if (pickCount < 4)
 					{
 						pickIcon->SetPosition(29, 137 + (pickCount * 158));
 						pickCount++;
@@ -2204,6 +2151,7 @@ void SceneGame::BanPickInit()
 				ChampionPick(i, team);
 				ChangeTeam();
 				ChangeTurn();
+
 			}
 			};
 	}
@@ -2342,12 +2290,10 @@ void SceneGame::LineUpInit()
 				if (i > (int)mode + 1)
 				{
 					std::swap(playerInfo[i - (2 - (int)mode)], playerInfo[swapIndex]);
-					std::swap(playerOriginIndex[i - (2 - (int)mode)], playerOriginIndex[swapIndex]);
 				}
 				else
 				{
 					std::swap(playerInfo[i], playerInfo[swapIndex]);
-					std::swap(playerOriginIndex[i], playerOriginIndex[swapIndex]);
 				}
 				SetLineUp();
 
@@ -2891,84 +2837,6 @@ void SceneGame::GetPlayers()
 		return;
 	}
 	swapChampCount = Utils::Clamp(TEAM_MGR.GetPlayerNum(), (int)mode + 2, (int)mode + 4);
-}
-
-void SceneGame::SetChampionStat()
-{
-	int count = 0;
-	auto itemTable = DATATABLE_MGR.Get<ItemTable>(DataTable::Ids::Item);
-	std::vector<int> gearNum = TEAM_MGR.GetEquipedGear();
-	std::vector<ItemInfo> gear = std::vector<ItemInfo>(4);
-	for (int i = 0; i < 4; i++)
-	{
-		gear[i] = itemTable->Get(i, gearNum[i]);
-	}
-
-	for (auto team : blueTeam)
-	{
-		int Atk = 0;
-		int Def = 0;
-		int AtkSpeed = 0;
-		int CoolDown = 0;
-		int HpDrain = 0;
-
-		Atk += playerInfo[count].attack;
-		Def += playerInfo[count].defence;
-		for (int i = 0; i < playerInfo[count].knownChamp; i++)
-		{
-			if (playerInfo[count].proficiencyCode[i] == playerPick[count])
-			{
-				Atk += playerInfo[count].proficiencyLevel[i];
-				Def += playerInfo[count].proficiencyLevel[i];
-			}
-		}
-
-		for (int i = 0; i < 4; i++)
-		{
-			Atk += gear[i].atk;
-			Def += gear[i].def;
-			AtkSpeed += gear[i].atkSpeed;
-			CoolDown += gear[i].coolDown;
-			HpDrain += gear[i].hpDrain;
-
-			if (gear[i].champProficiency == playerPick[count] + 1)
-			{
-				Atk += gear[i].champProficiencyValue;
-				Def += gear[i].champProficiencyValue;
-			}
-			if (gear[i].proficiencyType == (int)team->GetCurretState().type + 1)
-			{
-				Atk += gear[i].proficiencyValue;
-				Def += gear[i].proficiencyValue;
-			}
-		}
-		team->GetStat(Atk, Def, AtkSpeed, CoolDown, HpDrain, playerOriginIndex[count]);
-		count++;
-	}
-
-	count = 0;
-
-	for (auto team : redTeam)
-	{
-		int Atk = 0;
-		int Def = 0;
-		int AtkSpeed = 0;
-		int CoolDown = 0;
-		int HpDrain = 0;
-		
-		Atk += enemyInfo.player[count].attack;
-		Def += enemyInfo.player[count].defence;
-		for (int i = 0; i < enemyInfo.player[count].knownChamp; i++)
-		{
-			if (enemyInfo.player[count].proficiencyCode[i] == enemyPick[count])
-			{
-				Atk += enemyInfo.player[count].proficiencyLevel[i];
-				Def += enemyInfo.player[count].proficiencyLevel[i];
-			}
-		}
-		team->GetStat(Atk, Def, AtkSpeed, CoolDown, HpDrain, count);
-		count++;
-	}
 }
 
 void SceneGame::SetLineUp()
