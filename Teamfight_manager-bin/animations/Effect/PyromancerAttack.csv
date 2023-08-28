@@ -1,0 +1,17 @@
+ID,FPS,LOOPTYPE,,
+SkillEffect,10,0,,
+,,,,
+TEXTUREID,LEFT,TOP,WIDTH,HEIGHT
+graphics/CustomSprite/pyromancerAttack.png,0,0,7,16
+graphics/CustomSprite/pyromancerAttack.png,0,16,10,29
+graphics/CustomSprite/pyromancerAttack.png,0,45,14,36
+graphics/CustomSprite/pyromancerAttack.png,0,81,35,42
+graphics/CustomSprite/pyromancerAttack.png,0,123,49,49
+graphics/CustomSprite/pyromancerAttack.png,0,704,96,96
+graphics/CustomSprite/pyromancerAttack.png,0,360,86,82
+graphics/CustomSprite/pyromancerAttack.png,0,524,90,90
+graphics/CustomSprite/pyromancerAttack.png,0,442,94,82
+graphics/CustomSprite/pyromancerAttack.png,0,614,94,90
+graphics/CustomSprite/pyromancerAttack.png,0,294,93,66
+graphics/CustomSprite/pyromancerAttack.png,0,232,95,62
+graphics/CustomSprite/pyromancerAttack.png,0,172,96,60

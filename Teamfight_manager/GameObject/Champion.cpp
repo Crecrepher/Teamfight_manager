@@ -529,6 +529,7 @@ void Champion::Attack(float dt)
 		//std::cout << "공격" << std::endl;
 		if (this->currentState.charId == "priest")
 		{
+			AttackObj();
 			HealCalculate(this->currentState.attack);
 		}
 		else if (this->currentState.charId != "priest" && this->currentState.charId == "pyromancer")
@@ -661,6 +662,7 @@ void Champion::Dead(float dt)
 	{
 		this->currentState.animaition.Stop();
 		this->hp = this->currentState.maxHp;
+		this->target = nullptr;
 		auto it = std::find(cemetery->begin(), cemetery->end(), this);
 		this->myTeam->push_back(*it);
 		this->cemetery->erase(it);
@@ -678,6 +680,7 @@ void Champion::Dead(float dt)
 		}
 		}
 		this->sprite.setColor(sf::Color(255, 255, 255, 255));
+		ChangeStance(ChampionStance::Idle);
 		this->SetShadow();
 		this->SetHpGuage();
 		return;
@@ -686,15 +689,12 @@ void Champion::Dead(float dt)
 
 void Champion::ChampionDie()
 {
+	ChangeStance(ChampionStance::Dead);
 	this->reviveTimer = 3.f;
 	this->death++;
-	this->target = nullptr;
-	this->currentState.animaition.Stop();
-	ChangeStance(ChampionStance::Idle);
 	//std::cout << this->GetName() << "챔피언 죽음" << std::endl;
 	//std::cout << this->GetName() << " 데스 : " << this->death << std::endl;
 	this->sprite.setColor(sf::Color(0, 0, 0, 0));
-	ChangeStance(ChampionStance::Dead);
 	return;
 }
 
@@ -941,7 +941,7 @@ Champion* Champion::GetTarget()
 
 ChampionEffect* Champion::GetEffectPool()
 {
-	return this->pool->Get();
+	return pool->Get();
 }
 
 void Champion::SetTarget(Champion* champ)
@@ -1101,6 +1101,7 @@ void Champion::SetSkillObj(int type, float oTimer, float eTime, float eTimer)
 	obj->SetEffectTimer(eTimer);
 	obj->SetPosition(this->GetPosition());
 	obj->SetActive(true);
+	obj->sortLayer = 6;
 
 	SCENE_MGR.GetCurrScene()->AddGo(obj);
 }
@@ -1114,7 +1115,23 @@ void Champion::SetSkillObj(int type, float oTimer, std::string path1, std::strin
 	obj->SetPosition(this->GetPosition());
 	obj->SetActive(true);
 	obj->SetAni(path1);
+	obj->sortLayer = 6;
 
+	SCENE_MGR.GetCurrScene()->AddGo(obj);
+
+	obj->PlayAni(path2);
+}
+
+void Champion::SetSkillObj(int type, float oTimer, Champion* champ, std::string path1, std::string path2)
+{
+	SkillObject* obj = sObjPool->Get();
+	obj->SetType(type);
+	obj->SetChampion(champ);
+	obj->SetObjectTimer(oTimer);
+	obj->SetPosition(champ->GetPosition());
+	obj->SetActive(true);
+	obj->SetAni(path1);
+	obj->sortLayer = 6;
 	SCENE_MGR.GetCurrScene()->AddGo(obj);
 
 	obj->PlayAni(path2);
@@ -1126,10 +1143,12 @@ void Champion::SetSkillObj(int type, float oTimer, float eTime, float eTimer, st
 	obj->SetType(type);
 	obj->SetChampion(this->GetTarget());
 	obj->SetObjectTimer(oTimer);
+	obj->SetEffectTime(eTime);
+	obj->SetEffectTimer(eTimer);
 	obj->SetPosition(this->GetTarget()->GetPosition());
 	obj->SetActive(true);
 	obj->SetAni(path1);
-
+	obj->sortLayer = 6;
 	SCENE_MGR.GetCurrScene()->AddGo(obj);
 
 	obj->PlayAni(path2);
@@ -1145,7 +1164,7 @@ void Champion::SetSkillObj(int type, float oTimer, sf::Vector2f dir, std::string
 	obj->SetPosition(this->GetPosition());
 	obj->SetActive(true);
 	obj->SetAni(path1);
-
+	obj->sortLayer = 6;
 	if (this->sprite.getScale().x < 0)
 	{
 		obj->SetScaleY(-1.f);
@@ -1172,7 +1191,7 @@ void Champion::SetSkillObj(int type, float oTimer, float eTime, float eTimer, sf
 	obj->SetPosition(this->GetPosition());
 	obj->SetActive(true);
 	obj->SetAni(path1);
-
+	obj->sortLayer = 6;
 	if (this->sprite.getScale().x < 0)
 	{
 		obj->SetScaleY(-1.f);
@@ -1202,7 +1221,7 @@ void Champion::SetCopyChar(Champion* champ)
 
 Champion* Champion::GetPool()
 {
-	return this->cPool->Get();
+	return cPool->Get();
 }
 
 void Champion::AttackObj()
@@ -1218,7 +1237,7 @@ void Champion::AttackObj()
 			bullet->sprite.setTextureRect(setting);
 			bullet->SetChampion(this);
 			bullet->SetEffectType(5);
-			bullet->sortLayer = 2;
+			bullet->sortLayer = 6;
 			bullet->SetActive(true);
 			bullet->SetPosition(this->GetPosition());
 			this -> attackFrame = true;
@@ -1229,6 +1248,10 @@ void Champion::AttackObj()
 		{
 			this->attackFrame = false;
 		}
+	}
+	else if (this->GetCurretState().charId == "priest")
+	{
+		this->SetSkillObj(9, 2.f, this->GetTarget(), "animations/Effect/PriestAttack.csv", "SkillEffect");
 	}
 	else if (this->GetCurretState().charId == "archer")
 	{
@@ -1241,7 +1264,7 @@ void Champion::AttackObj()
 			arrow->sprite.setTextureRect(setting);
 			arrow->SetChampion(this);
 			arrow->SetEffectType(5);
-			arrow->sortLayer = 2;
+			arrow->sortLayer = 6;
 			arrow->SetActive(true);
 			arrow->SetPosition(this->GetPosition());
 			this->attackFrame = true;
@@ -1253,11 +1276,23 @@ void Champion::AttackObj()
 			this->attackFrame = false;
 		}
 	}
+	else if (this->GetCurretState().charId == "pyromancer")
+	{
+		if (this->GetCurretState().animaition.GetCurrFrame() == 4 && !this->attackFrame)
+		{
+			this->SetSkillObj(0, 3.f, "animations/Effect/PyromancerAttack.csv", "SkillEffect");
+			this->attackFrame = true;
+		}
+		else if (this->GetCurretState().animaition.GetLastFrame())
+		{
+			this->attackFrame = false;
+		}
+	}
 }
 
 void Champion::SetShadow()
 {
-	ChampionEffect* shadow = this->pool->Get();
+	ChampionEffect* shadow = pool->Get();
 	sf::IntRect setting = { 0, 0, 20, 10 };
 	shadow->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/CustomSprite/player_shadow.png"));
 	shadow->sprite.setTextureRect(setting);
@@ -1274,7 +1309,7 @@ void Champion::SetShadow()
 void Champion::SetHpGuage()
 {
 	sf::IntRect setting = { 0,0,30,6 };
-	ChampionEffect* Guage = this->pool->Get();
+	ChampionEffect* Guage = pool->Get();
 	Guage->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/CustomSprite/player_ingame_guage_5.png"));
 	Guage->sprite.setTextureRect(setting);
 	Guage->SetChampion(this);
@@ -1287,7 +1322,7 @@ void Champion::SetHpGuage()
 	SCENE_MGR.GetCurrScene()->AddGo(Guage);
 
 	sf::IntRect hpBgSetting = { 0,0,30,6 };
-	ChampionEffect* hpGuageBg = this->pool->Get();
+	ChampionEffect* hpGuageBg =pool->Get();
 	hpGuageBg->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/CustomSprite/player_ingame_guage_0.png"));
 	hpGuageBg->sprite.setTextureRect(hpBgSetting);
 	hpGuageBg->SetChampion(this);
@@ -1301,7 +1336,7 @@ void Champion::SetHpGuage()
 
 
 	sf::IntRect GuageSetting = { 0,0,29,2 };
-	ChampionEffect* hpGuage = this->pool->Get();
+	ChampionEffect* hpGuage = pool->Get();
 	if (this->team == Team::Red)
 	{
 		hpGuage->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/CustomSprite/player_ingame_guage_4.png"));
@@ -1322,7 +1357,7 @@ void Champion::SetHpGuage()
 	SCENE_MGR.GetCurrScene()->AddGo(hpGuage);
 
 	sf::IntRect coolSetting = {0,0,30,1};
-	ChampionEffect* coolGuage = this->pool->Get();
+	ChampionEffect* coolGuage = pool->Get();
 	coolGuage->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/CustomSprite/player_ingame_guage_2.png"));
 	coolGuage->sprite.setTextureRect(coolSetting);
 	coolGuage->SetChampion(this);
@@ -1545,6 +1580,10 @@ void Champion::HealCalculate(float attack)
 	if (heal + this->target->GetHp() >= this->target->GetCurretState().maxHp)
 	{
 		heal = this->target->GetCurretState().maxHp - this->target->GetHp();
+	}
+	if(this->currentState.charId=="monk")
+	{
+	this->SetSkillObj(9, 2.f, this->target, "animations/Effect/MonkSkill.csv", "SkillEffect");
 	}
 	this->total_Damage += heal;
 	//std::cout << this->GetName() << " 회복량 : " << this->total_Damage << std::endl;

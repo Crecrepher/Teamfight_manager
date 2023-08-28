@@ -221,6 +221,7 @@ public:
 	void BuffUpdate(float dt);
 	void SetSkillObj(int type, float oTimer, float eTime, float eTimer);
 	void SetSkillObj(int type, float oTimer, std::string path1, std::string path2);
+	void SetSkillObj(int type, float oTimer, Champion* champ, std::string path1, std::string path2);
 	void SetSkillObj(int type, float oTimer, float eTime, float eTimer, std::string path1, std::string path2);
 	void SetSkillObj(int type, float oTimer, sf::Vector2f dir, std::string path1, std::string path2);
 	void SetSkillObj(int type, float oTimer, float eTime, float eTimer, sf::Vector2f dir, std::string path1, std::string path2);

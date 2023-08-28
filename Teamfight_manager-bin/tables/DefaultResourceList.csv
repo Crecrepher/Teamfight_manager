@@ -191,3 +191,17 @@ RESOURCE_TYPES 0.TEX 1.FONT 2.SOUND 3.ANI,RESOURCE_PATH
 3,animations/Effect/SwordmanUltiSkill.csv
 0,graphics/CustomSprite/soldierSkill.png
 3,animations/Effect/SoldierSkill.csv
+0,graphics/CustomSprite/knightSkill.png
+3,animations/Effect/KnightSkill.csv
+0,graphics/CustomSprite/monkSkill.png
+3,animations/Effect/MonkSkill.csv
+0,graphics/CustomSprite/priestAttack.png
+3,animations/Effect/PriestAttack.csv
+0,graphics/CustomSprite/pyromancerAttack.png
+3,animations/Effect/PyromancerAttack.csv
+0,graphics/CustomSprite/pyromancerSprit.png
+3,animations/Effect/PyromancerSprit.csv
+0,graphics/CustomSprite/pythonessSkill.png
+3,animations/Effect/PythonessSkill.csv
+0,graphics/CustomSprite/pyromancerSprit_2.png
+3,animations/Effect/PyromancerSprit_2.csv

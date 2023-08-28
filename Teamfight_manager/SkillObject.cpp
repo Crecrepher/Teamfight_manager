@@ -35,12 +35,23 @@ void SkillObject::Release()
 {
 	SpriteGo::Release();
 
+	this->sprite.setTexture(sf::Texture());
+	this->champ = nullptr;
+	this->type = SkillType::None;
+	this->effectTime = 0.f;
+	this->effectTimer = 0.f;
+	this->objectTimer = 0.f;
+	this->dir = { 0,0 };
+	this->check.clear();
+	this->SetActive(false);
+
 	SCENE_MGR.GetCurrScene()->RemoveGo(this);
 	pool->Return(this);
 }
 
 void SkillObject::Update(float dt)
 {
+	this->sortOrder = this->GetPosition().y;
 	this->effectTimer -= dt;
 	this->objectTimer -= dt;
 
@@ -96,6 +107,11 @@ void SkillObject::Update(float dt)
 		SwordUltiSkillUpdate(dt);
 		break;
 	}
+	case SkillType::Team:
+	{
+		TeamUpdate(dt);
+		break;
+	}
 	}
 }
 
@@ -109,6 +125,18 @@ void SkillObject::PublicUpdate(float dt)
 	}
 	this->SetOrigin(Origins::MC);
 	this->SetPosition(champ->GetTarget()->GetPosition());
+}
+
+void SkillObject::TeamUpdate(float dt)
+{
+	effect.Update(dt);
+	if (this->champ == nullptr)
+	{
+		this->objectTimer = 0.f;
+		return;
+	}
+	this->SetOrigin(Origins::MC);
+	this->SetPosition(champ->GetPosition());
 }
 
 void SkillObject::IcemageUpdate(float dt)
@@ -170,15 +198,28 @@ void SkillObject::PriestUpdate(float dt)
 
 void SkillObject::PyromancerUpdate(float dt)
 {
+	effect.Update(dt);
+
 	if (this->objectTimer < 0.f)
 	{
 		return;
 	}
 
-	if (this->effectTimer < 0.f)
+	if (this->effectTimer < 0.f&&!this->torgle)
 	{
+		this->torgle = true;
+		this->SetAni("animations/Effect/PyromancerSprit_2.csv");
+		this->PlayAni("SkillEffect");
 		this->effectTimer = this->effectTime;
 		this->champ->TargetOrderCIE(1, 175, champ->GetCurretState().attack, this->GetPosition());
+		return;
+	}
+
+	if (this->torgle && this->effect.GetLastFrame())
+	{
+		this->torgle = false;
+		this->SetAni("animations/Effect/PyromancerSprit.csv");
+		this->PlayAni("SKillEffect");
 		return;
 	}
 }

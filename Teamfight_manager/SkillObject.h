@@ -18,6 +18,7 @@ enum class SkillType
 	Pythoness,
 	MagicknightSkill,
 	SwordUltiSkill,
+	Team,
 };
 
 class SkillObject : public SpriteGo
@@ -27,6 +28,8 @@ protected:
 	Champion* champ;
 
 	AnimatioControler effect;
+
+	bool torgle = false;
 
 	float objectTimer = 0.f;
 	float effectTime = 0.f;
@@ -47,6 +50,7 @@ public:
 	void Update(float dt);
 
 	void PublicUpdate(float dt);
+	void TeamUpdate(float dt);
 	void IcemageUpdate(float dt);
 	void MagicknightUpdate(float dt);
 	void PriestUpdate(float dt);
