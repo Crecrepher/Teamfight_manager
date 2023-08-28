@@ -168,6 +168,7 @@ void ChampionEffect::ObjectUpdate(float dt)
 	if (this->champ->GetTarget() == nullptr)
 	{
 		Setting();
+		return;
 	}
 	float a = Utils::Angle(Utils::Normalize(this->champ->GetTarget()->GetPosition() - this->champ->GetPosition()));
 	this->sprite.setRotation(a);
