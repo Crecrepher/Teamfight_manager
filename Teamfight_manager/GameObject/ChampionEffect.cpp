@@ -23,10 +23,23 @@ void ChampionEffect::Init()
 void ChampionEffect::Reset()
 {
 	SpriteGo::Reset();
+
+	this->sprite.setTexture(sf::Texture());
+
+	this->type = EffectType::None;
+	this->champ = nullptr;
+	this->plusWidth = 0.f;
+	this->plusHight = 0.f;
+
+	this->sprite.setScale(1.f, 1.f);
+	this->sprite.setRotation(0);
+
+	this->SetActive(false);
 }
 
 void ChampionEffect::Release()
 {
+
 	SpriteGo::Release();
 }
 
@@ -70,6 +83,8 @@ void ChampionEffect::Update(float dt)
 
 void ChampionEffect::Setting()
 {
+	this->sprite.setTexture(sf::Texture());
+
 	this->type = EffectType::None;
 	this->champ = nullptr;
 	this->plusWidth = 0.f;
@@ -77,7 +92,6 @@ void ChampionEffect::Setting()
 
 	this->sprite.setScale(1.f, 1.f);
 	this->sprite.setRotation(0);
-
 
 	this->SetActive(false);
 

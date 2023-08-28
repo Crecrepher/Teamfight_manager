@@ -1,0 +1,13 @@
+ID,FPS,LOOPTYPE,,
+SkillEffect,10,0,,
+,,,,
+TEXTUREID,LEFT,TOP,WIDTH,HEIGHT
+graphics/CustomSprite/monkSkill.png,0,0,16,6
+graphics/CustomSprite/monkSkill.png,0,6,24,6
+graphics/CustomSprite/monkSkill.png,0,41,32,27
+graphics/CustomSprite/monkSkill.png,0,97,32,31
+graphics/CustomSprite/monkSkill.png,0,128,34,39
+graphics/CustomSprite/monkSkill.png,0,167,46,40
+graphics/CustomSprite/monkSkill.png,0,68,46,29
+graphics/CustomSprite/monkSkill.png,0,21,46,20
+graphics/CustomSprite/monkSkill.png,0,12,34,9

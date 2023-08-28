@@ -1,0 +1,8 @@
+ID,FPS,LOOPTYPE,,
+SkillEffect,10,0,,
+,,,,
+TEXTUREID,LEFT,TOP,WIDTH,HEIGHT
+graphics/CustomSprite/pyromancerSprit_2.png,0,0,32,32
+graphics/CustomSprite/pyromancerSprit_2.png,0,96,64,64
+graphics/CustomSprite/pyromancerSprit_2.png,0,32,32,32
+graphics/CustomSprite/pyromancerSprit_2.png,0,64,32,32

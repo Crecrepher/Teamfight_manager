@@ -536,13 +536,18 @@ void SkillMgr::KnightSkill(Champion* champ)
 		{
 			champ->TargetOrderLR();
 			champ->GetTarget()->SetTarget(champ);
+			champ->GetTarget()->SetOrder(TargetingOrder::Aggro);
 		}
 		else if (champ->GetTarget()->GetCurretState().charId == "priest")
 		{
 			champ->TargetOrderSR();
 			champ->GetTarget()->SetTarget(champ);
+			champ->GetTarget()->SetOrder(TargetingOrder::Aggro);
 		}
 		champ->GetTarget()->SetBuff(aggro);
+
+		champ->SetSkillObj(0, 2.f, "animations/Effect/KnightSkill.csv", "SkillEffect");
+
 
 		BuffState* buff = new BuffState;
 		buff->SetType(BuffType::DEFEND);
@@ -825,7 +830,7 @@ void SkillMgr::PyromancerSkill(Champion* champ)
 	if (champ->GetCurretState().animaition.GetLastFrame())
 	{
 		std::cout << "fire ball" << std::endl;
-		champ->SetSkillObj(5, 5.f, 0.7f, 0.f);
+		champ->SetSkillObj(5, 5.f, 0.7f, 0.f, "animations/Effect/PyromancerSprit.csv", "SkillEffect");
 		champ->SkillChangeIdle();
 		return;
 	}
@@ -868,7 +873,7 @@ void SkillMgr::PythonessSkill(Champion* champ)
 		{
 			champ->TargetOrderH();
 			champ->HealCalculate(15);
-
+			champ->SetSkillObj(9, 2.f, champ->GetTarget(), "animations/Effect/PythonessSkill.csv", "SkillEffect");
 			//std::cout << "mu heal" << std::endl;
 			champ->SetFrameLimit(true);
 		}

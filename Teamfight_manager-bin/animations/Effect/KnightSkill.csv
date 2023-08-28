@@ -1,0 +1,10 @@
+ID,FPS,LOOPTYPE,,
+SkillEffect,10,0,,
+,,,,
+TEXTUREID,LEFT,TOP,WIDTH,HEIGHT
+graphics/CustomSprite/knightSkill.png,0,226,96,96
+graphics/CustomSprite/knightSkill.png,0,22,49,36
+graphics/CustomSprite/knightSkill.png,0,0,52,22
+graphics/CustomSprite/knightSkill.png,0,58,48,56
+graphics/CustomSprite/knightSkill.png,0,114,44,56
+graphics/CustomSprite/knightSkill.png,0,170,44,56
