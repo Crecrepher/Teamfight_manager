@@ -70,7 +70,7 @@ public:
 	void MainUiClose();
 	void MainUiFunc(int index);
 
-	void SubUiBaseOpen(int index,bool on = true);
+	void SubUiBaseOpen(int index, bool on = true);
 
 	void UiRecruitOpen(bool on = true);
 
@@ -80,22 +80,23 @@ public:
 	void UiTrainingPlayerSelect(int index);
 	void UiTrainingGaugeUpdate(int index);
 
-	void UiSponsorContractOpen(bool contract = false ,bool on = true);
+	void UiSponsorContractOpen(bool contract = false, bool on = true);
 	void UiSponsorContractSelect(Sponsor sponsor, int index);
 	void SponsorContract(int index);
 	void UiSponsorSelect(int index);
 
 	void UiEquipOpen(bool on = true);
-	void UiEquipChangeOpen(int type,bool on = true);
+	void UiEquipChangeOpen(int type, bool on = true);
 	void UiEquipMakeOpen(int index, bool on = true);
 	int CraftRoll(int type);
 	void UiCraftFinish(int index, bool on = true);
 	void UpdateCraftVal();
 	std::wstring ReturnEquipStats(int itemType, int itemNum);
-	void ReturnItemName(TextGo& text,int type, int num);
+	void ReturnItemName(TextGo& text, int type, int num);
+	void UpdateWheel();
 
 	void UpdateMoney();
-	void Recruit(int grade,int slotNum);
+	void Recruit(int grade, int slotNum);
 	void NewYear();
 	PlayerInfo MakeDefaultPlayer();
 	PlayerInfo MakeLocalPlayer();
@@ -108,7 +109,7 @@ public:
 	void UpdateClouds(float dt);
 
 	bool isPartsEmpty();
-	
+
 	void TestingCheats();
 };
 

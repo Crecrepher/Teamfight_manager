@@ -1,6 +1,13 @@
 #pragma once
 #include "Singleton.h"
 
+enum class MouseWheelDir
+{
+	WheelUp = -1,
+	None,
+	WheelDown
+};
+
 enum class Axis
 {
 	Horizontal,
@@ -32,6 +39,9 @@ private:
 	sf::Vector2f mousePos;
 
 	std::map<Axis, AxisInfo> axisInfoMap;
+
+	MouseWheelDir mouseWheell = MouseWheelDir::None;
+
 public:
 	void Update(float dt);
 	void UpdateEvent(const sf::Event& ev);
@@ -46,10 +56,13 @@ public:
 	bool GetMouseButtonDown(sf::Mouse::Button button);
 	bool GetMouseButton(sf::Mouse::Button button);
 	bool GetMouseButtonUp(sf::Mouse::Button button);
+	bool GetMouseWheel(MouseWheelDir wheelDir);
 
 	// Axis
 	float GetAxis(Axis axis);
 	float GetAxisRaw(Axis axis);
+
+
 };
 
 #define INPUT_MGR (InputMgr::Instance())

@@ -80,6 +80,19 @@ void InputMgr::UpdateEvent(const sf::Event& ev)
 		upList.push_back(code);
 		break;
 	}
+
+	case sf::Event::MouseWheelScrolled:
+		if (ev.mouseWheelScroll.wheel == sf::Mouse::VerticalWheel)
+		{
+			float delta = ev.mouseWheelScroll.delta;
+			if (delta > 0) {
+				mouseWheell = MouseWheelDir::WheelUp;
+			}
+			else if (delta < 0) {
+				mouseWheell = MouseWheelDir::WheelDown;
+			}
+		}
+		break;
 	}
 	mousePos = (sf::Vector2f)sf::Mouse::getPosition(FRAMEWORK.GetWindow());
 }
@@ -121,6 +134,16 @@ bool InputMgr::GetMouseButtonUp(sf::Mouse::Button button)
 {
 	int code = sf::Keyboard::KeyCount + (int)button;
 	return std::find(upList.begin(), upList.end(), code) != upList.end();
+}
+
+bool InputMgr::GetMouseWheel(MouseWheelDir wheelDir)
+{
+	if (mouseWheell == wheelDir)
+	{
+		mouseWheell = MouseWheelDir::None;
+		return true;
+	}
+	return false;
 }
 
 float InputMgr::GetAxis(Axis axis)

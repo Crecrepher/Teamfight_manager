@@ -244,6 +244,15 @@ void SceneTitile::Update(float dt)
 		TEAM_MGR.SaveLoad(0);
 		SCENE_MGR.ChangeScene(SceneId::Home);
 	}
+
+	if (INPUT_MGR.GetMouseWheel(MouseWheelDir::WheelUp))
+	{
+		std::cout << "1" << std::endl;
+	}
+	if (INPUT_MGR.GetMouseWheel(MouseWheelDir::WheelDown))
+	{
+		std::cout << "-1" << std::endl;
+	}
 }
 
 void SceneTitile::Draw(sf::RenderWindow& window)
