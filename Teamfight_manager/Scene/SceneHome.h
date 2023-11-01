@@ -21,6 +21,7 @@ protected:
 	bool cheatMode = true;
 
 	int selectedMenu = -1;
+	int useItemCount = 0;
 
 	bool backClick = true;
 	bool isMenuOn = false;
@@ -93,7 +94,6 @@ public:
 	void UpdateCraftVal();
 	std::wstring ReturnEquipStats(int itemType, int itemNum);
 	void ReturnItemName(TextGo& text, int type, int num);
-	void UpdateWheel();
 
 	void UpdateMoney();
 	void Recruit(int grade, int slotNum);
@@ -111,5 +111,7 @@ public:
 	bool isPartsEmpty();
 
 	void TestingCheats();
+	void ScrollEquip(float dt);
+	void EquipListShower();
 };
 

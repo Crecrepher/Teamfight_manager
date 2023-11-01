@@ -140,6 +140,11 @@ void SceneHome::Update(float dt)
 
 	TestingCheats();
 	UpdateClouds(dt);
+
+	if (isInnerPopOn)
+	{
+		ScrollEquip(dt);
+	}
 }
 
 void SceneHome::Draw(sf::RenderWindow& window)
@@ -394,7 +399,7 @@ void SceneHome::AddGoUiButton()
 	}
 
 	//ChangeEquip
-	AddGo(new SpriteGo("graphics/Origin/Sprite/equipment_change_popup_bg_mask.png", "EquipMask"));
+	AddGo(new SpriteGo("graphics/Origin/Sprite/equipment_change_popup_bg_mask1.png", "EquipMask"));
 	for (int i = 0; i < 38; i++)
 	{
 		std::stringstream ss;
@@ -2324,13 +2329,14 @@ void SceneHome::MakeSubUiEquip()
 	spr->SetSize(2, 2);
 	spr->sortLayer = 116;
 
+
 	text = (TextGo*)FindGo("PopupUiText");
 	text->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
 	text->text.setString(stringtable->GetW("ChangeEquip"));
 	text->text.setCharacterSize(30);
 	text->SetOrigin(Origins::MC);
 	text->SetPosition(spr->GetPosition().x, spr->GetPosition().y - 215);
-	text->sortLayer = 115;
+	text->sortLayer = 117;
 
 	text = (TextGo*)FindGo("EquipItemText");
 	text->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
@@ -2338,7 +2344,7 @@ void SceneHome::MakeSubUiEquip()
 	text->text.setCharacterSize(18);
 	text->SetOrigin(Origins::ML);
 	text->SetPosition(665, 190);
-	text->sortLayer = 115;
+	text->sortLayer = 117;
 
 	text = (TextGo*)FindGo("EquipItemValText");
 	text->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
@@ -2346,7 +2352,7 @@ void SceneHome::MakeSubUiEquip()
 	text->text.setCharacterSize(14);
 	text->SetOrigin(Origins::ML);
 	text->SetPosition(665, 220);
-	text->sortLayer = 115;
+	text->sortLayer = 117;
 
 	text = (TextGo*)FindGo("EquipingText");
 	text->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
@@ -2354,7 +2360,7 @@ void SceneHome::MakeSubUiEquip()
 	text->text.setCharacterSize(14);
 	text->SetOrigin(Origins::MR);
 	text->SetPosition(980, 190);
-	text->sortLayer = 115;
+	text->sortLayer = 117;
 
 	text = (TextGo*)FindGo("LookItemText");
 	text->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
@@ -2362,7 +2368,7 @@ void SceneHome::MakeSubUiEquip()
 	text->text.setCharacterSize(18);
 	text->SetOrigin(Origins::ML);
 	text->SetPosition(665, 376);
-	text->sortLayer = 115;
+	text->sortLayer = 117;
 
 	text = (TextGo*)FindGo("LookItemValText");
 	text->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri14.ttf"));
@@ -2370,7 +2376,7 @@ void SceneHome::MakeSubUiEquip()
 	text->text.setCharacterSize(14);
 	text->SetOrigin(Origins::ML);
 	text->SetPosition(665, 405);
-	text->sortLayer = 115;
+	text->sortLayer = 117;
 
 	spr = (SpriteGo*)FindGo("ExitEquipPopB");
 	spr->SetOrigin(Origins::MC);
@@ -4574,6 +4580,94 @@ void SceneHome::TestingCheats()
 	}
 }
 
+void SceneHome::ScrollEquip(float dt)
+{
+	if (INPUT_MGR.GetMouseWheel(MouseWheelDir::WheelUp))
+	{
+		SpriteGo* spr;
+		UiButton* bt;
+		
+		bt = (UiButton*)FindGo("EquipItemB0");
+		if (bt->GetPosition().y > 200)
+		{
+			return;
+		}
+
+		for (int i = 0; i < 38; i++)
+		{
+			std::stringstream ss;
+			ss.str("");
+			ss << "EquipItemB" << i;
+			bt = (UiButton*)FindGo(ss.str());
+			bt->SetPosition(bt->GetPosition() + sf::Vector2f{ 0,1 }*50.f);
+
+			ss << "Sprite";
+			spr = (SpriteGo*)FindGo(ss.str());
+			spr->SetPosition(bt->GetPosition());
+
+			ss << "Lock";
+			spr = (SpriteGo*)FindGo(ss.str());
+			spr->SetPosition(bt->GetPosition().x + 15, bt->GetPosition().y - 15);
+		}
+	}
+	else if (INPUT_MGR.GetMouseWheel(MouseWheelDir::WheelDown))
+	{
+		SpriteGo* spr;
+		UiButton* bt;
+
+		bt = (UiButton*)FindGo("EquipItemB37");
+		if (bt->GetPosition().y < 465)
+		{
+			return;
+		}
+
+		for (int i = 0; i < 38; i++)
+		{
+			std::stringstream ss;
+			ss.str("");
+			ss << "EquipItemB" << i;
+			bt = (UiButton*)FindGo(ss.str());
+			bt->SetPosition(bt->GetPosition() + sf::Vector2f{ 0,-1 }*50.f);
+
+			ss << "Sprite";
+			spr = (SpriteGo*)FindGo(ss.str());
+			spr->SetPosition(bt->GetPosition());
+
+			ss << "Lock";
+			spr = (SpriteGo*)FindGo(ss.str());
+			spr->SetPosition(bt->GetPosition().x + 15, bt->GetPosition().y - 15);
+		}
+	}
+	EquipListShower();
+}
+
+void SceneHome::EquipListShower()
+{
+	SpriteGo* spr;
+	UiButton* bt;
+	for (int i = 0; i < useItemCount; i++)
+	{
+		std::stringstream ss;
+		ss.str("");
+		ss << "EquipItemB" << i;
+		bt = (UiButton*)FindGo(ss.str());
+		float pos = bt->GetPosition().y;
+		bool available = pos > 110 && pos < 530;
+
+		bt->SetActive(available);
+
+		ss << "Sprite";
+		spr = (SpriteGo*)FindGo(ss.str());
+		spr->SetActive(available);
+
+		ss << "Lock";
+		spr = (SpriteGo*)FindGo(ss.str());
+		spr->SetActive(available);
+
+	}
+
+}
+
 void SceneHome::ResetSky()
 {
 	sky = (sky + 1) % 3;
@@ -5074,6 +5168,26 @@ void SceneHome::UiEquipChangeOpen(int type, bool on)
 		itemCount = 32;
 		break;
 	}
+	useItemCount = itemCount;
+
+	for (int i = 0; i < 38; i++)
+	{
+		std::stringstream ss;
+		ss << "EquipItemB" << i;
+		bt = (UiButton*)FindGo(ss.str());
+		bt->SetPosition(330 + (63 * (i % 5)), 210 + (63 * (i / 5)));
+		bt->SetOrigin(Origins::MC);
+		std::stringstream ss2;
+		ss2 << "EquipItemB" << i << "Sprite";
+		spr = (SpriteGo*)FindGo(ss2.str());
+		spr->SetPosition(bt->GetPosition());
+		spr->SetOrigin(Origins::MC);
+
+		ss2 << "Lock";
+		spr = (SpriteGo*)FindGo(ss2.str());
+		spr->SetOrigin(Origins::MC);
+		spr->SetPosition(bt->GetPosition().x + 15, bt->GetPosition().y - 15);
+	}
 
 	for (int i = 0; i < itemCount; i++)
 	{
@@ -5082,6 +5196,7 @@ void SceneHome::UiEquipChangeOpen(int type, bool on)
 		ss << "EquipItemB" << i;
 		bt = (UiButton*)FindGo(ss.str());
 		bt->SetActive(on);
+		
 		if (equipedGear[type] == i)
 		{
 			bt->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/Origin/Sprite/equipment_icon_bg_2.png"));
@@ -5096,9 +5211,11 @@ void SceneHome::UiEquipChangeOpen(int type, bool on)
 			ss2 << "EquipItemB" << i << "Sprite";
 			SpriteGo* spr = (SpriteGo*)FindGo(ss2.str());
 			spr->sprite.setColor(sf::Color(50, 50, 50));
+
 			ss2 << "Lock";
 			spr = (SpriteGo*)FindGo(ss2.str());
 			spr->SetActive(on);
+
 		}
 		else
 		{
@@ -5215,6 +5332,11 @@ void SceneHome::UiEquipChangeOpen(int type, bool on)
 
 	spr = (SpriteGo*)FindGo("EquipMask");
 	spr->SetActive(on);
+
+	if (on)
+	{
+		EquipListShower();
+	}
 }
 
 
@@ -5732,10 +5854,3 @@ void SceneHome::ReturnItemName(TextGo& text, int type, int num)
 	}
 }
 
-void SceneHome::UpdateWheel()
-{
-	if (INPUT_MGR.GetMouseWheel(MouseWheelDir::WheelDown))
-	{
-
-	}
-}
