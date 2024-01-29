@@ -141,7 +141,7 @@ void SceneHome::Update(float dt)
 	TestingCheats();
 	UpdateClouds(dt);
 
-	if (isInnerPopOn)
+	if (isInnerPopOn && !isCraft)
 	{
 		ScrollEquip(dt);
 	}
@@ -4653,7 +4653,6 @@ void SceneHome::EquipListShower()
 		bt = (UiButton*)FindGo(ss.str());
 		float pos = bt->GetPosition().y;
 		bool available = pos > 110 && pos < 530;
-
 		bt->SetActive(available);
 
 		ss << "Sprite";
@@ -4662,8 +4661,7 @@ void SceneHome::EquipListShower()
 
 		ss << "Lock";
 		spr = (SpriteGo*)FindGo(ss.str());
-		spr->SetActive(available);
-
+		spr->SetActive(available && !TEAM_MGR.GetGearOpen(currntType,i));
 	}
 
 }
@@ -5142,6 +5140,7 @@ void SceneHome::UiEquipOpen(bool on)
 void SceneHome::UiEquipChangeOpen(int type, bool on)
 {
 	isInnerPopOn = on;
+	currntType = type;
 	auto stringtable = DATATABLE_MGR.Get<StringTable>(DataTable::Ids::String);
 	auto itemTable = DATATABLE_MGR.Get<ItemTable>(DataTable::Ids::Item);
 	std::vector<int> equipedGear = TEAM_MGR.GetEquipedGear();
@@ -5343,6 +5342,7 @@ void SceneHome::UiEquipChangeOpen(int type, bool on)
 void SceneHome::UiEquipMakeOpen(int index, bool on)
 {
 	isInnerPopOn = on;
+	isCraft = on;
 	auto stringtable = DATATABLE_MGR.Get<StringTable>(DataTable::Ids::String);
 	SpriteGo* spr;
 	UiButton* bt;

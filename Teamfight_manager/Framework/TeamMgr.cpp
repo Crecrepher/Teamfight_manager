@@ -432,7 +432,7 @@ void TeamMgr::SaveLoad(int saveSlot)
 	playerTraining.resize(playerNum);
 	for (int i = 0; i < playerNum; i++)
 	{
-		player[i].readF(is);
+		player[i].ReadFile(is);
 		playerTraining[i].readF(is);
 	}
 	
@@ -441,14 +441,14 @@ void TeamMgr::SaveLoad(int saveSlot)
 		std::bitset<1> bitset;
 		is.read(reinterpret_cast<char*>(&bitset), sizeof(bitset));
 		recruiting_players[i].first = bitset[0];
-		recruiting_players[i].second.readF(is);
+		recruiting_players[i].second.ReadFile(is);
 	}
 	is.read((char*)&recruit_able, sizeof(int));
 	
 	aiTeams.resize(7);
 	for (int i = 0; i < 7; i++)
 	{
-		aiTeams[i].readF(is);
+		aiTeams[i].ReadFile(is);
 	}
 
 	for (int i = 0; i < 4; i++)

@@ -38,6 +38,8 @@ protected:
 	std::vector<int> equipCraftParts;
 	int craftCost = 0;
 	int craftTime = 0;
+	int currntType = 0;
+	bool isCraft = false;
 
 	int sky = 2;
 	std::vector<float> cloudSpeed;

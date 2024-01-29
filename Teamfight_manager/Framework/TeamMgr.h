@@ -32,7 +32,7 @@ struct PlayerInfo
 	int totalAssist = 0;
 	int death = 0;
 
-	void readF(std::ifstream& ifs)
+	void ReadFile(std::ifstream& ifs)
 	{
 		std::size_t size;
 		ifs.read(reinterpret_cast<char*>(&size), sizeof(size));
@@ -141,7 +141,7 @@ struct AiTeam
 	int win = 0;
 	int lose = 0;
 
-	void readF(std::ifstream& ifs)
+	void ReadFile(std::ifstream& ifs)
 	{
 		std::size_t size;
 		ifs.read(reinterpret_cast<char*>(&size), sizeof(size));
@@ -153,7 +153,7 @@ struct AiTeam
 
 		for (int i = 0; i < 4; i++)
 		{
-			player[i].readF(ifs);
+			player[i].ReadFile(ifs);
 		}
 	}
 
@@ -331,6 +331,7 @@ protected:
 
 	std::vector<std::vector<bool>> gear;
 	//장비 [장비유형][장비코드] <보유여부>
+
 	std::vector<int> equipedGear;
 	int gearNum = 37;
 	int gearMakeSlotCount = 1;
