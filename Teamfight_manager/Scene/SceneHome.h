@@ -39,7 +39,7 @@ protected:
 	int craftCost = 0;
 	int craftTime = 0;
 	int currntType = 0;
-	bool isCraft = false;
+	bool isInventory = false;
 
 	int sky = 2;
 	std::vector<float> cloudSpeed;
